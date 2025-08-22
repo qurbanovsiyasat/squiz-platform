@@ -1,0 +1,17 @@
+{
+  "panelTitle": "Admin Panel",
+  "panelDesc": "Platform management and statistics",
+  "overview": "Overview",
+  "users": "Users",
+  "categories": "Categories",
+  "totalUsers": "Total Users",
+  "totalQuizzes": "Total Quizzes",
+  "forumPosts": "Forum Posts",
+  "activeUsers": "Active Users",
+  "recentActivities": "Recent Activities",
+  "loadingActivities": "Loading activities...",
+  "activityParticipated": "Participated in {{quiz}} quiz",
+  "completed": "Completed",
+  "inProgress": "In Progress",
+  "noRecentActivity": "No recent activity"
+}

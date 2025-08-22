@@ -1,0 +1,76 @@
+/* Enhanced Image Cropper Styles */
+.crop-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+}
+
+.crop-container:active {
+  cursor: grabbing !important;
+}
+
+.crop-media {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  pointer-events: auto;
+  cursor: grab;
+  transition: transform 0.1s ease-out;
+}
+
+.crop-media:active {
+  cursor: grabbing;
+}
+
+.crop-area {
+  border: 2px solid #3b82f6 !important;
+  border-radius: 8px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+  cursor: move;
+  transition: border-color 0.2s ease;
+}
+
+.crop-area:hover {
+  border-color: #1d4ed8;
+}
+
+.crop-area:active {
+  border-color: #1e40af;
+  cursor: grabbing;
+}
+
+/* Touch support for mobile */
+@media (hover: none) and (pointer: coarse) {
+  .crop-container,
+  .crop-media,
+  .crop-area {
+    cursor: default;
+  }
+  
+  .crop-area {
+    border-width: 3px;
+  }
+}
+
+/* Smooth animations */
+.crop-container * {
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Grid enhancement */
+.crop-container .reactEasyCrop_Grid::before {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.crop-container .reactEasyCrop_Grid::after {
+  background: rgba(255, 255, 255, 0.3);
+}

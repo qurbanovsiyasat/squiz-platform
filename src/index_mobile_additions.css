@@ -1,0 +1,160 @@
+
+
+@layer components {
+  /* Enhanced Mobile Responsiveness */
+  .mobile-qa-container {
+    @apply w-full max-w-full px-3 mx-auto overflow-hidden;
+  }
+  
+  @media (min-width: 640px) {
+    .mobile-qa-container {
+      @apply px-4;
+    }
+  }
+  
+  .mobile-qa-filters {
+    @apply flex flex-col space-y-3 w-full;
+  }
+  
+  @media (min-width: 640px) {
+    .mobile-qa-filters {
+      @apply flex-row space-y-0 space-x-3;
+    }
+  }
+  
+  .mobile-qa-search {
+    @apply w-full min-w-0 flex-1;
+  }
+  
+  /* Enhanced answer form mobile styles */
+  .qa-answer-form {
+    @apply w-full max-w-full;
+  }
+  
+  .qa-answer-form textarea {
+    @apply w-full min-h-[120px] resize-y;
+    font-size: 16px !important; /* Prevents zoom on iOS */
+    @apply p-3 leading-6;
+  }
+  
+  @media (max-width: 767px) {
+    .qa-answer-form textarea {
+      @apply min-h-[150px] rounded-lg;
+      font-size: 16px !important;
+    }
+  }
+  
+  /* Enhanced touch targets */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
+  }
+  
+  /* Mobile form improvements */
+  .mobile-form-input {
+    @apply w-full min-w-0 min-h-[44px] text-base;
+    font-size: 16px !important; /* Prevent iOS zoom */
+  }
+  
+  /* Mobile dropdown optimizations */
+  .mobile-dropdown {
+    @apply max-h-[300px] overflow-y-auto;
+  }
+  
+  /* Text breaking for mobile */
+  .text-break {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+  
+  /* Mobile card enhancements */
+  .mobile-card {
+    @apply w-full max-w-full mx-0;
+  }
+  
+  .mobile-card-content {
+    @apply p-4;
+  }
+  
+  @media (min-width: 768px) {
+    .mobile-card-content {
+      @apply p-6;
+    }
+  }
+  
+  /* Q&A Question Card Mobile Layout */
+  .qa-question-card {
+    @apply w-full min-w-0 max-w-full overflow-hidden;
+  }
+  
+  .qa-question-content {
+    @apply flex flex-col space-y-3;
+  }
+  
+  @media (min-width: 768px) {
+    .qa-question-content {
+      @apply flex-row space-y-0 space-x-4 items-start;
+    }
+  }
+  
+  .qa-vote-sidebar {
+    @apply flex flex-row justify-between items-center;
+  }
+  
+  @media (min-width: 768px) {
+    .qa-vote-sidebar {
+      @apply flex-col justify-start items-center space-y-3 min-w-[60px] flex-shrink-0;
+    }
+  }
+  
+  .qa-question-body {
+    @apply flex-1 min-w-0 w-full;
+  }
+  
+  /* Mobile stats layout */
+  .mobile-qa-stats {
+    @apply flex flex-wrap items-center gap-2 justify-start;
+  }
+  
+  @media (max-width: 479px) {
+    .mobile-qa-stats {
+      @apply flex-col items-start space-y-1 gap-1;
+    }
+  }
+  
+  .mobile-qa-content {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    @apply leading-relaxed;
+  }
+}
+
+/* Final mobile optimizations for better UX */
+@media (max-width: 640px) {
+  /* Improve touch targets on mobile */
+  .btn, button, [role="button"] {
+    @apply min-h-[44px] px-4 py-2;
+  }
+  
+  /* Better mobile spacing */
+  .space-y-mobile > * + * {
+    margin-top: 1rem !important;
+  }
+  
+  /* Mobile-first container */
+  .container {
+    @apply px-4;
+  }
+  
+  /* Prevent horizontal overflow */
+  body {
+    overflow-x: hidden;
+  }
+  
+  /* Better mobile inputs */
+  input, textarea, select {
+    @apply rounded-lg;
+    font-size: 16px !important;
+  }
+}
