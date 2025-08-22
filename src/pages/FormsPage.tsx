@@ -216,16 +216,15 @@ export default function FormPage() {
                 >
                   <Card className="card-hover mobile-card">
                     <CardContent className="mobile-card-content">
-                      <div className="flex items-start space-x-4">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-start gap-3 sm:gap-4 p-3 sm:p-4">
                         {/* Form Icon */}
-                        <div className="flex-shrink-0">
+                        <div className="flex-shrink-0 mb-2 sm:mb-0">
                           <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
                             <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                           </div>
                         </div>
-                        
                         {/* Form Content */}
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 w-full">
                           <div className="mb-3">
                             <Link 
                               to={`/form/${form.id}`}
@@ -234,19 +233,20 @@ export default function FormPage() {
                               {form.title}
                             </Link>
                           </div>
-                          
                           {form.description && (
                             <p className="typography-body text-slate-600 dark:text-slate-400 line-clamp-2 mb-4 mobile-qa-content">
-                              {form.description.length > 150 
-                                ? `${form.description.substring(0, 150)}...` 
+                              {form.description.length > 150
+                                ? <>
+                                    {form.description.substring(0, 150)}...
+                                    <Link to={`/form/${form.id}`} className="text-primary-600 hover:underline ml-1">Devamına bax</Link>
+                                  </>
                                 : form.description
                               }
                             </p>
                           )}
-                          
-                          {/* Form Meta */}
-                          <div className="flex items-center justify-between">
-                            <div className="mobile-qa-stats typography-small text-slate-500">
+                          {/* Form Meta & Actions */}
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
+                            <div className="mobile-qa-stats typography-small text-slate-500 flex flex-row flex-wrap gap-x-4 gap-y-1 mb-2">
                               <div className="flex items-center space-x-1">
                                 <User className="h-4 w-4" />
                                 <span className="text-break font-medium">
@@ -273,26 +273,26 @@ export default function FormPage() {
                                 </Badge>
                               )}
                             </div>
-                            
-                            <div className="flex items-center space-x-2">
-                              <Badge variant={form.is_public ? "default" : "secondary"}>
+                            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                              <Badge variant={form.is_public ? "default" : "secondary"} className="w-max">
                                 {form.is_public ? "Public" : "Private"}
                               </Badge>
-                              
-                              <Link to={`/form/${form.id}`}>
-                                <Button variant="outline" size="sm">
-                                  View
+                              <Link to={`/form/${form.id}`} className="w-full sm:w-auto">
+                                <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                                  Bax
                                 </Button>
                               </Link>
-                              
                               {isAdmin && (
-                                <AdminDeleteButton
-                                  itemType="form"
-                                  itemId={form.id}
-                                  itemName={form.title}
-                                  size="sm"
-                                  variant="icon"
-                                />
+                                <div className="w-full sm:w-auto">
+                                  <AdminDeleteButton
+                                    itemType="form"
+                                    itemId={form.id}
+                                    itemName={form.title}
+                                    size="sm"
+                                    variant="icon"
+                                    className="w-full sm:w-auto"
+                                  />
+                                </div>
                               )}
                             </div>
                           </div>

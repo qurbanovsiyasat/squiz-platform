@@ -18,6 +18,7 @@ import { RoleBadge } from '@/components/ui/RoleBadge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
+import logo from '../../image/logo.png'
 import {
   Menu,
   Bell,
@@ -82,6 +83,10 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Left side */}
         <div className="flex items-center space-x-4">
+          {/* Logo Only */}
+          <Link to="/">
+            <img src={logo} alt="Logo" className="h-12 w-auto" style={{ borderRadius: '8px' }} />
+          </Link>
           {/* Mobile menu button */}
           {user && (
             <Button

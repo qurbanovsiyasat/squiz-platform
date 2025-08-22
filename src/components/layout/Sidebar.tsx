@@ -10,6 +10,7 @@ import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
+import logo from '../../image/logo.png'
 import {
   Home,
   BookOpen,
@@ -117,13 +118,15 @@ export default function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
       {/* Header */}
       <div className="p-6 border-b border-light-grey">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-vibrant-blue to-purple-600 rounded-xl flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-pure-white" />
-            </div>
-            <div>
-              <h2 className="text-section-title text-dark-charcoal">Squiz</h2>
-              <p className="text-caption text-medium-grey">Active Platform</p>
+          <div className="flex items-center pl-1 pb-2 space-x-2 select-none">
+            <img src={logo} alt="Logo" className="h-16 w-16 md:h-20 md:w-20 object-cover rounded-2xl shadow-sm border border-light-grey bg-white" style={{ boxShadow: '0 2px 12px 0 rgb(80 0 180 / 9%)' }} />
+            <div className="flex flex-col justify-center ml-1">
+              <span className="text-3xl md:text-4xl font-extrabold text-purple-700 leading-tight tracking-tight drop-shadow-sm">
+                Squiz
+              </span>
+              <span className="text-xs text-medium-grey font-medium mt-1 md:mt-2 pl-0.5">
+                Təhsil Platforması
+              </span>
             </div>
           </div>
           {isMobile && onClose && (

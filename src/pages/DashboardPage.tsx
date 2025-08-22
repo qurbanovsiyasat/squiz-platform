@@ -18,7 +18,7 @@ import {
   Trophy, 
   TrendingUp,
   ArrowRight,
-  Sparkles,
+  // Sparkles,
   Clock,
   Target,
   Zap,
@@ -209,9 +209,9 @@ export default function DashboardPage() {
           className="space-y-6"
         >
           <div className="flex items-center space-x-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-vibrant-blue to-purple-600 rounded-design-system flex items-center justify-center shadow-lg">
+            {/* <div className="w-16 h-16 bg-gradient-to-br from-vibrant-blue to-purple-600 rounded-design-system flex items-center justify-center shadow-lg">
               <Sparkles className="h-8 w-8 text-pure-white" />
-            </div>
+            </div> */}
             <div>
               <p className="text-ui-label text-medium-grey">{getWelcomeMessage()}</p>
               <h1 className="text-page-title">{displayName}</h1>

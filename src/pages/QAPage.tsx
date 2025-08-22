@@ -185,7 +185,7 @@ export default function QAPage() {
                 >
                   <Card className="card-hover mobile-card qa-question-card">
                     <CardContent className="mobile-card-content">
-                      <div className="qa-question-content">
+                      <div className="qa-question-content px-3 sm:px-4 py-2 sm:py-4">
                         {/* Vote Score & Stats */}
                         <div className="qa-vote-sidebar">
                           <div className="flex items-center space-x-2 md:flex-col md:space-x-0 md:space-y-2">
@@ -196,21 +196,18 @@ export default function QAPage() {
                               </span>
                               <ArrowDown className="h-4 w-4 text-red-600" />
                             </div>
-                            
                             {question.is_answered && (
                               <CheckCircle className="h-4 w-4 text-green-600" />
                             )}
                           </div>
-                          
                           <div className="flex items-center space-x-1 text-xs text-slate-500 md:mt-2">
                             <Eye className="h-3 w-3" />
                             <span>{question.views}</span>
                           </div>
                         </div>
-                        
                         {/* Question Content */}
-                        <div className="qa-question-body">
-                          <div className="mb-3">
+                        <div className="qa-question-body flex-1 flex flex-col gap-2 sm:gap-4">
+                          <div className="mb-2 sm:mb-3">
                             <Link 
                               to={`/qa/${question.id}`}
                               className="font-semibold typography-h3 text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors line-clamp-2 text-break block"
@@ -218,11 +215,17 @@ export default function QAPage() {
                               {question.title}
                             </Link>
                           </div>
-                          
-                          <p className="typography-body text-slate-600 dark:text-slate-400 line-clamp-2 mb-4 mobile-qa-content">
-                            {question.content.substring(0, 200)}...
+                          {/* Collapsed question desc + Devamina bax */}
+                          <p className="typography-body text-slate-600 dark:text-slate-400 line-clamp-2 mb-1 sm:mb-2 mobile-qa-content">
+                            {question.content.length > 200
+                              ? <>
+                                  {question.content.substring(0, 200)}...
+                                  <Link to={`/qa/${question.id}`} className="text-primary-600 hover:underline ml-1">Devamına bax</Link>
+                                </>
+                              : question.content
+                            }
                           </p>
-                          
+
                           {/* Question Image */}
                           {question.image_url && (
                             <div className="mb-4">
@@ -233,13 +236,11 @@ export default function QAPage() {
                                 style={{ maxHeight: '250px' }}
                                 onClick={() => window.open(question.image_url, '_blank')}
                                 onError={(e) => {
-                                  // Hide image if it fails to load
                                   (e.target as HTMLImageElement).style.display = 'none'
                                 }}
                               />
                             </div>
                           )}
-                          
                           {/* Tags */}
                           {question.tags && question.tags.length > 0 && (
                             <div className="flex flex-wrap gap-1 md:gap-2 mb-4">
@@ -255,10 +256,9 @@ export default function QAPage() {
                               )}
                             </div>
                           )}
-                          
-                          {/* Meta info */}
-                          <div className="flex items-center justify-between">
-                            <div className="mobile-qa-stats typography-small text-slate-500">
+                          {/* Actions and Meta info, mobile responsive stack */}
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mt-2 sm:mt-4">
+                            <div className="mobile-qa-stats typography-small text-slate-500 flex flex-row flex-wrap gap-x-4 gap-y-1 mb-1">
                               <UserDisplay 
                                 user={question.author} 
                                 showRole={true}
@@ -274,15 +274,25 @@ export default function QAPage() {
                                 </Badge>
                               )}
                             </div>
-                            {isAdmin && (
-                              <AdminDeleteButton
-                                itemType="qa_question"
-                                itemId={question.id}
-                                itemName={question.title}
-                                size="sm"
-                                variant="icon"
-                              />
-                            )}
+                            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                              <Link to={`/qa/${question.id}`} className="w-full sm:w-auto">
+                                <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                                  Bax
+                                </Button>
+                              </Link>
+                              {isAdmin && (
+                                <div className="w-full sm:w-auto">
+                                  <AdminDeleteButton
+                                    itemType="qa_question"
+                                    itemId={question.id}
+                                    itemName={question.title}
+                                    size="sm"
+                                    variant="icon"
+                                    className="w-full sm:w-auto"
+                                  />
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>

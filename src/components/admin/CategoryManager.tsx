@@ -394,10 +394,10 @@ export function CategoryManager() {
                   {categories.map((category) => (
                     <div
                       key={category.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full p-3 sm:p-4 border rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors gap-2"
                     >
                       {editingCategory === category.id ? (
-                        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-2 gap-3">
                           <Input
                             value={editData.name}
                             onChange={(e) => setEditData({ ...editData, name: e.target.value })}
@@ -410,8 +410,8 @@ export function CategoryManager() {
                           />
                         </div>
                       ) : (
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-3">
+                        <div className="flex-1 w-full">
+                          <div className="flex items-center flex-wrap space-x-2 space-y-1 sm:space-x-3 sm:space-y-0">
                             <Badge variant="outline" className="font-medium">
                               {getTabIcon(category.type)}
                               <span className="ml-1">{category.name}</span>
@@ -427,12 +427,13 @@ export function CategoryManager() {
                           </div>
                         </div>
                       )}
-                      
-                      <div className="flex items-center space-x-2">
+
+                      <div className="flex flex-row sm:flex-row gap-2 pt-2 sm:pt-0 w-full sm:w-auto">
                         {editingCategory === category.id ? (
                           <>
                             <Button
                               size="sm"
+                              className="w-full sm:w-auto"
                               onClick={() => handleUpdateCategory(category.id)}
                               disabled={updateCategoryMutation.isPending}
                             >
@@ -445,6 +446,7 @@ export function CategoryManager() {
                             <Button
                               size="sm"
                               variant="outline"
+                              className="w-full sm:w-auto"
                               onClick={() => setEditingCategory(null)}
                             >
                               <X className="h-4 w-4" />
@@ -455,6 +457,7 @@ export function CategoryManager() {
                             <Button
                               size="sm"
                               variant="outline"
+                              className="w-full sm:w-auto"
                               onClick={() => startEditing(category)}
                             >
                               <Edit className="h-4 w-4" />
@@ -462,8 +465,8 @@ export function CategoryManager() {
                             <Button
                               size="sm"
                               variant="outline"
+                              className="w-full sm:w-auto text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
                               onClick={() => setDeleteCategory(category)}
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>

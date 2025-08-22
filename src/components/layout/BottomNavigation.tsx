@@ -36,9 +36,9 @@ export default function BottomNavigation() {
       href: '/quizzes'
     },
     {
-      icon: Users,
-      label: t('nav.socialMedia'),
-      href: '/social-media'
+      icon: BookOpen,
+      label: t('nav.forms') || 'Formlar',
+      href: '/forms'
     },
     {
       icon: MessageSquare,
