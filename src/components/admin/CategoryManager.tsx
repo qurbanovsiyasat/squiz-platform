@@ -147,7 +147,7 @@ export function CategoryManager() {
         force_delete: false,
         reassign_to_default: true
       })
-      
+
       // If RPC function doesn't exist (404), fall back to direct delete
       if (error && error.message && (error.message.includes('404') || error.message.includes('not found'))) {
         console.warn('RPC delete_category not found, using direct delete method')
@@ -155,18 +155,23 @@ export function CategoryManager() {
           .from('categories')
           .delete()
           .eq('id', categoryId)
-        
         if (deleteError) throw deleteError
         return { success: true, message: 'Category deleted successfully' }
       }
-      
+
       if (error) throw error
+
+      // Eğer Supabase fonksiyonu "returns table" ise data bir array olur.
+      if (Array.isArray(data) && data.length > 0) {
+        return data[0]
+      }
       return data
     },
-    onSuccess: (data) => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['categories'] })
-      
-      // Handle improved response format
+
+      // Gelen veri array ise ilk elemanı al, değilse kendisini kullan
+      const data = Array.isArray(result) && result.length > 0 ? result[0] : result
       if (data && typeof data === 'object') {
         if (data.success) {
           toast.success(data.message || 'Category deleted successfully')
@@ -180,7 +185,7 @@ export function CategoryManager() {
       } else {
         toast.success('Category deleted successfully')
       }
-      
+
       setDeleteCategory(null)
     },
     onError: (error: any) => {
