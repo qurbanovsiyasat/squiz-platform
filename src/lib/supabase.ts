@@ -46,7 +46,9 @@ export async function uploadImage(file: File, folder: string = 'general'): Promi
   }
 }
 
-// Database Types
+// =====================
+// Database Types (Aligned with app usage)
+// =====================
 export interface User {
   id: string
   email: string
@@ -78,40 +80,47 @@ export interface Quiz {
   title: string
   description?: string
   creator_id: string
-  category_id?: string
+  category?: string // In this app, category is stored as a string
   is_public: boolean
   time_limit?: number
-  questions: QuizQuestion[]
-  attempts_count?: number
+  max_attempts?: number
+  access_code?: string
+  hero_image_url?: string
   difficulty?: 'easy' | 'medium' | 'hard'
+  attempts_count?: number
+  participant_count?: number
+  views?: number
   created_at: string
   updated_at: string
-  creator?: User
-  category?: Category
+  questions?: QuizQuestion[]
 }
 
 export interface QuizQuestion {
   id: string
   quiz_id: string
-  question: string
-  type: 'multiple_choice' | 'true_false' | 'short_answer'
-  options?: string[]
-  correct_answer: string | number
-  explanation?: string
+  question_text: string
+  question_type: 'multiple_choice' | 'true_false' | 'text' | 'math'
+  options?: string[] | null
+  correct_answer: string
+  explanation?: string | null
   points: number
   order_index: number
+  image_url?: string | null
+  created_at?: string
+  updated_at?: string
 }
 
-// Alias for backward compatibility
+// Alias used across the codebase
 export type Question = QuizQuestion
 
 export interface QuizResult {
   id: string
   quiz_id: string
   user_id: string
-  answers: any[]
+  answers: any
   score: number
-  total_points: number
+  percentage?: number
+  total_points?: number
   correct_answers: number
   total_questions: number
   completed_at: string
@@ -121,64 +130,14 @@ export interface QuizResult {
 export interface Category {
   id: string
   name: string
-  type: 'quiz' | 'form' | 'qa'
+  type?: 'quiz' | 'form' | 'qa'
   description?: string
-  created_at: string
-  updated_at: string
+  color?: string
+  is_active?: boolean
+  created_at?: string
+  updated_at?: string
   item_count?: number
-}
-
-export interface Form {
-  id: string
-  title: string
-  description?: string
-  creator_id: string
-  category_id?: string
-  category_name?: string
-  is_public: boolean
-  fields: FormField[]
-  created_at: string
-  updated_at: string
-  creator?: User
-  category?: Category
-}
-
-export interface FormField {
-  id: string
-  form_id: string
-  type: 'text' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'file'
-  label: string
-  required: boolean
-  options?: string[]
-  order_index: number
-}
-
-export interface QAQuestion {
-  id: string
-  title: string
-  content: string
-  author_id: string
-  category_id?: string
-  is_answered: boolean
-  view_count: number
-  like_count: number
-  created_at: string
-  updated_at: string
-  author?: User
-  category?: Category
-  answers?: QAAnswer[]
-}
-
-export interface QAAnswer {
-  id: string
-  question_id: string
-  content: string
-  author_id: string
-  is_accepted: boolean
-  like_count: number
-  created_at: string
-  updated_at: string
-  author?: User
+  quiz_count?: number
 }
 
 // Helper functions for type safety
@@ -186,14 +145,10 @@ export const isValidRole = (role: string): role is User['role'] => {
   return ['admin', 'teacher', 'student', 'super_admin'].includes(role)
 }
 
-export const isValidCategoryType = (type: string): type is Category['type'] => {
+export const isValidCategoryType = (type: string): type is NonNullable<Category['type']> => {
   return ['quiz', 'form', 'qa'].includes(type)
 }
 
-export const isValidQuestionType = (type: string): type is QuizQuestion['type'] => {
-  return ['multiple_choice', 'true_false', 'short_answer'].includes(type)
-}
-
-export const isValidFieldType = (type: string): type is FormField['type'] => {
-  return ['text', 'textarea', 'select', 'radio', 'checkbox', 'file'].includes(type)
+export const isValidQuestionType = (type: string): type is QuizQuestion['question_type'] => {
+  return ['multiple_choice', 'true_false', 'text', 'math'].includes(type as any)
 }

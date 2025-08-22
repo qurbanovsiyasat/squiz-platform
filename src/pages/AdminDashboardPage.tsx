@@ -42,6 +42,7 @@ import {
 import { motion } from 'framer-motion'
 import { toast } from 'react-hot-toast'
 import { formatDate } from '@/lib/utils'
+import { useTranslation } from 'react-i18next'
 
 interface NewCategoryForm {
   name: string
@@ -50,6 +51,7 @@ interface NewCategoryForm {
 }
 
 export default function AdminDashboardPage() {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const queryClient = useQueryClient()
   const { data: stats, isLoading: statsLoading } = useAdminStats()
@@ -582,11 +584,11 @@ export default function AdminDashboardPage() {
                         </Button>
                       </div>
                       <div className="flex items-center justify-between">
-                        <Badge className={getCategoryColor(category.color)}>
-                          {category.quiz_count} quiz
+                        <Badge className={getCategoryColor((category as any).color || 'gray')}>
+                          {(category as any).quiz_count || 0} quiz
                         </Badge>
                         <span className="text-xs text-slate-500">
-                          {formatDate(category.created_at)}
+                          {category.created_at ? formatDate(category.created_at) : ''}
                         </span>
                       </div>
                     </div>
