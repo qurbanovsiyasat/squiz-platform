@@ -305,11 +305,13 @@ export default function FileUpload({
 
   // Handle image load error
   const handleImageError = useCallback((fileId: string) => {
+    console.error('FileUpload: Image failed to load for file ID:', fileId)
     setImageLoadErrors(prev => new Set([...prev, fileId]))
   }, [])
 
   // Handle image load success
   const handleImageLoad = useCallback((fileId: string) => {
+    console.log('FileUpload: Image loaded successfully for file ID:', fileId)
     setImageLoadErrors(prev => {
       const next = new Set(prev)
       next.delete(fileId)
@@ -484,22 +486,31 @@ export default function FileUpload({
                   >
                     {/* File Icon or Preview */}
                     <div className="flex-shrink-0">
-                      {file.isImage && file.url && file.url.trim() !== '' && showPreview && !imageLoadErrors.has(file.id) ? (
-                        <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
-                          <img
-                            src={file.url}
-                            alt={file.name}
-                            className="w-full h-full object-cover"
-                            onError={() => {
-                              console.error('Image load error for:', file.name, file.url)
-                              handleImageError(file.id)
-                            }}
-                            onLoad={() => {
-                              console.log('Image loaded successfully:', file.name)
-                              handleImageLoad(file.id)
-                            }}
-                          />
-                        </div>
+                      {file.isImage && file.url && file.url.trim() !== '' && showPreview ? (
+                        !imageLoadErrors.has(file.id) ? (
+                          <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+                            <img
+                              src={file.url}
+                              alt={file.name}
+                              className="w-full h-full object-cover"
+                              onError={() => {
+                                console.error('Image load error for:', file.name, file.url)
+                                handleImageError(file.id)
+                              }}
+                              onLoad={() => {
+                                console.log('Image loaded successfully:', file.name)
+                                handleImageLoad(file.id)
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center border border-red-200 dark:border-red-800">
+                            <div className="text-center">
+                              {getFileIcon(file.type, file.isImage)}
+                              <p className="text-xs text-red-500 mt-1">Failed</p>
+                            </div>
+                          </div>
+                        )
                       ) : (
                         <div className="w-12 h-12 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                           {getFileIcon(file.type, file.isImage)}
