@@ -3,11 +3,12 @@ import { useAIChat, useAIConversation, generateChatSessionId, ConversationManage
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Input } from '@/components/ui/input'
-import { MessageSquare, Send, X, Bot, User, Loader2, Move, Image as ImageIcon, Trash2, Camera } from 'lucide-react'
+import { MessageSquare, Send, X, Bot, User, Loader2, Move, Image as ImageIcon, Trash2, Camera, Maximize2, Minimize2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import toast from 'react-hot-toast'
 import { MathRenderer } from '@/components/ui/MathRenderer'
+import { useMobile } from '@/hooks/use-mobile'
 import 'katex/dist/katex.min.css'
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
@@ -73,6 +74,7 @@ const convertImageToBase64 = (file: File): Promise<string> => {
 
 export default function AIChat() {
   const [isOpen, setIsOpen] = useState(false)
+  const [isFullScreen, setIsFullScreen] = useState(false)
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
   const [sessionId] = useState(() => generateChatSessionId())
@@ -82,6 +84,7 @@ export default function AIChat() {
   const [uploadingImage, setUploadingImage] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const isMobile = useMobile()
   
   const chatMutation = useAIChat()
   const { data: conversationData, refetch: refetchConversation } = useAIConversation(sessionId)
@@ -281,7 +284,8 @@ export default function AIChat() {
       <motion.button
         onClick={() => setIsOpen(true)}
         className={cn(
-          'fixed bottom-6 right-6 z-50 w-14 h-14 bg-purple-600 hover:bg-purple-700 text-white rounded-full shadow-lg transition-all duration-200',
+          'fixed z-50 w-14 h-14 bg-purple-600 hover:bg-purple-700 text-white rounded-full shadow-lg transition-all duration-200',
+          isMobile ? 'bottom-4 right-4' : 'bottom-6 right-6',
           isOpen && 'opacity-0 pointer-events-none'
         )}
         whileHover={{ scale: 1.05 }}
@@ -290,7 +294,7 @@ export default function AIChat() {
         <MessageSquare className="h-6 w-6 mx-auto" />
       </motion.button>
 
-      {/* Draggable Chat Window */}
+      {/* Chat Window - Mobile Full Screen or Desktop Draggable */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -298,7 +302,7 @@ export default function AIChat() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            drag
+            drag={!isMobile && !isFullScreen}
             dragMomentum={false}
             dragElastic={0.1}
             dragConstraints={{
@@ -312,24 +316,47 @@ export default function AIChat() {
               setIsDragging(false)
             }}
             className={cn(
-              "fixed bottom-6 right-6 z-50 w-96 h-[500px] max-w-[calc(100vw-1rem)] max-h-[calc(100vh-2rem)] cursor-move",
+              "fixed z-50 transition-all duration-200",
+              // Mobile: Full screen or fixed bottom
+              isMobile ? (
+                isFullScreen 
+                  ? "inset-0 w-full h-full"
+                  : "bottom-0 left-0 right-0 w-full h-[70vh] max-h-[600px]"
+              ) : (
+                // Desktop: Full screen or floating window
+                isFullScreen
+                  ? "inset-4 w-auto h-auto"
+                  : "bottom-6 right-6 w-96 h-[500px] max-w-[calc(100vw-1rem)] max-h-[calc(100vh-2rem)]"
+              ),
+              !isMobile && !isFullScreen && "cursor-move",
               isDragging && "shadow-2xl scale-105"
             )}
-            style={{ x: position.x, y: position.y }}
+            style={!isMobile && !isFullScreen ? { x: position.x, y: position.y } : {}}
           >
             <Card className={cn(
               "h-full flex flex-col transition-all duration-200 border-gray-200/50 dark:border-gray-700/50 shadow-lg",
-              isDragging ? "shadow-2xl ring-2 ring-purple-300/50" : "shadow-lg"
+              isDragging ? "shadow-2xl ring-2 ring-purple-300/50" : "shadow-lg",
+              isMobile && !isFullScreen && "rounded-t-lg rounded-b-none",
+              isMobile && isFullScreen && "rounded-none"
             )}>
-              <CardHeader className="bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-t-lg py-4 cursor-move">
+              <CardHeader className={cn(
+                "bg-gradient-to-r from-purple-600 to-purple-700 text-white py-4",
+                isMobile && !isFullScreen ? "rounded-t-lg" : "rounded-t-lg",
+                isMobile && isFullScreen && "rounded-none",
+                !isMobile && !isFullScreen && "cursor-move"
+              )}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Bot className="h-5 w-5" />
-                    <CardTitle className="text-lg">AI Köməkçisi</CardTitle>
-                    <Move className={cn(
-                      "h-4 w-4 opacity-50 transition-opacity",
-                      isDragging && "opacity-100"
-                    )} />
+                    <CardTitle className={cn(
+                      isMobile ? "text-base" : "text-lg"
+                    )}>AI Köməkçisi</CardTitle>
+                    {!isMobile && !isFullScreen && (
+                      <Move className={cn(
+                        "h-4 w-4 opacity-50 transition-opacity",
+                        isDragging && "opacity-100"
+                      )} />
+                    )}
                   </div>
                   <div className="flex items-center space-x-1">
                     {messages.length > 0 && (
@@ -343,22 +370,46 @@ export default function AIChat() {
                         <Trash2 className="h-3 w-3" />
                       </Button>
                     )}
+                    
+                    {/* Full Screen Toggle */}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setIsFullScreen(!isFullScreen)}
+                      className="text-white hover:bg-white/20 h-8 w-8"
+                      title={isFullScreen ? "Kiçik rejim" : "Tam ekran"}
+                    >
+                      {isFullScreen ? (
+                        <Minimize2 className="h-3 w-3" />
+                      ) : (
+                        <Maximize2 className="h-3 w-3" />
+                      )}
+                    </Button>
+                    
+                    {/* Position Reset (Desktop only) */}
+                    {!isMobile && !isFullScreen && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setPosition({ x: 0, y: 0 })
+                          toast.success('Mövqe sıfırlandı')
+                        }}
+                        className="text-white hover:bg-white/20 h-8 w-8"
+                        title="Mövqeyi sıfırla"
+                      >
+                        <Move className="h-3 w-3" />
+                      </Button>
+                    )}
+                    
+                    {/* Close Button */}
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => {
-                        setPosition({ x: 0, y: 0 })
-                        toast.success('Mövqe sıfırlandı')
+                        setIsOpen(false)
+                        setIsFullScreen(false)
                       }}
-                      className="text-white hover:bg-white/20 h-8 w-8"
-                      title="Mövqeyi sıfırla"
-                    >
-                      <Move className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setIsOpen(false)}
                       className="text-white hover:bg-white/20 h-8 w-8"
                     >
                       <X className="h-4 w-4" />
@@ -369,7 +420,10 @@ export default function AIChat() {
               
               <CardContent className="flex-1 flex flex-col p-0">
                 {/* Messages Area */}
-                <div className="flex-1 overflow-y-auto p-1 space-y-3 custom-scrollbar">
+                <div className={cn(
+                  "flex-1 overflow-y-auto space-y-3 custom-scrollbar",
+                  isMobile ? "p-3" : "p-4"
+                )}>
                   {messages.length === 0 ? (
                     <div className="text-center text-slate-500 py-8">
                       <Bot className="h-12 w-12 mx-auto mb-4 text-slate-400" />
@@ -445,7 +499,11 @@ export default function AIChat() {
                 </div>
                 
                 {/* Input Area */}
-                <div className="border-t border-gray-200/50 dark:border-gray-700/50 p-3 space-y-2">
+                <div className={cn(
+                  "border-t border-gray-200/50 dark:border-gray-700/50 space-y-2",
+                  isMobile ? "p-3" : "p-3",
+                  isMobile && !isFullScreen && "pb-4" // Extra bottom padding on mobile
+                )}>
                   {/* Selected Image Preview */}
                   {selectedImage && (
                     <div className="flex items-center space-x-2 p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg">

@@ -157,4 +157,56 @@
     @apply rounded-lg;
     font-size: 16px !important;
   }
+  
+  /* AI Chat Mobile Optimizations */
+  .ai-chat-mobile {
+    @apply fixed inset-0 z-50;
+  }
+  
+  .ai-chat-mobile-bottom {
+    @apply fixed bottom-0 left-0 right-0 z-50;
+    max-height: 70vh;
+  }
+  
+  .ai-chat-messages {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  
+  .ai-chat-input-area {
+    /* Ensure input area stays above keyboard on mobile */
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* AI Chat enhancements for all screen sizes */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 20px;
+  border: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.8);
+}
+
+/* Mobile viewport units fix for iOS */
+@supports (-webkit-touch-callout: none) {
+  .ai-chat-mobile-bottom {
+    height: 70vh;
+    height: calc(70 * var(--vh, 1vh));
+  }
 }
