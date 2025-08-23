@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useCreateForm } from '@/hooks/useForms'
 import { useAuth } from '@/contexts/AuthContext'
+import { useDraftPersistence } from '@/utils/persistence'
 import { CategorySelect } from '@/components/admin/CategorySelect'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -29,7 +30,10 @@ import {
   PlusCircle,
   Share2,
   Upload,
-  Calculator
+  Calculator,
+  RefreshCw,
+  Download,
+  Trash2
 } from 'lucide-react'
 import { toast } from 'sonner'
 import FileUpload, { FileItem } from '@/components/FileUpload'
@@ -63,6 +67,14 @@ export default function CreateFormPage() {
   const [heroImageUrl, setHeroImageUrl] = useState<string>('')
   const createFormMutation = useCreateForm()
   
+  // Draft management
+  const { saveDraft, loadDraft, deleteDraft, getAllDrafts, autoSaveDraft } = useDraftPersistence()
+  const [currentDraftId, setCurrentDraftId] = useState<string | null>(null)
+  const [showDraftDialog, setShowDraftDialog] = useState(false)
+  const [availableDrafts, setAvailableDrafts] = useState<any[]>([])
+  const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  const [savingDraft, setSavingDraft] = useState(false)
+  
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -81,6 +93,112 @@ export default function CreateFormPage() {
   })
   
   const watchedForm = form.watch()
+  
+  // Check for existing drafts on component mount
+  useEffect(() => {
+    const drafts = getAllDrafts('form')
+    if (drafts.length > 0) {
+      setAvailableDrafts(drafts)
+      setShowDraftDialog(true)
+    }
+  }, [])
+  
+  // Collect current form data for persistence
+  const getCurrentFormData = () => {
+    const formValues = form.getValues()
+    return {
+      formData: formValues,
+      selectedCategory,
+      attachedFiles,
+      heroImageUrl,
+      currentTab,
+      previewMode
+    }
+  }
+  
+  // Auto-save functionality
+  useEffect(() => {
+    if (currentDraftId && user) {
+      const formData = getCurrentFormData()
+      // Only auto-save if there's actual content
+      if (formData.formData.title?.trim() || formData.formData.content?.trim() || formData.formData.mathContent?.trim()) {
+        autoSaveDraft('form', formData, currentDraftId, 3000) // 3-second delay
+      }
+    }
+  }, [watchedForm, selectedCategory, attachedFiles, heroImageUrl, currentTab, currentDraftId, user])
+  
+  // Load draft data
+  const loadDraftData = (draftData: any) => {
+    if (draftData.formData) {
+      // Reset form with draft data
+      form.reset(draftData.formData)
+    }
+    
+    if (draftData.selectedCategory) {
+      setSelectedCategory(draftData.selectedCategory)
+    }
+    
+    if (draftData.attachedFiles) {
+      setAttachedFiles(draftData.attachedFiles)
+    }
+    
+    if (draftData.heroImageUrl) {
+      setHeroImageUrl(draftData.heroImageUrl)
+    }
+    
+    if (draftData.currentTab) {
+      setCurrentTab(draftData.currentTab)
+    }
+  }
+  
+  // Save draft manually
+  const handleSaveDraft = async () => {
+    if (!user) {
+      toast.error('Login required to save drafts')
+      return
+    }
+    
+    setSavingDraft(true)
+    try {
+      const formData = getCurrentFormData()
+      const draftId = currentDraftId || `form_${user.id}_${Date.now()}`
+      saveDraft('form', formData, draftId)
+      setCurrentDraftId(draftId)
+      setLastSaved(new Date())
+      toast.success('Draft saved successfully!')
+    } catch (error) {
+      toast.error('Failed to save draft')
+      console.error('Failed to save draft:', error)
+    } finally {
+      setSavingDraft(false)
+    }
+  }
+  
+  // Load selected draft
+  const handleLoadDraft = (draftId: string) => {
+    const draftData = loadDraft('form', draftId)
+    if (draftData) {
+      loadDraftData(draftData)
+      setCurrentDraftId(draftId)
+      setLastSaved(new Date(draftData.timestamp || Date.now()))
+      toast.success('Draft loaded!')
+    }
+    setShowDraftDialog(false)
+  }
+  
+  // Delete draft
+  const handleDeleteDraft = (draftId: string) => {
+    deleteDraft('form', draftId)
+    const updatedDrafts = availableDrafts.filter(draft => draft.id !== draftId)
+    setAvailableDrafts(updatedDrafts)
+    
+    if (currentDraftId === draftId) {
+      setCurrentDraftId(null)
+      setLastSaved(null)
+    }
+    
+    toast.success('Draft deleted')
+  }
   
   const onSubmit = async (data: FormData) => {
     try {
@@ -107,6 +225,11 @@ export default function CreateFormPage() {
         },
         category_id: selectedCategory && selectedCategory !== '' && selectedCategory !== '__none__' ? selectedCategory : null
       })
+      
+      // Clean up draft after successful creation
+      if (currentDraftId) {
+        deleteDraft('form', currentDraftId)
+      }
       
       toast.success('Information post created successfully!')
       navigate(`/form/${result.id}`)
@@ -136,6 +259,90 @@ export default function CreateFormPage() {
   
   return (
     <div className="max-w-6xl mx-auto space-y-6 px-4 sm:px-6 lg:px-8 py-6">
+      {/* Draft Dialog */}
+      {showDraftDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-2">
+                  <Download className="h-5 w-5 text-blue-600" />
+                  <h3 className="text-lg font-semibold">Saved Drafts</h3>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowDraftDialog(false)}
+                >
+                  ✕
+                </Button>
+              </div>
+              
+              <p className="text-gray-600 mb-4">
+                You have previously saved drafts. Choose one to continue or start a new post.
+              </p>
+              
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {availableDrafts.map((draft) => {
+                  const draftTitle = draft.data?.formData?.title || 'Untitled Draft'
+                  const draftDate = new Date(draft.timestamp).toLocaleString()
+                  const hasContent = draft.data?.formData?.content || draft.data?.formData?.mathContent
+                  
+                  return (
+                    <div key={draft.id} className="border rounded-lg p-3 hover:bg-gray-50">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900 truncate">{draftTitle}</h4>
+                          <p className="text-sm text-gray-600">
+                            {hasContent ? 'Has content' : 'No content'} • {draftDate}
+                          </p>
+                        </div>
+                        <div className="flex space-x-2 ml-4">
+                          <Button
+                            size="sm"
+                            onClick={() => handleLoadDraft(draft.id)}
+                            className="text-xs"
+                          >
+                            <Download className="h-3 w-3 mr-1" />
+                            Load
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDeleteDraft(draft.id)}
+                            className="text-xs text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-3 w-3 mr-1" />
+                            Delete
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+              
+              <div className="flex justify-between mt-6">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowDraftDialog(false)
+                    // Start new draft with current user
+                    if (user) {
+                      setCurrentDraftId(`form_${user.id}_${Date.now()}`)
+                    }
+                  }}
+                >
+                  Start New Post
+                </Button>
+                <Button variant="ghost" onClick={() => setShowDraftDialog(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -152,8 +359,41 @@ export default function CreateFormPage() {
             <p className="mt-2 text-slate-600 dark:text-slate-400">
               Share content and information with your community
             </p>
+            
+            {/* Draft status indicator */}
+            {currentDraftId && (
+              <div className="flex items-center text-sm text-gray-600 mt-1">
+                <RefreshCw className={`h-3 w-3 mr-1 ${savingDraft ? 'animate-spin' : ''}`} />
+                {lastSaved ? (
+                  <span>Last saved: {lastSaved.toLocaleTimeString()}</span>
+                ) : (
+                  <span>Draft in progress...</span>
+                )}
+              </div>
+            )}
           </div>
           <div className="flex items-center space-x-2">
+            {/* Save Draft Button */}
+            <Button 
+              type="button"
+              variant="ghost" 
+              onClick={handleSaveDraft} 
+              disabled={savingDraft}
+              className="text-blue-600 hover:text-blue-700"
+            >
+              {savingDraft ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Draft
+                </>
+              )}
+            </Button>
+            
             <Button 
               type="button" 
               variant="outline" 

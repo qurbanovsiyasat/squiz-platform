@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { supabase, uploadImage } from '@/lib/supabase'
+import persistenceManager, { useDraftPersistence } from '@/utils/persistence'
 import { CategorySelect } from '@/components/admin/CategorySelect'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/input'
@@ -36,7 +37,10 @@ import {
   BookOpen,
   Calculator,
   ImageIcon,
-  Hash
+  Hash,
+  RefreshCw,
+  AlertCircle,
+  Download
 } from 'lucide-react'
 import { generateAccessCode } from '@/lib/utils'
 import ErrorBoundary from '@/components/ErrorBoundary'
@@ -63,6 +67,14 @@ function CreateQuizContent() {
   const { t } = useLanguage()
   const [loading, setLoading] = useState(false)
   const [currentStep, setCurrentStep] = useState(1)
+  
+  // Draft management
+  const { saveDraft, loadDraft, deleteDraft, getAllDrafts, hasDraft, autoSaveDraft } = useDraftPersistence()
+  const [currentDraftId, setCurrentDraftId] = useState<string | null>(null)
+  const [showDraftDialog, setShowDraftDialog] = useState(false)
+  const [availableDrafts, setAvailableDrafts] = useState<any[]>([])
+  const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  const [savingDraft, setSavingDraft] = useState(false)
   
   // Quiz basic info
   const [quizTitle, setQuizTitle] = useState('')
@@ -97,7 +109,144 @@ function CreateQuizContent() {
   useEffect(() => {
     // Generate access code for private quizzes
     setAccessCode(generateAccessCode())
+    
+    // Check for existing drafts on component mount
+    const drafts = getAllDrafts('quiz')
+    if (drafts.length > 0) {
+      setAvailableDrafts(drafts)
+      setShowDraftDialog(true)
+    }
   }, [])
+  
+  // Collect current quiz data for persistence
+  const getCurrentQuizData = useCallback(() => {
+    return {
+      basicInfo: {
+        quizTitle,
+        quizDescription,
+        selectedCategory,
+        difficulty,
+        timeLimit,
+        maxAttempts,
+        isPublic,
+        accessCode
+      },
+      questions,
+      currentQuestion: {
+        questionText,
+        questionType,
+        options,
+        correctAnswer,
+        explanation,
+        points,
+        questionImage,
+        mathExpression
+      },
+      currentQuestionIndex,
+      currentStep
+    }
+  }, [
+    quizTitle, quizDescription, selectedCategory, difficulty, timeLimit, maxAttempts, isPublic, accessCode,
+    questions, questionText, questionType, options, correctAnswer, explanation, points, questionImage, mathExpression,
+    currentQuestionIndex, currentStep
+  ])
+  
+  // Auto-save functionality
+  useEffect(() => {
+    if (currentDraftId && user) {
+      const quizData = getCurrentQuizData()
+      // Only auto-save if there's actual content
+      if (quizData.basicInfo.quizTitle.trim() || questions.length > 0 || quizData.currentQuestion.questionText.trim()) {
+        autoSaveDraft('quiz', quizData, currentDraftId, 3000) // 3-second delay
+      }
+    }
+  }, [getCurrentQuizData, currentDraftId, autoSaveDraft, user])
+  
+  // Load draft data
+  const loadDraftData = (draftData: any) => {
+    if (draftData.basicInfo) {
+      setQuizTitle(draftData.basicInfo.quizTitle || '')
+      setQuizDescription(draftData.basicInfo.quizDescription || '')
+      setSelectedCategory(draftData.basicInfo.selectedCategory || '')
+      setDifficulty(draftData.basicInfo.difficulty || 'medium')
+      setTimeLimit(draftData.basicInfo.timeLimit || null)
+      setMaxAttempts(draftData.basicInfo.maxAttempts || 3)
+      setIsPublic(draftData.basicInfo.isPublic !== undefined ? draftData.basicInfo.isPublic : true)
+      setAccessCode(draftData.basicInfo.accessCode || '')
+    }
+    
+    if (draftData.questions) {
+      setQuestions(draftData.questions)
+    }
+    
+    if (draftData.currentQuestion) {
+      setQuestionText(draftData.currentQuestion.questionText || '')
+      setQuestionType(draftData.currentQuestion.questionType || 'multiple_choice')
+      setOptions(draftData.currentQuestion.options || ['', '', '', ''])
+      setCorrectAnswer(draftData.currentQuestion.correctAnswer || '')
+      setExplanation(draftData.currentQuestion.explanation || '')
+      setPoints(draftData.currentQuestion.points || 1)
+      setQuestionImage(draftData.currentQuestion.questionImage || null)
+      setMathExpression(draftData.currentQuestion.mathExpression || '')
+    }
+    
+    if (draftData.currentQuestionIndex !== undefined) {
+      setCurrentQuestionIndex(draftData.currentQuestionIndex)
+    }
+    
+    if (draftData.currentStep) {
+      setCurrentStep(draftData.currentStep)
+    }
+  }
+  
+  // Save draft manually
+  const handleSaveDraft = async () => {
+    if (!user) {
+      toast.error('Daxil olmaq tələb olunur')
+      return
+    }
+    
+    setSavingDraft(true)
+    try {
+      const quizData = getCurrentQuizData()
+      const draftId = currentDraftId || `quiz_${user.id}_${Date.now()}`
+      saveDraft('quiz', quizData, draftId)
+      setCurrentDraftId(draftId)
+      setLastSaved(new Date())
+      toast.success('Layihə yadda saxlanıldı!')
+    } catch (error) {
+      toast.error('Layihə saxlanılmadı')
+      console.error('Failed to save draft:', error)
+    } finally {
+      setSavingDraft(false)
+    }
+  }
+  
+  // Load selected draft
+  const handleLoadDraft = (draftId: string) => {
+    const draftData = loadDraft('quiz', draftId)
+    if (draftData) {
+      loadDraftData(draftData)
+      setCurrentDraftId(draftId)
+      setLastSaved(new Date(draftData.timestamp || Date.now()))
+      toast.success('Layihə yükləndi!')
+    }
+    setShowDraftDialog(false)
+  }
+  
+  // Delete draft
+  const handleDeleteDraft = (draftId: string) => {
+    deleteDraft('quiz', draftId)
+    const updatedDrafts = availableDrafts.filter(draft => draft.id !== draftId)
+    setAvailableDrafts(updatedDrafts)
+    
+    if (currentDraftId === draftId) {
+      setCurrentDraftId(null)
+      setLastSaved(null)
+    }
+    
+    toast.success('Layihə silindi')
+  }
 
   const handleImageUpload = async (file: File) => {
     if (!file) return
@@ -346,6 +495,11 @@ function CreateQuizContent() {
         .insert(questionsData)
 
       if (questionsError) throw questionsError
+
+      // Clean up draft after successful creation
+      if (currentDraftId) {
+        deleteDraft('quiz', currentDraftId)
+      }
 
       toast.success('Test uğurla yaradıldı!')
       navigate(`/quizzes/${quiz.id}`)
@@ -998,14 +1152,103 @@ function CreateQuizContent() {
                 </div>
               )}
             </div>
-          ))}
+          ))}  
         </div>
       </CardContent>
     </Card>
   )
+  
+  // Draft management dialog
+  const renderDraftDialog = () => (
+    showDraftDialog && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-2">
+                <Download className="h-5 w-5 text-purple-600" />
+                <h3 className="text-lg font-semibold">Saxlanılmış Layihələr</h3>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowDraftDialog(false)}
+              >
+                ✕
+              </Button>
+            </div>
+            
+            <p className="text-gray-600 mb-4">
+              Əvvəllər saxlanılmış layihələriniz var. Birini seçin və ya yeni layihəyə başlayın.
+            </p>
+            
+            <div className="space-y-3 max-h-64 overflow-y-auto">
+              {availableDrafts.map((draft) => {
+                const draftTitle = draft.data?.basicInfo?.quizTitle || 'Adsız layihə'
+                const draftDate = new Date(draft.timestamp).toLocaleString('az-AZ')
+                const questionCount = draft.data?.questions?.length || 0
+                
+                return (
+                  <div key={draft.id} className="border rounded-lg p-3 hover:bg-gray-50">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900 truncate">{draftTitle}</h4>
+                        <p className="text-sm text-gray-600">
+                          {questionCount} sual • {draftDate}
+                        </p>
+                      </div>
+                      <div className="flex space-x-2 ml-4">
+                        <Button
+                          size="sm"
+                          onClick={() => handleLoadDraft(draft.id)}
+                          className="text-xs"
+                        >
+                          <Download className="h-3 w-3 mr-1" />
+                          Yüklə
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeleteDraft(draft.id)}
+                          className="text-xs text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-3 w-3 mr-1" />
+                          Sil
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+            
+            <div className="flex justify-between mt-6">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowDraftDialog(false)
+                  // Start new draft with current user
+                  if (user) {
+                    setCurrentDraftId(`quiz_${user.id}_${Date.now()}`)
+                  }
+                }}
+              >
+                Yeni layihəyə başla
+              </Button>
+              <Button variant="ghost" onClick={() => setShowDraftDialog(false)}>
+                Ləğv et
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  )
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
+      {renderDraftDialog()}
+      
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -1024,16 +1267,48 @@ function CreateQuizContent() {
 
         {/* Navigation */}
         <div className="flex items-center justify-between">
-          <div>
+          <div className="flex items-center space-x-4">
             {currentStep > 1 && (
               <Button variant="outline" onClick={prevStep}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Əvvəlki addım
               </Button>
             )}
+            
+            {/* Draft status indicator */}
+            {currentDraftId && (
+              <div className="flex items-center text-sm text-gray-600">
+                <RefreshCw className={`h-3 w-3 mr-1 ${savingDraft ? 'animate-spin' : ''}`} />
+                {lastSaved ? (
+                  <span>Son saxlanılan: {lastSaved.toLocaleTimeString('az-AZ')}</span>
+                ) : (
+                  <span>Layihə hazırlanır...</span>
+                )}
+              </div>
+            )}
           </div>
           
           <div className="flex space-x-2">
+            {/* Save Draft Button */}
+            <Button 
+              variant="ghost" 
+              onClick={handleSaveDraft} 
+              disabled={savingDraft}
+              className="text-purple-600 hover:text-purple-700"
+            >
+              {savingDraft ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Saxlanır...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Layihəni Saxla
+                </>
+              )}
+            </Button>
+            
             <Button variant="outline" onClick={() => navigate('/quizzes')}>
               Ləğv et
             </Button>

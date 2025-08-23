@@ -7,6 +7,36 @@ import { MessageSquare, Send, X, Bot, User, Loader2, Move } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import toast from 'react-hot-toast'
+import { MathRenderer } from '@/components/ui/MathRenderer'
+import 'katex/dist/katex.min.css'
+import ReactMarkdown from 'react-markdown'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+
+// Helper function to render text with math expressions using ReactMarkdown
+const renderMessageContent = (content: string) => {
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkMath]}
+      rehypePlugins={[rehypeKatex]}
+      components={{
+        p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+        code: ({ children }) => (
+          <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-xs font-mono">
+            {children}
+          </code>
+        ),
+        pre: ({ children }) => (
+          <pre className="bg-gray-100 dark:bg-gray-800 p-2 rounded text-xs overflow-x-auto">
+            {children}
+          </pre>
+        )
+      }}
+    >
+      {content}
+    </ReactMarkdown>
+  )
+}
 
 interface Message {
   role: 'user' | 'assistant'
@@ -114,8 +144,8 @@ export default function AIChat() {
             style={{ x: position.x, y: position.y }}
           >
             <Card className={cn(
-              "h-full flex flex-col transition-all duration-200",
-              isDragging ? "shadow-2xl ring-2 ring-purple-400" : "shadow-xl"
+              "h-full flex flex-col transition-all duration-200 border-gray-200/50 dark:border-gray-700/50 shadow-lg",
+              isDragging ? "shadow-2xl ring-2 ring-purple-300/50" : "shadow-lg"
             )}>
               <CardHeader className="bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-t-lg py-4 cursor-move">
                 <div className="flex items-center justify-between">
@@ -154,7 +184,7 @@ export default function AIChat() {
               
               <CardContent className="flex-1 flex flex-col p-0">
                 {/* Messages Area */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
                   {messages.length === 0 ? (
                     <div className="text-center text-slate-500 py-8">
                       <Bot className="h-12 w-12 mx-auto mb-4 text-slate-400" />
@@ -172,25 +202,27 @@ export default function AIChat() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3 }}
                         className={cn(
-                          'flex space-x-2',
+                          'flex space-x-3 mb-4',
                           msg.role === 'user' ? 'justify-end' : 'justify-start'
                         )}
                       >
                         {msg.role === 'assistant' && (
-                          <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center flex-shrink-0">
+                          <div className="w-8 h-8 bg-purple-50 dark:bg-purple-900 rounded-full flex items-center justify-center flex-shrink-0">
                             <Bot className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                           </div>
                         )}
                         
                         <div
                           className={cn(
-                            'max-w-[80%] px-3 py-2 rounded-lg text-sm',
+                            'max-w-[80%] px-4 py-3 rounded-xl text-sm leading-relaxed',
                             msg.role === 'user'
-                              ? 'bg-purple-600 text-white'
-                              : 'bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-slate-100'
+                              ? 'bg-purple-600 text-white border border-purple-600/20 shadow-sm'
+                              : 'bg-gray-50 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-200/50 dark:border-gray-700/50 shadow-sm'
                           )}
                         >
-                          <p className="whitespace-pre-wrap">{msg.content}</p>
+                          <div className="text-sm">
+                            {renderMessageContent(msg.content)}
+                          </div>
                         </div>
                         
                         {msg.role === 'user' && (
@@ -206,15 +238,15 @@ export default function AIChat() {
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="flex space-x-2"
+                      className="flex space-x-3 mb-4"
                     >
-                      <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center flex-shrink-0">
+                      <div className="w-8 h-8 bg-purple-50 dark:bg-purple-900 rounded-full flex items-center justify-center flex-shrink-0">
                         <Bot className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                       </div>
-                      <div className="bg-slate-100 dark:bg-slate-700 px-3 py-2 rounded-lg">
+                      <div className="bg-gray-50 dark:bg-gray-800 px-4 py-3 rounded-xl border border-gray-200/50 dark:border-gray-700/50 shadow-sm">
                         <div className="flex items-center space-x-2">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          <span className="text-sm text-slate-600 dark:text-slate-400">
+                          <Loader2 className="h-4 w-4 animate-spin text-purple-600" />
+                          <span className="text-sm text-gray-600 dark:text-gray-400">
                             Düşünürəm...
                           </span>
                         </div>
@@ -226,20 +258,21 @@ export default function AIChat() {
                 </div>
                 
                 {/* Input Area */}
-                <div className="border-t border-slate-200 dark:border-slate-700 p-4">
-                  <div className="flex space-x-2">
+                <div className="border-t border-gray-200/50 dark:border-gray-700/50 p-6">
+                  <div className="flex space-x-3">
                     <Input
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       onKeyPress={handleKeyPress}
                       placeholder="Sualınızı yazın..."
                       disabled={chatMutation.isPending}
-                      className="flex-1"
+                      className="flex-1 text-sm border-gray-200/50 focus:border-purple-400 transition-colors"
                     />
                     <Button
                       onClick={handleSendMessage}
                       disabled={!message.trim() || chatMutation.isPending}
                       size="icon"
+                      className="bg-purple-600 hover:bg-purple-700 shadow-sm"
                     >
                       {chatMutation.isPending ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
