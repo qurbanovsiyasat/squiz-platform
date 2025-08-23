@@ -4,15 +4,15 @@ import { useAuth } from '@/contexts/AuthContext'
 // OpenRouter API configuration
 const OPENROUTER_API_KEY = "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"
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-// Primary working model - MoonshotAI Kimi-K2
-const TEXT_MODEL = "moonshotai/kimi-k2:free" // MoonshotAI model for text
+// Primary working model - AI Text Model
+const TEXT_MODEL = "ai-provider/main-model:free" // AI model for text
 // Vision models to try (may not be available)
 const VISION_MODELS = [
-  "moonshotai/kimi-k2:free", // Try main model for vision first
-  "anthropic/claude-3-haiku",
-  "anthropic/claude-3-haiku:beta", 
-  "google/gemini-pro-vision",
-  "openai/gpt-4-vision-preview"
+  "ai-provider/main-model:free", // Try main model for vision first
+  "ai-provider/model-v3-lite",
+  "ai-provider/model-v3-lite:beta", 
+  "ai-provider/vision-pro",
+  "ai-provider/vision-model-preview"
 ]
 
 // Enhanced message interface with image support

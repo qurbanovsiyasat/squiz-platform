@@ -81,6 +81,13 @@ export default function CreateQAQuestionPage() {
     }
   }
 
+  const handleInputKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      // Don't submit form when pressing Enter in input fields
+    }
+  }
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
     
@@ -425,6 +432,7 @@ export default function CreateQAQuestionPage() {
                   placeholder="Sualınızı qısa və açıq şəkildə yazın..."
                   value={formData.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
+                  onKeyPress={handleInputKeyPress}
                   className={errors.title ? 'border-red-500' : ''}
                   maxLength={200}
                 />

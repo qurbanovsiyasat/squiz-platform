@@ -27,7 +27,7 @@ const mainFeatures = [
     description: 'Müəyyən mövzularda avtomatik sual yaradın və şəxsi öyrənmə köməyi alın',
     icon: Brain,
     details: [
-      'OpenAI texnologiyası ilə sual generasiyası',
+      'AI texnologiyası ilə sual generasiyası',
       'Şəxsi öyrənmə məsləhətləri',
       'Real-time cavab yardımı',
       'Çətinlik səviyyəsinə görə məzmun'
