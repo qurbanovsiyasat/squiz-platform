@@ -95,6 +95,7 @@ export default function ImageUploadCrop({
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null)
   const [originalImageSrc, setOriginalImageSrc] = useState<string | null>(null)
   const [rotation, setRotation] = useState(0)
+  const [imageLoadError, setImageLoadError] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Handle crop completion
@@ -171,6 +172,7 @@ export default function ImageUploadCrop({
       const uploadedUrl = urlData.publicUrl
       
       setSelectedImage(uploadedUrl)
+      setImageLoadError(false) // Reset error state for new image
       onImageUploaded?.(uploadedUrl)
       toast.success('Image uploaded successfully!')
     } catch (error: any) {
@@ -205,6 +207,7 @@ export default function ImageUploadCrop({
   const removeImage = useCallback(() => {
     setSelectedImage(null)
     setOriginalImageSrc(null)
+    setImageLoadError(false) // Reset error state
     onImageRemoved?.()
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
@@ -242,11 +245,29 @@ export default function ImageUploadCrop({
           ) : (
             <div className="space-y-4">
               <div className="relative rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
-                <img
-                  src={selectedImage}
-                  alt="Uploaded"
-                  className="w-full h-48 object-cover"
-                />
+                {!imageLoadError ? (
+                  <img
+                    src={selectedImage}
+                    alt="Uploaded"
+                    className="w-full h-48 object-cover"
+                    onError={() => {
+                      console.error('ImageUploadCrop: Image failed to load:', selectedImage)
+                      setImageLoadError(true)
+                    }}
+                    onLoad={() => {
+                      console.log('ImageUploadCrop: Image loaded successfully:', selectedImage)
+                      setImageLoadError(false)
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-48 bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                    <div className="text-center">
+                      <Upload className="h-12 w-12 text-slate-400 mx-auto mb-2" />
+                      <p className="text-slate-500 text-sm">Image failed to load</p>
+                      <p className="text-xs text-slate-400 mt-1">Try replacing the image</p>
+                    </div>
+                  </div>
+                )}
                 {isProcessing && (
                   <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                     <div className="text-white text-center">

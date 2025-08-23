@@ -72,6 +72,7 @@ export default function FileUpload({
   const [dragActive, setDragActive] = useState(false)
   const [localUploading, setLocalUploading] = useState(false)
   const [uploadingFiles, setUploadingFiles] = useState<Set<string>>(new Set())
+  const [imageLoadErrors, setImageLoadErrors] = useState<Set<string>>(new Set()) // Track failed image loads
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const isMobile = useIsMobile()
@@ -92,10 +93,19 @@ export default function FileUpload({
   useEffect(() => {
     console.log('FileUpload: Syncing existingFiles:', existingFiles.length, 'current files:', files.length, 'existingFiles:', existingFiles.map(f => f.name))
     
-    // Always sync with existingFiles, regardless of current state
-    if (JSON.stringify(files) !== JSON.stringify(existingFiles)) {
-      console.log('FileUpload: Files changed, updating state')
+    // Only sync if existingFiles actually changed, not on every render
+    const existingFileIds = new Set(existingFiles.map(f => f.id))
+    const currentFileIds = new Set(files.map(f => f.id))
+    
+    const hasChanges = existingFiles.length !== files.length || 
+                      !existingFiles.every(ef => currentFileIds.has(ef.id)) ||
+                      !files.every(f => existingFileIds.has(f.id))
+    
+    if (hasChanges) {
+      console.log('FileUpload: Files actually changed, updating state')
       setFiles(existingFiles)
+      // Clear image load errors for new files
+      setImageLoadErrors(new Set())
     }
   }, [existingFiles])
   
@@ -293,6 +303,20 @@ export default function FileUpload({
     }, 100)
   }, [shouldUseDatabasePersistence, hookResult.uploadFiles, validateFile, uploadFileLocally, files, onFilesUploaded])
 
+  // Handle image load error
+  const handleImageError = useCallback((fileId: string) => {
+    setImageLoadErrors(prev => new Set([...prev, fileId]))
+  }, [])
+
+  // Handle image load success
+  const handleImageLoad = useCallback((fileId: string) => {
+    setImageLoadErrors(prev => {
+      const next = new Set(prev)
+      next.delete(fileId)
+      return next
+    })
+  }, [])
+
   // Remove file
   const removeFile = useCallback(async (fileId: string) => {
     if (shouldUseDatabasePersistence) {
@@ -460,29 +484,19 @@ export default function FileUpload({
                   >
                     {/* File Icon or Preview */}
                     <div className="flex-shrink-0">
-                      {file.isImage && file.url && file.url.trim() !== '' && showPreview ? (
+                      {file.isImage && file.url && file.url.trim() !== '' && showPreview && !imageLoadErrors.has(file.id) ? (
                         <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
                           <img
                             src={file.url}
                             alt={file.name}
                             className="w-full h-full object-cover"
-                            onError={(e) => {
+                            onError={() => {
                               console.error('Image load error for:', file.name, file.url)
-                              // Fallback to file icon on error
-                              e.currentTarget.style.display = 'none'
-                              const parent = e.currentTarget.parentElement
-                              if (parent) {
-                                parent.innerHTML = `
-                                  <div class="w-12 h-12 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                    </svg>
-                                  </div>
-                                `
-                              }
+                              handleImageError(file.id)
                             }}
                             onLoad={() => {
                               console.log('Image loaded successfully:', file.name)
+                              handleImageLoad(file.id)
                             }}
                           />
                         </div>
