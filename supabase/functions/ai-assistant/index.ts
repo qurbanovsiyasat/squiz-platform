@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
 
     // Request body'yi parse et
     const requestData = await req.json()
-    const { message, messages, model = 'gemini-2.0-flash' } = requestData
+    const { message, messages, model = 'gemini-2.0-flash', image } = requestData
 
     // Mesajları Google Gemini format'ına çevir
     let contents = []
@@ -39,6 +39,36 @@ Deno.serve(async (req) => {
       }]
     } else {
       throw new Error('Message or messages parameter is required')
+    }
+    
+    // Eğer şekil varsa, son mesajı şekil analizi için uyarla
+    if (image && contents.length > 0) {
+      const lastContent = contents[contents.length - 1]
+      if (lastContent.role === 'user') {
+        // Base64 formatını kontrol et ve gerekirse temizle
+        let imageData = image
+        let mimeType = 'image/jpeg' // Varsayılan
+        
+        if (imageData.startsWith('data:image/')) {
+          // MIME type'ı çıkar
+          const mimeMatch = imageData.match(/data:image\/(\w+);base64,/)
+          if (mimeMatch) {
+            mimeType = `image/${mimeMatch[1]}`
+          }
+          // data:image/jpeg;base64, kısmını kaldır
+          imageData = imageData.split(',')[1]
+        }
+        
+        lastContent.parts = [
+          { text: lastContent.parts[0].text },
+          {
+            inline_data: {
+              mime_type: mimeType,
+              data: imageData
+            }
+          }
+        ]
+      }
     }
 
     // Google Gemini API'ye istek gönder

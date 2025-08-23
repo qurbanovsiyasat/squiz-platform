@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
@@ -359,40 +359,187 @@ export function useAIClearHistory() {
 // Export error class for external use
 export { AIError }
 
-// Chat-related types and functions (placeholders for AIChat component)
+// Chat-related types and functions
+export interface AIChatMessage {
+  role: 'user' | 'assistant' | 'system'
+  content: string
+  timestamp?: string
+  image?: string
+}
+
+export interface AIChatSessionRequest {
+  message: string
+  sessionId?: string
+  image?: string
+  messages?: AIChatMessage[]
+}
+
+export interface AIChatApiResponse {
+  reply: string
+  timestamp: string
+  sessionId?: string
+}
+
 export function generateChatSessionId(): string {
   return `chat_${Date.now()}_${Math.random().toString(36).substring(2)}`
 }
 
 export class ConversationManager {
-  // Placeholder implementation
+  private static conversations = new Map<string, AIChatMessage[]>()
+  
+  static saveMessage(sessionId: string, message: AIChatMessage) {
+    if (!this.conversations.has(sessionId)) {
+      this.conversations.set(sessionId, [])
+    }
+    const messages = this.conversations.get(sessionId)!
+    messages.push(message)
+    
+    // Son 50 mesajı tut (bellek yönetimi için)
+    if (messages.length > 50) {
+      messages.splice(0, messages.length - 50)
+    }
+  }
+  
+  static getConversation(sessionId: string): AIChatMessage[] {
+    return this.conversations.get(sessionId) || []
+  }
+  
   static clearConversation(sessionId: string) {
-    // Placeholder implementation
-    console.log('Clearing conversation:', sessionId)
+    this.conversations.delete(sessionId)
+  }
+  
+  static getAllSessions(): string[] {
+    return Array.from(this.conversations.keys())
   }
 }
 
+/**
+ * Google Gemini AI Chat Hook
+ */
 export function useAIChat() {
-  // Placeholder hook for AIChat component
-  return {
-    mutateAsync: async (data: any) => {
-      // Placeholder implementation
-      return { 
-        success: true, 
-        reply: 'Chat feature not implemented yet',
-        timestamp: new Date().toISOString()
+  return useMutation({
+    mutationFn: async (request: AIChatSessionRequest): Promise<AIChatApiResponse> => {
+      if (!request.message?.trim()) {
+        throw new AIError('Mesaj gerekli', 'VALIDATION_ERROR')
+      }
+      
+      if (request.message.length > 2000) {
+        throw new AIError('Mesaj çok uzun (maksimum 2000 karakter)', 'MESSAGE_TOO_LONG')
+      }
+      
+      try {
+        // Conversation history al
+        const conversationHistory = request.sessionId 
+          ? ConversationManager.getConversation(request.sessionId)
+          : []
+        
+        // Mesajları Google Gemini formatına çevir
+        let messages: Array<{role: 'user' | 'assistant', content: string}> = []
+        
+        // Son 10 mesajı context olarak ekle
+        const recentHistory = conversationHistory.slice(-10)
+        messages = recentHistory.map(msg => ({
+          role: msg.role === 'system' ? 'assistant' : msg.role,
+          content: msg.content
+        }))
+        
+        // Mevcut mesajı ekle
+        messages.push({
+          role: 'user',
+          content: request.message
+        })
+        
+        // Şekil analizi varsa, mesajı şekil analizi için uyarla
+        if (request.image) {
+          // Şekil varsa, hem şekil analizi hem de metin için özel prompt hazırla
+          const imageAnalysisPrompt = `Mən sizə bir şəkil göndərdim. Zəhmət olmasa bu şəkili təhlil edin və aşağıdaki suala cavab verin: ${request.message}. 
+
+Egər şəkil haqqında sual deyilsə, ümumi olaraq şəkildə nə gördüyünüzü izah edin.`
+          
+          messages[messages.length - 1].content = imageAnalysisPrompt
+        }
+        
+        // Google Gemini API çağrısı
+        const { data, error } = await supabase.functions.invoke('ai-assistant', {
+          body: {
+            messages: messages,
+            model: 'gemini-2.0-flash',
+            image: request.image // Şekil verisini gönder
+          }
+        })
+        
+        if (error) {
+          throw handleAIError(error, 'AI chat')
+        }
+        
+        if (!data || data.error) {
+          throw new AIError(data?.error?.message || 'AI yanıt vermedi', 'API_ERROR')
+        }
+        
+        const reply = data.choices?.[0]?.message?.content
+        if (!reply) {
+          throw new AIError('Geçersiz AI yanıtı', 'INVALID_RESPONSE')
+        }
+        
+        const timestamp = new Date().toISOString()
+        
+        // Conversation history'ye kaydet
+        if (request.sessionId) {
+          ConversationManager.saveMessage(request.sessionId, {
+            role: 'user',
+            content: request.message,
+            timestamp,
+            image: request.image
+          })
+          
+          ConversationManager.saveMessage(request.sessionId, {
+            role: 'assistant', 
+            content: reply,
+            timestamp
+          })
+        }
+        
+        return {
+          reply,
+          timestamp,
+          sessionId: request.sessionId
+        }
+      } catch (error) {
+        if (error instanceof AIError) {
+          throw error
+        }
+        throw handleAIError(error, 'AI chat')
       }
     },
-    isPending: false,
-    error: null,
-    reset: () => {}
-  }
+    onError: (error: AIError) => {
+      console.error('AI chat error:', error)
+      toast.error(error.message || 'AI chat başarısız oldu')
+    }
+  })
 }
 
+/**
+ * Conversation Hook
+ */
 export function useAIConversation(sessionId: string) {
-  // Placeholder hook for conversation history
+  const [conversationData, setConversationData] = useState<{
+    messages: AIChatMessage[]
+  }>({ messages: [] })
+  
+  const refetch = useCallback(() => {
+    if (sessionId) {
+      const messages = ConversationManager.getConversation(sessionId)
+      setConversationData({ messages })
+    }
+    return Promise.resolve()
+  }, [sessionId])
+  
+  useEffect(() => {
+    refetch()
+  }, [refetch])
+  
   return {
-    data: { messages: [] },
-    refetch: () => Promise.resolve()
+    data: conversationData,
+    refetch
   }
 }
