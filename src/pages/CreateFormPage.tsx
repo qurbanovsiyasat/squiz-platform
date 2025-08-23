@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useCreateForm } from '@/hooks/useForms'
+import { useCreateForm, useSaveFormAttachments } from '@/hooks/useForms'
 import { useAuth } from '@/contexts/AuthContext'
 import { useDraftPersistence } from '@/utils/persistence'
 import { CategorySelect } from '@/components/admin/CategorySelect'
@@ -65,7 +65,8 @@ export default function CreateFormPage() {
   const [currentTab, setCurrentTab] = useState('basic')
   const [attachedFiles, setAttachedFiles] = useState<FileItem[]>([])
   const [heroImageUrl, setHeroImageUrl] = useState<string>('')
-  const createFormMutation = useCreateForm()
+    const createFormMutation = useCreateForm()
+  const saveAttachmentsMutation = useSaveFormAttachments()
   
   // Draft management
   const { saveDraft, loadDraft, deleteDraft, getAllDrafts, autoSaveDraft } = useDraftPersistence()
@@ -225,6 +226,28 @@ export default function CreateFormPage() {
         },
         category_id: selectedCategory && selectedCategory !== '' && selectedCategory !== '__none__' ? selectedCategory : null
       })
+      
+      // Save attachments to database if they exist
+      if (attachedFiles.length > 0) {
+        try {
+          await saveAttachmentsMutation.mutateAsync({
+            formId: result.id,
+            attachments: attachedFiles.map(file => ({
+              id: file.id,
+              name: file.name,
+              type: file.type,
+              size: file.size,
+              url: file.url,
+              isImage: file.isImage
+            }))
+          })
+          console.log('Attachments saved to database successfully')
+        } catch (attachmentError) {
+          console.error('Failed to save attachments to database:', attachmentError)
+          // Don't fail the entire form creation if attachments fail
+          toast.warning('Form created but some files may not display properly')
+        }
+      }
       
       // Clean up draft after successful creation
       if (currentDraftId) {

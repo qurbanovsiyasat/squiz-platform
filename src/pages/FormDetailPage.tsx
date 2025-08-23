@@ -80,7 +80,9 @@ export default function FormDetailPage() {
     const isPdf = attachment.mime_type === 'application/pdf'
     const fileUrl = attachment.file_path || attachment.url
     
-    if (!fileUrl) return null
+    if (!fileUrl) {
+      return null
+    }
     
     return (
       <div

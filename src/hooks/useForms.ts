@@ -64,7 +64,7 @@ export interface FormReply {
 export interface FormAttachment {
   id: string
   form_id: string
-  user_id: string
+  uploaded_by: string
   file_name: string
   original_name: string
   mime_type: string
@@ -73,6 +73,7 @@ export interface FormAttachment {
   storage_bucket: string
   is_image: boolean
   created_at: string
+  updated_at?: string
 }
 
 // Form Query Filters
@@ -641,6 +642,7 @@ export function useFormAttachments(formId: string) {
  * Upload form attachment with progress tracking
  */
 export function useUploadFormAttachment() {
+  const { user } = useAuth()
   const queryClient = useQueryClient()
   
   return useMutation({
@@ -655,6 +657,10 @@ export function useUploadFormAttachment() {
       fileName: string
       originalName: string
     }) => {
+      if (!user) {
+        throw new FormError('User must be authenticated', 'AUTH_REQUIRED')
+      }
+      
       // Validate inputs
       if (!formId || !file || !fileName || !originalName) {
         throw new FormError('All parameters are required', 'VALIDATION_ERROR')
@@ -733,6 +739,72 @@ export function useFormSubmissions(formId: string) {
       return data || []
     },
     enabled: !!formId
+  })
+}
+
+/**
+ * Save attachment to database after form creation
+ */
+export function useSaveFormAttachments() {
+  const { user } = useAuth()
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: async ({
+      formId,
+      attachments
+    }: {
+      formId: string
+      attachments: { id: string; name: string; type: string; size: number; url: string; isImage: boolean }[]
+    }) => {
+      if (!user) {
+        throw new FormError('User must be authenticated', 'AUTH_REQUIRED')
+      }
+      
+      if (!formId || !attachments.length) {
+        return []
+      }
+      
+      const results = []
+      
+      for (const attachment of attachments) {
+        try {
+          // Extract file path from URL for storage path
+          const urlParts = attachment.url.split('/')
+          const fileName = urlParts[urlParts.length - 1] || attachment.id
+          
+          const { data, error } = await supabase.rpc('save_form_attachment', {
+            p_form_id: formId,
+            p_file_name: fileName,
+            p_original_name: attachment.name,
+            p_mime_type: attachment.type,
+            p_file_size: attachment.size,
+            p_file_path: attachment.url,
+            p_storage_bucket: 'form-attachments'
+          })
+          
+          if (error) {
+            console.error('Failed to save attachment:', attachment.name, error)
+            throw handleDatabaseError(error, 'Save attachment')
+          }
+          
+          results.push({ id: data, ...attachment })
+        } catch (error) {
+          console.error('Error saving attachment:', attachment.name, error)
+          // Continue with other files even if one fails
+        }
+      }
+      
+      return results
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['form-attachments', variables.formId] })
+      queryClient.invalidateQueries({ queryKey: ['form', variables.formId] })
+    },
+    onError: (error: FormError) => {
+      console.error('Save attachments error:', error)
+      toast.error('Some files could not be saved to database')
+    }
   })
 }
 

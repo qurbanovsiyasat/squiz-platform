@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useCreateForm } from '@/hooks/useForms'
+import { useCreateForm, useSaveFormAttachments } from '@/hooks/useForms'
 import { useAuth } from '@/contexts/AuthContext'
 import { CategorySelect } from '@/components/admin/CategorySelect'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
@@ -41,6 +41,7 @@ export default function CreateFormPageSimple() {
   const [selectedCategory, setSelectedCategory] = useState<string>('')
   const [attachedFiles, setAttachedFiles] = useState<FileItem[]>([])
   const createFormMutation = useCreateForm()
+  const saveAttachmentsMutation = useSaveFormAttachments()
   
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -76,6 +77,28 @@ export default function CreateFormPageSimple() {
         },
         category_id: (selectedCategory && selectedCategory !== '' && selectedCategory !== '__none__') ? selectedCategory : null
       })
+      
+      // Save attachments to database if they exist
+      if (attachedFiles.length > 0) {
+        try {
+          await saveAttachmentsMutation.mutateAsync({
+            formId: result.id,
+            attachments: attachedFiles.map(file => ({
+              id: file.id,
+              name: file.name,
+              type: file.type,
+              size: file.size,
+              url: file.url,
+              isImage: file.isImage
+            }))
+          })
+          console.log('Attachments saved to database successfully')
+        } catch (attachmentError) {
+          console.error('Failed to save attachments to database:', attachmentError)
+          // Don't fail the entire form creation if attachments fail
+          toast.warning('Form created but some files may not display properly')
+        }
+      }
       
       toast.success('Information post created successfully!')
       navigate(`/form/${result.id}`)
