@@ -29,18 +29,49 @@ class PersistenceManager {
     }
 
     try {
-      localStorage.setItem(storageKey, JSON.stringify(draftData))
-      console.log(`Draft saved: ${storageKey}`)
+      const dataString = JSON.stringify(draftData)
+      
+      // Check if data is too large (most browsers limit is ~10MB for localStorage)
+      if (dataString.length > 5000000) { // 5MB limit for safety
+        console.warn('Draft data is too large, compressing...') 
+        // Try to compress by removing optional fields
+        const compressedData = {
+          ...draftData,
+          data: {
+            ...draftData.data,
+            // Remove optional fields that take up space
+            currentQuestion: {
+              ...draftData.data.currentQuestion,
+              explanation: undefined // Remove explanation from auto-saves
+            }
+          }
+        }
+        localStorage.setItem(storageKey, JSON.stringify(compressedData))
+      } else {
+        localStorage.setItem(storageKey, dataString)
+      }
+      
+      console.log(`Draft saved successfully: ${storageKey} (${(dataString.length / 1024).toFixed(2)} KB)`)
       return draftId
     } catch (error) {
-      console.error('Failed to save draft:', error)
+      console.warn('localStorage failed, trying sessionStorage:', error)
       // Fallback to sessionStorage if localStorage fails
       try {
         sessionStorage.setItem(storageKey, JSON.stringify(draftData))
+        console.log(`Draft saved to sessionStorage: ${storageKey}`)
         return draftId
       } catch (sessionError) {
-        console.error('Failed to save draft to sessionStorage:', sessionError)
-        return draftId
+        console.error('Both localStorage and sessionStorage failed:', sessionError)
+        // Try to free up space by cleaning old drafts
+        this.cleanupExpiredDrafts()
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(draftData))
+          console.log(`Draft saved after cleanup: ${storageKey}`)
+          return draftId
+        } catch (finalError) {
+          console.error('Failed to save draft after cleanup:', finalError)
+          return draftId
+        }
       }
     }
   }
@@ -234,8 +265,14 @@ class PersistenceManager {
     
     // Set new timeout
     const timeout = setTimeout(() => {
-      this.saveDraft(type, data, id)
-      this.autoSaveTimeouts.delete(timeoutKey)
+      try {
+        this.saveDraft(type, data, id)
+        console.log(`Auto-saved draft: ${timeoutKey}`)
+      } catch (error) {
+        console.error(`Auto-save failed for ${timeoutKey}:`, error)
+      } finally {
+        this.autoSaveTimeouts.delete(timeoutKey)
+      }
     }, delay)
     
     this.autoSaveTimeouts.set(timeoutKey, timeout)

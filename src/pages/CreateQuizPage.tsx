@@ -114,9 +114,29 @@ function CreateQuizContent() {
     const drafts = getAllDrafts('quiz')
     if (drafts.length > 0) {
       setAvailableDrafts(drafts)
-      setShowDraftDialog(true)
+      
+      // If there's only one recent draft (from the last hour), automatically load it
+      const recentDrafts = drafts.filter(draft => 
+        Date.now() - draft.timestamp < 60 * 60 * 1000 // 1 hour
+      )
+      
+      if (recentDrafts.length === 1) {
+        const recentDraft = recentDrafts[0]
+        loadDraftData(recentDraft.data)
+        setCurrentDraftId(recentDraft.id)
+        setLastSaved(new Date(recentDraft.timestamp))
+        toast.success('Son layihəniz bərpa edildi')
+      } else {
+        setShowDraftDialog(true)
+      }
+    } else {
+      // Create a new draft ID for auto-saving if no existing drafts
+      if (user) {
+        const newDraftId = `quiz_${user.id}_${Date.now()}`
+        setCurrentDraftId(newDraftId)
+      }
     }
-  }, [])
+  }, [user])
   
   // Collect current quiz data for persistence
   const getCurrentQuizData = useCallback(() => {
@@ -151,16 +171,34 @@ function CreateQuizContent() {
     currentQuestionIndex, currentStep
   ])
   
-  // Auto-save functionality
+  // Auto-save functionality - save every time data changes
   useEffect(() => {
     if (currentDraftId && user) {
       const quizData = getCurrentQuizData()
       // Only auto-save if there's actual content
       if (quizData.basicInfo.quizTitle.trim() || questions.length > 0 || quizData.currentQuestion.questionText.trim()) {
-        autoSaveDraft('quiz', quizData, currentDraftId, 3000) // 3-second delay
+        autoSaveDraft('quiz', quizData, currentDraftId, 2000) // 2-second delay for better responsiveness
+        setLastSaved(new Date())
       }
     }
-  }, [getCurrentQuizData, currentDraftId, autoSaveDraft, user])
+  }, [quizTitle, quizDescription, selectedCategory, difficulty, timeLimit, maxAttempts, isPublic, 
+      questions, questionText, questionType, options, correctAnswer, explanation, points, 
+      questionImage, mathExpression, currentQuestionIndex, currentStep, currentDraftId, user])
+  
+  // Prevent accidental page refresh/navigation when there's unsaved work
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (currentDraftId && (quizTitle.trim() || questions.length > 0 || questionText.trim())) {
+        const message = 'Test məlumatlarınız itirə bilər. Syahqı çıxmaq istəyirsiniz?'
+        e.preventDefault()
+        e.returnValue = message
+        return message
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [currentDraftId, quizTitle, questions, questionText])
   
   // Load draft data
   const loadDraftData = (draftData: any) => {
@@ -230,6 +268,15 @@ function CreateQuizContent() {
       setCurrentDraftId(draftId)
       setLastSaved(new Date(draftData.timestamp || Date.now()))
       toast.success('Layihə yükləndi!')
+    }
+    setShowDraftDialog(false)
+  }
+  
+  // Continue with a new draft (don't load existing)
+  const handleStartNew = () => {
+    if (user) {
+      const newDraftId = `quiz_${user.id}_${Date.now()}`
+      setCurrentDraftId(newDraftId)
     }
     setShowDraftDialog(false)
   }
@@ -1225,13 +1272,7 @@ function CreateQuizContent() {
             <div className="flex justify-between mt-6">
               <Button
                 variant="outline"
-                onClick={() => {
-                  setShowDraftDialog(false)
-                  // Start new draft with current user
-                  if (user) {
-                    setCurrentDraftId(`quiz_${user.id}_${Date.now()}`)
-                  }
-                }}
+                onClick={handleStartNew}
               >
                 Yeni layihəyə başla
               </Button>
@@ -1277,12 +1318,22 @@ function CreateQuizContent() {
             
             {/* Draft status indicator */}
             {currentDraftId && (
-              <div className="flex items-center text-sm text-gray-600">
-                <RefreshCw className={`h-3 w-3 mr-1 ${savingDraft ? 'animate-spin' : ''}`} />
-                {lastSaved ? (
-                  <span>Son saxlanılan: {lastSaved.toLocaleTimeString('az-AZ')}</span>
-                ) : (
-                  <span>Layihə hazırlanır...</span>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center text-sm text-gray-600">
+                  <RefreshCw className={`h-3 w-3 mr-1 ${savingDraft ? 'animate-spin' : ''}`} />
+                  {lastSaved ? (
+                    <span>Son saxlanılan: {lastSaved.toLocaleTimeString('az-AZ')}</span>
+                  ) : (
+                    <span>Layihə hazırlanır...</span>
+                  )}
+                </div>
+                
+                {/* Auto-save notification */}
+                {lastSaved && (
+                  <div className="flex items-center text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Avtomatik saxlanıldı
+                  </div>
                 )}
               </div>
             )}
