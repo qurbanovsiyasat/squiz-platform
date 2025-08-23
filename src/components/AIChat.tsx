@@ -369,7 +369,7 @@ export default function AIChat() {
               
               <CardContent className="flex-1 flex flex-col p-0">
                 {/* Messages Area */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-2 space-y-3 custom-scrollbar">
                   {messages.length === 0 ? (
                     <div className="text-center text-slate-500 py-8">
                       <Bot className="h-12 w-12 mx-auto mb-4 text-slate-400" />
@@ -391,7 +391,7 @@ export default function AIChat() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3 }}
                         className={cn(
-                          'flex space-x-2 mb-3',
+                          'flex space-x-2 mb-2',
                           msg.role === 'user' ? 'justify-end' : 'justify-start'
                         )}
                       >
@@ -403,7 +403,7 @@ export default function AIChat() {
                         
                         <div
                           className={cn(
-                            'max-w-[80%] px-3 py-2 rounded-xl leading-relaxed',
+                            'max-w-[85%] px-2 py-1.5 rounded-xl leading-relaxed',
                             msg.role === 'user'
                               ? 'bg-purple-600 text-white shadow-sm'
                               : 'bg-gray-50 text-gray-800 dark:bg-gray-800 dark:text-gray-200 shadow-sm'
@@ -445,7 +445,7 @@ export default function AIChat() {
                 </div>
                 
                 {/* Input Area */}
-                <div className="border-t border-gray-200/50 dark:border-gray-700/50 p-6 space-y-3">
+                <div className="border-t border-gray-200/50 dark:border-gray-700/50 p-3 space-y-2">
                   {/* Selected Image Preview */}
                   {selectedImage && (
                     <div className="flex items-center space-x-2 p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
