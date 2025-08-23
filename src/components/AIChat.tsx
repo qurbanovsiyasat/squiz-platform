@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect } from 'react'
-import { useAIChat, generateChatSessionId } from '@/hooks/useAI'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { useAIChat, useAIConversation, generateChatSessionId, ConversationManager } from '@/hooks/useAI'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Input } from '@/components/ui/input'
-import { MessageSquare, Send, X, Bot, User, Loader2, Move } from 'lucide-react'
+import { MessageSquare, Send, X, Bot, User, Loader2, Move, Image as ImageIcon, Trash2, Camera } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import toast from 'react-hot-toast'
@@ -38,10 +38,31 @@ const renderMessageContent = (content: string) => {
   )
 }
 
+// Enhanced message interface
 interface Message {
-  role: 'user' | 'assistant'
-  content: string
+  role: 'user' | 'assistant' | 'system'
+  content: string | Array<{
+    type: 'text' | 'image_url'
+    text?: string
+    image_url?: {
+      url: string
+    }
+  }>
   timestamp: string
+  image?: string // Base64 image data for display
+}
+
+// Image upload helper
+const convertImageToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      const result = reader.result as string
+      resolve(result) // This includes the data:image/jpeg;base64, prefix
+    }
+    reader.onerror = () => reject(reader.error)
+    reader.readAsDataURL(file)
+  })
 }
 
 export default function AIChat() {
@@ -51,9 +72,13 @@ export default function AIChat() {
   const [sessionId] = useState(() => generateChatSessionId())
   const [isDragging, setIsDragging] = useState(false)
   const [position, setPosition] = useState({ x: 0, y: 0 })
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [uploadingImage, setUploadingImage] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   
   const chatMutation = useAIChat()
+  const { data: conversationData, refetch: refetchConversation } = useAIConversation(sessionId)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -63,22 +88,93 @@ export default function AIChat() {
     scrollToBottom()
   }, [messages])
 
+  // Load conversation history when component mounts or conversation data changes
+  useEffect(() => {
+    if (conversationData?.messages) {
+      const formattedMessages: Message[] = conversationData.messages.map((msg: any) => ({
+        role: msg.role === 'system' ? 'assistant' : msg.role,
+        content: typeof msg.content === 'string' ? msg.content : 
+          Array.isArray(msg.content) ? 
+            msg.content.find((c: any) => c.type === 'text')?.text || 'Image message' 
+            : String(msg.content),
+        timestamp: msg.timestamp || new Date().toISOString(),
+        image: msg.image // Base64 image data
+      }))
+      .filter((msg: Message) => msg.role !== 'system') // Filter out system messages from display
+      
+      setMessages(formattedMessages)
+    }
+  }, [conversationData])
+
+  // Handle image file selection
+  const handleImageSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Yalnız şəkil faylları dəstəklənir')
+      return
+    }
+
+    // Validate file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Şəkil ölçüsü 5MB-dan çox ola bilməz')
+      return
+    }
+
+    setUploadingImage(true)
+    try {
+      const base64Image = await convertImageToBase64(file)
+      setSelectedImage(base64Image)
+      toast.success('Şəkil yükləndi. İndi mesaj göndərə bilərsiniz.')
+    } catch (error) {
+      console.error('Image conversion error:', error)
+      toast.error('Şəkil yüklənmədi')
+    } finally {
+      setUploadingImage(false)
+    }
+  }
+
+  // Remove selected image
+  const removeSelectedImage = () => {
+    setSelectedImage(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  // Clear conversation
+  const clearConversation = useCallback(() => {
+    ConversationManager.clearConversation(sessionId)
+    setMessages([])
+    setSelectedImage(null)
+    toast.success('Söhbət təmizləndi')
+  }, [sessionId])
+
   const handleSendMessage = async () => {
-    if (!message.trim() || chatMutation.isPending) return
+    if ((!message.trim() && !selectedImage) || chatMutation.isPending) return
 
     const userMessage: Message = {
       role: 'user',
-      content: message.trim(),
-      timestamp: new Date().toISOString()
+      content: message.trim() || (selectedImage ? 'Sent an image' : ''),
+      timestamp: new Date().toISOString(),
+      image: selectedImage || undefined
     }
 
     setMessages(prev => [...prev, userMessage])
     setMessage('')
+    const currentImage = selectedImage
+    setSelectedImage(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
 
     try {
       const response = await chatMutation.mutateAsync({
-        message: userMessage.content,
-        sessionId
+        message: userMessage.content as string,
+        sessionId,
+        image: currentImage || undefined
       })
 
       const assistantMessage: Message = {
@@ -88,6 +184,9 @@ export default function AIChat() {
       }
 
       setMessages(prev => [...prev, assistantMessage])
+      
+      // Refetch conversation data to keep it in sync
+      refetchConversation()
     } catch (error) {
       console.error('AI chat error:', error)
       toast.error('AI köməkçisi ilə əlaqə zamanı xəta baş verdi')
@@ -99,6 +198,35 @@ export default function AIChat() {
       e.preventDefault()
       handleSendMessage()
     }
+  }
+
+  // Render message content with image support
+  const renderMessage = (msg: Message) => {
+    const contentText = typeof msg.content === 'string' ? msg.content : 
+      Array.isArray(msg.content) ? 
+        msg.content.find(c => c.type === 'text')?.text || 'Image message' 
+        : String(msg.content)
+
+    return (
+      <div className="space-y-2">
+        {msg.image && (
+          <div className="max-w-xs">
+            <img 
+              src={msg.image} 
+              alt="Uploaded content" 
+              className="rounded-lg border max-w-full h-auto cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={() => {
+                // Open image in new tab for full view
+                window.open(msg.image, '_blank')
+              }}
+            />
+          </div>
+        )}
+        <div className="text-sm">
+          {renderMessageContent(contentText)}
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -158,6 +286,17 @@ export default function AIChat() {
                     )} />
                   </div>
                   <div className="flex items-center space-x-1">
+                    {messages.length > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={clearConversation}
+                        className="text-white hover:bg-white/20 h-8 w-8"
+                        title="Söhbəti təmizlə"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="icon"
@@ -192,6 +331,8 @@ export default function AIChat() {
                         Salam! Mən Squiz AI köməkçisiyəm. 
                         <br />
                         Quiz yaratma, öyrənmə və digər mövzularda sizə kömək edə bilərəm.
+                        <br />
+                        <strong className="text-purple-600">Şəkil yükləyə və təhlil edə bilərəm!</strong>
                       </p>
                     </div>
                   ) : (
@@ -214,15 +355,13 @@ export default function AIChat() {
                         
                         <div
                           className={cn(
-                            'max-w-[80%] px-4 py-3 rounded-xl text-sm leading-relaxed',
+                            'max-w-[80%] px-4 py-3 rounded-xl leading-relaxed',
                             msg.role === 'user'
                               ? 'bg-purple-600 text-white border border-purple-600/20 shadow-sm'
                               : 'bg-gray-50 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-200/50 dark:border-gray-700/50 shadow-sm'
                           )}
                         >
-                          <div className="text-sm">
-                            {renderMessageContent(msg.content)}
-                          </div>
+                          {renderMessage(msg)}
                         </div>
                         
                         {msg.role === 'user' && (
@@ -258,19 +397,71 @@ export default function AIChat() {
                 </div>
                 
                 {/* Input Area */}
-                <div className="border-t border-gray-200/50 dark:border-gray-700/50 p-6">
-                  <div className="flex space-x-3">
+                <div className="border-t border-gray-200/50 dark:border-gray-700/50 p-6 space-y-3">
+                  {/* Selected Image Preview */}
+                  {selectedImage && (
+                    <div className="flex items-center space-x-2 p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                      <img 
+                        src={selectedImage} 
+                        alt="Selected" 
+                        className="w-12 h-12 object-cover rounded border"
+                      />
+                      <div className="flex-1">
+                        <p className="text-xs text-gray-600 dark:text-gray-400">Şəkil hazırdır</p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={removeSelectedImage}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                  
+                  <div className="flex items-end space-x-2">
+                    {/* Image Upload Button */}
+                    <div className="relative">
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleImageSelect}
+                        accept="image/*"
+                        className="sr-only"
+                        disabled={uploadingImage || chatMutation.isPending}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploadingImage || chatMutation.isPending}
+                        className="border-gray-200/50 hover:bg-purple-50 hover:border-purple-300"
+                        title="Şəkil yüklə"
+                      >
+                        {uploadingImage ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Camera className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    
+                    {/* Text Input */}
                     <Input
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       onKeyPress={handleKeyPress}
-                      placeholder="Sualınızı yazın..."
+                      placeholder={selectedImage ? "Şəkil haqqında sual yazın..." : "Sualınızı yazın..."}
                       disabled={chatMutation.isPending}
                       className="flex-1 text-sm border-gray-200/50 focus:border-purple-400 transition-colors"
                     />
+                    
+                    {/* Send Button */}
                     <Button
                       onClick={handleSendMessage}
-                      disabled={!message.trim() || chatMutation.isPending}
+                      disabled={(!message.trim() && !selectedImage) || chatMutation.isPending}
                       size="icon"
                       className="bg-purple-600 hover:bg-purple-700 shadow-sm"
                     >
