@@ -1,0 +1,17 @@
+{
+  "panelTitle": "Admin Panel",
+  "panelDesc": "Platform idarəçiliyi və statistikası",
+  "overview": "Ümumi Baxış",
+  "users": "İstifadəçilər",
+  "categories": "Kateqoriyalar",
+  "totalUsers": "Ümumi İstifadəçilər",
+  "totalQuizzes": "Ümumi Quizlər",
+  "forumPosts": "Forum Yazıları",
+  "activeUsers": "Aktiv İstifadəçilər",
+  "recentActivities": "Son Fəaliyyətlər",
+  "loadingActivities": "Fəaliyyətlər yüklənir...",
+  "activityParticipated": "{{quiz}} quizində iştirak etdi",
+  "completed": "Tamamlandı",
+  "inProgress": "Davam edir",
+  "noRecentActivity": "Son fəaliyyət yoxdur"
+}

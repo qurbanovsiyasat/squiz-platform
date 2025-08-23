@@ -218,45 +218,87 @@ export default function QuizTakePage() {
     switch (currentQuestion.question_type) {
       case 'multiple_choice':
         return (
-          <RadioGroup 
-            value={currentAnswer || ''} 
-            onValueChange={handleAnswerChange}
-            className="grid grid-cols-1 md:grid-cols-2 gap-3"
-          >
-            {Array.isArray(currentQuestion.options) && currentQuestion.options.map((option, index) => (
-              <div key={index} className="flex items-center space-x-3 p-4 rounded-xl border-2 hover:border-primary-300 dark:hover:border-primary-600 hover:bg-slate-50 dark:hover:bg-black transition-all duration-200 cursor-pointer group">
-                <RadioGroupItem value={option} id={`option-${index}`} className="shrink-0" />
-                <Label 
-                  htmlFor={`option-${index}`} 
-                  className="flex-1 cursor-pointer text-base leading-relaxed group-hover:text-primary-700 dark:group-hover:text-primary-300 transition-colors"
+          <div className="space-y-3">
+            {Array.isArray(currentQuestion.options) && currentQuestion.options.map((option, index) => {
+              const isSelected = currentAnswer === option
+              return (
+                <div 
+                  key={index} 
+                  className={`quiz-answer-option ${
+                    isSelected ? 'selected' : ''
+                  }`}
+                  onClick={() => handleAnswerChange(option)}
                 >
-                  {currentQuestion?.question_type === 'math' ? (
-                    <NewMathRenderer latex={option} inline={true} />
-                  ) : (
-                    <MixedContentRenderer content={option} />
-                  )}
-                </Label>
-              </div>
-            ))}
-          </RadioGroup>
+                  <div className="flex items-start space-x-3">
+                    <div className={`mt-1 flex-shrink-0 w-4 h-4 rounded-full border-2 transition-colors ${
+                      isSelected 
+                        ? 'bg-purple-600 border-purple-600' 
+                        : 'border-slate-300 dark:border-slate-600'
+                    }`}>
+                      {isSelected && (
+                        <div className="w-full h-full rounded-full bg-white transform scale-50"></div>
+                      )}
+                    </div>
+                    <div className="quiz-answer-text flex-1">
+                      {currentQuestion?.question_type === 'math' ? (
+                        <NewMathRenderer latex={option} inline={true} />
+                      ) : (
+                        <MixedContentRenderer content={option} />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         )
       
       case 'true_false':
         return (
-          <RadioGroup 
-            value={currentAnswer || ''} 
-            onValueChange={handleAnswerChange}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4"
-          >
-            <div className="flex items-center space-x-3 p-4 rounded-xl border-2 hover:border-primary-300 dark:hover:border-primary-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer group">
-              <RadioGroupItem value="True" id="true" className="shrink-0" />
-              <Label htmlFor="true" className="flex-1 cursor-pointer text-base font-medium group-hover:text-primary-700 dark:group-hover:text-primary-300 transition-colors">✓ Doğru</Label>
+          <div className="space-y-3">
+            <div 
+              className={`quiz-answer-option ${
+                currentAnswer === 'True' ? 'selected' : ''
+              }`}
+              onClick={() => handleAnswerChange('True')}
+            >
+              <div className="flex items-start space-x-3">
+                <div className={`mt-1 flex-shrink-0 w-4 h-4 rounded-full border-2 transition-colors ${
+                  currentAnswer === 'True' 
+                    ? 'bg-purple-600 border-purple-600' 
+                    : 'border-slate-300 dark:border-slate-600'
+                }`}>
+                  {currentAnswer === 'True' && (
+                    <div className="w-full h-full rounded-full bg-white transform scale-50"></div>
+                  )}
+                </div>
+                <div className="quiz-answer-text flex-1 font-medium text-green-700 dark:text-green-400">
+                  ✓ Doğru
+                </div>
+              </div>
             </div>
-            <div className="flex items-center space-x-3 p-4 rounded-xl border-2 hover:border-primary-300 dark:hover:border-primary-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer group">
-              <RadioGroupItem value="False" id="false" className="shrink-0" />
-              <Label htmlFor="false" className="flex-1 cursor-pointer text-base font-medium group-hover:text-primary-700 dark:group-hover:text-primary-300 transition-colors">✗ Yanlış</Label>
+            <div 
+              className={`quiz-answer-option ${
+                currentAnswer === 'False' ? 'selected' : ''
+              }`}
+              onClick={() => handleAnswerChange('False')}
+            >
+              <div className="flex items-start space-x-3">
+                <div className={`mt-1 flex-shrink-0 w-4 h-4 rounded-full border-2 transition-colors ${
+                  currentAnswer === 'False' 
+                    ? 'bg-purple-600 border-purple-600' 
+                    : 'border-slate-300 dark:border-slate-600'
+                }`}>
+                  {currentAnswer === 'False' && (
+                    <div className="w-full h-full rounded-full bg-white transform scale-50"></div>
+                  )}
+                </div>
+                <div className="quiz-answer-text flex-1 font-medium text-red-700 dark:text-red-400">
+                  ✗ Yanlış
+                </div>
+              </div>
             </div>
-          </RadioGroup>
+          </div>
         )
       
       case 'text':
@@ -266,12 +308,12 @@ export default function QuizTakePage() {
               <Type className="h-4 w-4" />
               <span>Text Answer</span>
             </div>
-            <div className="border rounded-lg p-4 bg-slate-50 dark:bg-slate-800">
+            <div className="p-4 border border-purple-100 dark:border-purple-800 rounded-lg bg-purple-50/50 dark:bg-purple-900/10">
               <Input
                 value={currentAnswer || ''}
                 onChange={(e) => handleAnswerChange(e.target.value)}
                 placeholder="Enter your answer..."
-                className="text-base min-h-[44px] bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600"
+                className="text-sm min-h-[44px] bg-white dark:bg-slate-900 border-purple-200 dark:border-purple-700 focus:border-purple-500 focus:ring-purple-200"
               />
               <p className="text-xs text-slate-500 mt-2">
                 Type your answer in the text field above
@@ -287,12 +329,12 @@ export default function QuizTakePage() {
               <Calculator className="h-4 w-4" />
               <span>Mathematical Expression</span>
             </div>
-            <div className="border rounded-lg p-4 bg-slate-50 dark:bg-slate-800">
+            <div className="p-4 border border-purple-100 dark:border-purple-800 rounded-lg bg-purple-50/50 dark:bg-purple-900/10">
               <MathInput
                 value={currentAnswer || ''}
                 onChange={handleAnswerChange}
                 placeholder="Enter mathematical expression using LaTeX..."
-                className="bg-white dark:bg-slate-900"
+                className="bg-white dark:bg-slate-900 border-purple-200 dark:border-purple-700 focus:border-purple-500"
               />
               <p className="text-xs text-slate-500 mt-2">
                 Use LaTeX syntax for mathematical expressions (e.g., \frac{"{1}"}{"{2}"}, x^2, \sqrt{"{x}"})

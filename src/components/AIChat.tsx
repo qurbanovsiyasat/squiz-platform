@@ -77,7 +77,7 @@ export default function AIChat() {
       <motion.button
         onClick={() => setIsOpen(true)}
         className={cn(
-          'fixed bottom-6 right-6 z-50 w-14 h-14 bg-primary-600 hover:bg-primary-700 text-white rounded-full shadow-lg transition-all duration-200',
+          'fixed bottom-6 right-6 z-50 w-14 h-14 bg-purple-600 hover:bg-purple-700 text-white rounded-full shadow-lg transition-all duration-200',
           isOpen && 'opacity-0 pointer-events-none'
         )}
         whileHover={{ scale: 1.05 }}
@@ -117,7 +117,7 @@ export default function AIChat() {
               "h-full flex flex-col transition-all duration-200",
               isDragging ? "shadow-2xl ring-2 ring-purple-400" : "shadow-xl"
             )}>
-              <CardHeader className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-t-lg py-4 cursor-move">
+              <CardHeader className="bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-t-lg py-4 cursor-move">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Bot className="h-5 w-5" />
@@ -177,8 +177,8 @@ export default function AIChat() {
                         )}
                       >
                         {msg.role === 'assistant' && (
-                          <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <Bot className="h-4 w-4 text-primary-600" />
+                          <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center flex-shrink-0">
+                            <Bot className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                           </div>
                         )}
                         
@@ -186,7 +186,7 @@ export default function AIChat() {
                           className={cn(
                             'max-w-[80%] px-3 py-2 rounded-lg text-sm',
                             msg.role === 'user'
-                              ? 'bg-primary-600 text-white'
+                              ? 'bg-purple-600 text-white'
                               : 'bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-slate-100'
                           )}
                         >
@@ -194,7 +194,7 @@ export default function AIChat() {
                         </div>
                         
                         {msg.role === 'user' && (
-                          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
                             <User className="h-4 w-4 text-white" />
                           </div>
                         )}
@@ -208,8 +208,8 @@ export default function AIChat() {
                       animate={{ opacity: 1, y: 0 }}
                       className="flex space-x-2"
                     >
-                      <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
-                        <Bot className="h-4 w-4 text-primary-600" />
+                      <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center flex-shrink-0">
+                        <Bot className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                       </div>
                       <div className="bg-slate-100 dark:bg-slate-700 px-3 py-2 rounded-lg">
                         <div className="flex items-center space-x-2">

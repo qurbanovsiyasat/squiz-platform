@@ -325,10 +325,10 @@ export default function QuizzesPage() {
         ) : (
           <EmptyState
             icon={BookOpen}
-            title="Quiz tapılmadı"
-            description="Axtarış şərtlərinizə uyğun quiz mövcud deyil. Filtrləri dəyişdirməyi və ya yeni quiz yaratmagı sınayın."
+            title={t('quiz.noQuizzesFound')}
+            description={t('quiz.noQuizzesMatch')}
             action={(user?.role === 'teacher' || user?.role === 'admin' || user?.can_create_quiz) ? {
-              label: 'Yeni Quiz Yarat',
+              label: t('quiz.newQuiz'),
               onClick: checkPermissionAndNavigate,
               icon: Plus
             } : undefined}
