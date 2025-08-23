@@ -1,10 +1,19 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useFileUpload, FileUploadItem } from '@/hooks/useFileUpload'
+import { useAIImageAnalysis, AIImageAnalysisResponse } from '@/hooks/useAI'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Progress } from '@/components/ui/progress'
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription,
+  DialogFooter 
+} from '@/components/ui/dialog'
 import { 
   Upload, 
   Camera, 
@@ -16,7 +25,10 @@ import {
   FileText,
   X,
   Plus,
-  Loader2
+  Loader2,
+  Brain,
+  AlertCircle,
+  CheckCircle
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -31,6 +43,7 @@ export interface FileItem {
   isImage: boolean
   uploadProgress?: number
   isPersistent?: boolean
+  aiAnalysis?: any // AI analiz sonucu
 }
 
 interface FileUploadProps {
@@ -44,6 +57,8 @@ interface FileUploadProps {
   className?: string
   formId?: string // Add form ID for database persistence
   persistToDB?: boolean // Whether to save metadata to database
+  enableAIAnalysis?: boolean // Enable AI analysis features
+  onAIAnalysisComplete?: (fileId: string, analysis: any) => void // AI analiz callback
 }
 
 const DEFAULT_ACCEPTED_TYPES = [
@@ -66,16 +81,28 @@ export default function FileUpload({
   showPreview = true,
   className,
   formId,
-  persistToDB = true
+  persistToDB = true,
+  enableAIAnalysis = false,
+  onAIAnalysisComplete
 }: FileUploadProps) {
   const [files, setFiles] = useState<FileItem[]>(existingFiles)
   const [dragActive, setDragActive] = useState(false)
   const [localUploading, setLocalUploading] = useState(false)
   const [uploadingFiles, setUploadingFiles] = useState<Set<string>>(new Set())
   const [imageLoadErrors, setImageLoadErrors] = useState<Set<string>>(new Set()) // Track failed image loads
+  const [showAIAnalyzer, setShowAIAnalyzer] = useState<string | null>(null) // Currently analyzing file ID
+  const [aiAnalysisModal, setAiAnalysisModal] = useState<{
+    isOpen: boolean
+    fileId: string | null
+    fileName: string | null
+    analysisResult: AIImageAnalysisResponse | null
+  }>({ isOpen: false, fileId: null, fileName: null, analysisResult: null })
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const isMobile = useIsMobile()
+  
+  // AI Image Analysis hook
+  const aiImageAnalysis = useAIImageAnalysis()
   
   // Use the hook only for database persistence
   const hookResult = useFileUpload({
@@ -368,6 +395,50 @@ export default function FileUpload({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }, [])
 
+  // Handle AI image analysis
+  const handleAIAnalysis = useCallback(async (file: FileItem) => {
+    if (!file.isImage || !file.url) {
+      toast.error('AI analizi sadece görüntü dosyaları için kullanılabilir')
+      return
+    }
+
+    // Open modal immediately with loading state
+    setAiAnalysisModal({
+      isOpen: true,
+      fileId: file.id,
+      fileName: file.name,
+      analysisResult: null
+    })
+
+    try {
+      const result = await aiImageAnalysis.mutateAsync({
+        imageUrl: file.url,
+        analysisType: 'general'
+      })
+
+      // Update modal with result
+      setAiAnalysisModal(prev => ({
+        ...prev,
+        analysisResult: result
+      }))
+    } catch (error) {
+      console.error('AI analysis failed:', error)
+      // Modal will show the error state based on aiImageAnalysis.error
+    }
+  }, [aiImageAnalysis])
+
+  // Close AI analysis modal
+  const closeAIModal = useCallback(() => {
+    setAiAnalysisModal({
+      isOpen: false,
+      fileId: null,
+      fileName: null,
+      analysisResult: null
+    })
+    // Reset the mutation state
+    aiImageAnalysis.reset()
+  }, [aiImageAnalysis])
+
   // Get file icon
   const getFileIcon = useCallback((type: string, isImage: boolean) => {
     if (isImage) return <ImageIcon className="h-4 w-4" />
@@ -592,6 +663,21 @@ export default function FileUpload({
                         </Button>
                       )}
                       
+                      {/* AI Analysis Button for Images */}
+                      {file.url && file.isImage && enableAIAnalysis && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleAIAnalysis(file)}
+                          disabled={isFileUploading}
+                          className="h-8 w-8 p-0 text-purple-600 hover:text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-950/20"
+                          title="AI Analizi"
+                        >
+                          <Brain className="h-4 w-4" />
+                        </Button>
+                      )}
+                      
                       <Button
                         type="button"
                         variant="ghost"
@@ -613,6 +699,128 @@ export default function FileUpload({
             </div>
           </div>
         )}
+        
+        {/* AI Analysis Modal */}
+        <Dialog 
+          open={aiAnalysisModal.isOpen} 
+          onOpenChange={(open) => !open && closeAIModal()}
+        >
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Brain className="h-5 w-5 text-purple-600" />
+                AI Görüntü Analizi
+              </DialogTitle>
+              {aiAnalysisModal.fileName && (
+                <DialogDescription>
+                  {aiAnalysisModal.fileName} dosyası analiz ediliyor...
+                </DialogDescription>
+              )}
+            </DialogHeader>
+            
+            <div className="py-4">
+              {/* Loading State */}
+              {aiImageAnalysis.isPending && (
+                <div className="text-center py-8">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="relative">
+                      <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+                      <div className="absolute inset-0 rounded-full border-2 border-purple-200 dark:border-purple-800 animate-pulse" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        Görüntü AI ile analiz ediliyor...
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Bu işlem birkaç saniye sürebilir
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Error State */}
+              {aiImageAnalysis.error && !aiImageAnalysis.isPending && (
+                <div className="text-center py-8">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
+                      <AlertCircle className="h-6 w-6 text-red-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+                        AI Analizi Başarısız
+                      </p>
+                      <p className="text-xs text-red-600 dark:text-red-400">
+                        {aiImageAnalysis.error.message || 'Analiz sırasında bir hata oluştu'}
+                      </p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => aiAnalysisModal.fileId && handleAIAnalysis(
+                        files.find(f => f.id === aiAnalysisModal.fileId)!
+                      )}
+                    >
+                      Tekrar Dene
+                    </Button>
+                  </div>
+                </div>
+              )}
+              
+              {/* Success State */}
+              {aiAnalysisModal.analysisResult && !aiImageAnalysis.isPending && !aiImageAnalysis.error && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                    <CheckCircle className="h-5 w-5" />
+                    <span className="font-medium text-sm">Analiz Tamamlandı</span>
+                  </div>
+                  
+                  {/* Analysis Results */}
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-sm text-gray-900 dark:text-gray-100">
+                        Analiz Sonuçları
+                      </h4>
+                      <Badge variant="outline" className="text-xs">
+                        Güvenilirlik: %{Math.round(aiAnalysisModal.analysisResult.confidence * 100)}
+                      </Badge>
+                    </div>
+                    
+                    <div className="prose prose-sm dark:prose-invert max-w-none">
+                      <div className="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                        {aiAnalysisModal.analysisResult.analysis}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 pt-2 border-t border-gray-200 dark:border-gray-700">
+                      <span>Sağlayıcı: {aiAnalysisModal.analysisResult.provider}</span>
+                      <span>Tarih: {new Date(aiAnalysisModal.analysisResult.timestamp).toLocaleString('tr-TR')}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <DialogFooter>
+              <Button 
+                variant="outline" 
+                onClick={closeAIModal}
+              >
+                Kapat
+              </Button>
+              {aiAnalysisModal.analysisResult && (
+                <Button
+                  onClick={() => {
+                    navigator.clipboard.writeText(aiAnalysisModal.analysisResult!.analysis)
+                    toast.success('Analiz sonucu panoya kopyalandı')
+                  }}
+                >
+                  Kopyala
+                </Button>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   )

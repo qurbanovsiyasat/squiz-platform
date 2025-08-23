@@ -1,333 +1,308 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
-import { useAuth } from '@/contexts/AuthContext'
+import { useState } from 'react'
+import { useMutation } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
+import { toast } from 'sonner'
 
-// OpenRouter API configuration
-const OPENROUTER_API_KEY = "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"
-const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-// Primary working model - AI Text Model
-const TEXT_MODEL = "ai-provider/main-model:free" // AI model for text
-// Vision models to try (may not be available)
-const VISION_MODELS = [
-  "ai-provider/main-model:free", // Try main model for vision first
-  "ai-provider/model-v3-lite",
-  "ai-provider/model-v3-lite:beta", 
-  "ai-provider/vision-pro",
-  "ai-provider/vision-model-preview"
-]
-
-// Enhanced message interface with image support
-interface ChatMessage {
-  role: 'user' | 'assistant' | 'system'
-  content: string | Array<{
-    type: 'text' | 'image_url'
-    text?: string
-    image_url?: {
-      url: string
-    }
-  }>
-  timestamp?: string
-  image?: string // Base64 image data
+// AI Analysis Types
+export interface AITextAnalysisRequest {
+  text: string
+  analysisType?: 'grammar' | 'sentiment' | 'summarize' | 'suggest' | 'general'
+  language?: string
 }
 
-// Conversation persistence functions
-class ConversationManager {
-  private static getStorageKey(sessionId: string): string {
-    return `ai_conversation_${sessionId}`
+export interface AITextAnalysisResponse {
+  success: boolean
+  originalText: string
+  analysisType: string
+  language: string
+  result: string
+  timestamp: string
+  provider: string
+  tokenUsage?: {
+    prompt_tokens: number
+    total_tokens: number
+    completion_tokens: number
   }
+}
 
-  static saveMessage(sessionId: string, message: ChatMessage): void {
-    try {
-      const conversation = this.getConversation(sessionId)
-      conversation.messages.push({
-        ...message,
-        timestamp: message.timestamp || new Date().toISOString()
-      })
-      conversation.updated_at = new Date().toISOString()
+export interface AIImageAnalysisRequest {
+  imageUrl: string
+  analysisType?: 'general' | 'ocr' | 'quality'
+}
+
+export interface AIImageAnalysisResponse {
+  success: boolean
+  analysisType: string
+  imageUrl: string
+  analysis: string
+  confidence: number
+  timestamp: string
+  provider: string
+}
+
+export interface AIContentSuggestionsRequest {
+  formType?: string
+  existingContent?: string
+  targetAudience?: string
+  contentType?: 'form_fields' | 'validation_messages' | 'help_text' | 'completion'
+}
+
+export interface AIContentSuggestionsResponse {
+  success: boolean
+  formType: string
+  contentType: string
+  targetAudience: string
+  existingContent: string
+  suggestions: string
+  timestamp: string
+  provider: string
+}
+
+// Custom Error Class
+class AIError extends Error {
+  constructor(message: string, public code?: string, public details?: any) {
+    super(message)
+    this.name = 'AIError'
+  }
+}
+
+// Utility function to handle API errors
+const handleAIError = (error: any, operation: string): AIError => {
+  console.error(`${operation} error:`, error)
+  
+  if (error?.message?.includes('unauthorized')) {
+    return new AIError('AI servisine erişim yetkiniz yok', 'UNAUTHORIZED')
+  }
+  
+  if (error?.message?.includes('quota')) {
+    return new AIError('AI servis kotanız doldu', 'QUOTA_EXCEEDED')
+  }
+  
+  if (error?.message?.includes('timeout')) {
+    return new AIError('AI servisi yanıt vermedi', 'TIMEOUT')
+  }
+  
+  return new AIError(
+    error?.message || `AI ${operation.toLowerCase()} başarısız oldu`,
+    'AI_ERROR',
+    error
+  )
+}
+
+/**
+ * AI Metin Analizi Hook
+ */
+export function useAITextAnalysis() {
+  const [analysisHistory, setAnalysisHistory] = useState<AITextAnalysisResponse[]>([])
+  
+  return useMutation({
+    mutationFn: async (request: AITextAnalysisRequest): Promise<AITextAnalysisResponse> => {
+      if (!request.text?.trim()) {
+        throw new AIError('Analiz edilecek metin gerekli', 'VALIDATION_ERROR')
+      }
       
-      localStorage.setItem(
-        this.getStorageKey(sessionId), 
-        JSON.stringify(conversation)
-      )
-      console.log(`Saved message to conversation: ${sessionId}`)
-    } catch (error) {
-      console.error('Failed to save message:', error)
-      // Fallback to sessionStorage
+      if (request.text.length > 5000) {
+        throw new AIError('Metin çok uzun (maksimum 5000 karakter)', 'TEXT_TOO_LONG')
+      }
+      
       try {
-        const conversation = this.getConversation(sessionId)
-        conversation.messages.push(message)
-        sessionStorage.setItem(
-          this.getStorageKey(sessionId),
-          JSON.stringify(conversation)
-        )
-      } catch (fallbackError) {
-        console.error('Failed to save to sessionStorage:', fallbackError)
+        const { data, error } = await supabase.functions.invoke('nvidia-text-analysis', {
+          body: {
+            text: request.text.trim(),
+            analysisType: request.analysisType || 'general',
+            language: request.language || 'tr'
+          }
+        })
+        
+        if (error) {
+          throw handleAIError(error, 'Metin analizi')
+        }
+        
+        if (!data?.success) {
+          throw new AIError(data?.error?.message || 'Metin analizi başarısız oldu', 'API_ERROR')
+        }
+        
+        // Analiz geçmişine ekle
+        setAnalysisHistory(prev => [data, ...prev.slice(0, 9)]) // Son 10 analizi tut
+        
+        return data
+      } catch (error) {
+        if (error instanceof AIError) {
+          throw error
+        }
+        throw handleAIError(error, 'Metin analizi')
       }
+    },
+    onSuccess: (data) => {
+      if (data.analysisType !== 'general') {
+        toast.success(`${data.analysisType === 'grammar' ? 'Dilbilgisi analizi' : 
+          data.analysisType === 'sentiment' ? 'Duygu analizi' :
+          data.analysisType === 'summarize' ? 'Özet analizi' :
+          'Metin analizi'} tamamlandı`)
+      }
+    },
+    onError: (error: AIError) => {
+      console.error('Metin analizi hatası:', error)
+      toast.error(error.message || 'Metin analizi başarısız oldu')
     }
-  }
+  })
+}
 
-  static getConversation(sessionId: string): {
-    session_id: string
-    messages: ChatMessage[]
-    created_at: string
-    updated_at: string
-  } {
-    try {
-      // Try localStorage first
-      let stored = localStorage.getItem(this.getStorageKey(sessionId))
-      if (!stored) {
-        // Fallback to sessionStorage
-        stored = sessionStorage.getItem(this.getStorageKey(sessionId))
+/**
+ * AI Görüntü Analizi Hook
+ */
+export function useAIImageAnalysis() {
+  const [analysisHistory, setAnalysisHistory] = useState<AIImageAnalysisResponse[]>([])
+  
+  return useMutation({
+    mutationFn: async (request: AIImageAnalysisRequest): Promise<AIImageAnalysisResponse> => {
+      if (!request.imageUrl?.trim()) {
+        throw new AIError('Görüntü URL gerekli', 'VALIDATION_ERROR')
       }
       
-      if (stored) {
-        const conversation = JSON.parse(stored)
-        return conversation
+      // URL validation
+      try {
+        new URL(request.imageUrl)
+      } catch {
+        throw new AIError('Geçersiz görüntü URL', 'INVALID_URL')
       }
-    } catch (error) {
-      console.error('Failed to retrieve conversation:', error)
-    }
-    
-    // Return new conversation if none exists
-    return {
-      session_id: sessionId,
-      messages: [],
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }
-  }
-
-  static clearConversation(sessionId: string): void {
-    try {
-      localStorage.removeItem(this.getStorageKey(sessionId))
-      sessionStorage.removeItem(this.getStorageKey(sessionId))
-      console.log(`Cleared conversation: ${sessionId}`)
-    } catch (error) {
-      console.error('Failed to clear conversation:', error)
-    }
-  }
-
-  // Clean up old conversations (older than 7 days)
-  static cleanupOldConversations(): void {
-    const cutoffTime = Date.now() - (7 * 24 * 60 * 60 * 1000) // 7 days ago
-    
-    try {
-      for (let i = localStorage.length - 1; i >= 0; i--) {
-        const key = localStorage.key(i)
-        if (key && key.startsWith('ai_conversation_')) {
-          const stored = localStorage.getItem(key)
-          if (stored) {
-            try {
-              const conversation = JSON.parse(stored)
-              const updatedAt = new Date(conversation.updated_at).getTime()
-              if (updatedAt < cutoffTime) {
-                localStorage.removeItem(key)
-                console.log(`Cleaned up old conversation: ${key}`)
-              }
-            } catch (parseError) {
-              // Remove corrupted data
-              localStorage.removeItem(key)
-            }
+      
+      try {
+        const { data, error } = await supabase.functions.invoke('nvidia-image-analysis', {
+          body: {
+            imageUrl: request.imageUrl,
+            analysisType: request.analysisType || 'general'
           }
+        })
+        
+        if (error) {
+          throw handleAIError(error, 'Görüntü analizi')
         }
+        
+        if (!data?.success) {
+          throw new AIError(data?.error?.message || 'Görüntü analizi başarısız oldu', 'API_ERROR')
+        }
+        
+        // Analiz geçmişine ekle
+        setAnalysisHistory(prev => [data, ...prev.slice(0, 9)]) // Son 10 analizi tut
+        
+        return data
+      } catch (error) {
+        if (error instanceof AIError) {
+          throw error
+        }
+        throw handleAIError(error, 'Görüntü analizi')
       }
-    } catch (error) {
-      console.error('Failed to cleanup old conversations:', error)
-    }
-  }
-}
-
-// Initialize cleanup on module load
-ConversationManager.cleanupOldConversations()
-
-// Helper function to try multiple vision models with guaranteed text fallback
-async function tryVisionModels(apiMessages: ChatMessage[], hasImage: boolean) {
-  // If no image, just use the working text model
-  if (!hasImage) {
-    return await callModel(TEXT_MODEL, apiMessages)
-  }
-  
-  // Try vision models first
-  for (const visionModel of VISION_MODELS) {
-    try {
-      console.log(`Trying vision model: ${visionModel}`)
-      const result = await callModel(visionModel, apiMessages)
-      console.log(`Success with vision model: ${visionModel}`)
-      return result
-    } catch (error) {
-      console.warn(`Vision model ${visionModel} failed:`, error)
-      continue
-    }
-  }
-  
-  // All vision models failed, fall back to text-only processing
-  console.log('All vision models failed, falling back to text-only with MoonshotAI')
-  
-  // Convert image messages to text descriptions for text-only model
-  const textOnlyMessages = apiMessages.map(msg => {
-    if (Array.isArray(msg.content)) {
-      const textPart = msg.content.find(c => c.type === 'text')
-      const hasImagePart = msg.content.some(c => c.type === 'image_url')
-      return {
-        ...msg,
-        content: `${textPart?.text || ''} ${hasImagePart ? '\n\n[Qeyd: İstifadəçi şəkil göndərib, lakin şəkil təhlili hal-hazırda əlçatan deyil. Lütfən şəkili təsvir etməyi xahiş edin.]' : ''}`.trim()
-      }
-    }
-    return msg
-  })
-  
-  try {
-    const result = await callModel(TEXT_MODEL, textOnlyMessages)
-    return {
-      ...result,
-      reply: `[Şəkil təhlili MoonshotAI ilə məhdudlaşdırılıb]\n\n${result.reply}`,
-      model: `${TEXT_MODEL} (text-only fallback)`
-    }
-  } catch (error) {
-    console.error('Even MoonshotAI text-only model failed:', error)
-    throw new Error('AI xidməti hal-hazırda əlçatan deyil. Zəhmət olmasa bir az sonra yenidən cəhd edin.')
-  }
-}
-
-// Helper function to call a specific model
-async function callModel(model: string, messages: ChatMessage[]) {
-  const response = await fetch(OPENROUTER_API_URL, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-      'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      model: model,
-      messages: messages,
-      max_tokens: 1000,
-      temperature: 0.7,
-    })
+    onSuccess: () => {
+      toast.success('Görüntü analizi tamamlandı')
+    },
+    onError: (error: AIError) => {
+      console.error('Görüntü analizi hatası:', error)
+      toast.error(error.message || 'Görüntü analizi başarısız oldu')
+    }
   })
+}
+
+/**
+ * AI İçerik Önerileri Hook
+ */
+export function useAIContentSuggestions() {
+  const [suggestionsHistory, setSuggestionsHistory] = useState<AIContentSuggestionsResponse[]>([])
   
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}))
-    const errorMsg = errorData.error?.message || `HTTP ${response.status}`
-    throw new Error(`Model ${model} failed: ${errorMsg}`)
-  }
-  
-  const data = await response.json()
-  
-  if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-    throw new Error(`Invalid response from model ${model}`)
-  }
+  return useMutation({
+    mutationFn: async (request: AIContentSuggestionsRequest): Promise<AIContentSuggestionsResponse> => {
+      try {
+        const { data, error } = await supabase.functions.invoke('nvidia-content-suggestions', {
+          body: {
+            formType: request.formType || 'general',
+            existingContent: request.existingContent || '',
+            targetAudience: request.targetAudience || 'general',
+            contentType: request.contentType || 'form_fields'
+          }
+        })
+        
+        if (error) {
+          throw handleAIError(error, 'İçerik önerileri')
+        }
+        
+        if (!data?.success) {
+          throw new AIError(data?.error?.message || 'İçerik önerileri başarısız oldu', 'API_ERROR')
+        }
+        
+        // Öneri geçmişine ekle
+        setSuggestionsHistory(prev => [data, ...prev.slice(0, 9)]) // Son 10 öneriyi tut
+        
+        return data
+      } catch (error) {
+        if (error instanceof AIError) {
+          throw error
+        }
+        throw handleAIError(error, 'İçerik önerileri')
+      }
+    },
+    onSuccess: () => {
+      toast.success('AI önerileri hazırlandı')
+    },
+    onError: (error: AIError) => {
+      console.error('İçerik önerileri hatası:', error)
+      toast.error(error.message || 'İçerik önerileri başarısız oldu')
+    }
+  })
+}
+
+/**
+ * AI Analizlerini Temizleme Hook'u
+ */
+export function useAIClearHistory() {
+  const [textAnalysisHistory, setTextAnalysisHistory] = useState<AITextAnalysisResponse[]>([])
+  const [imageAnalysisHistory, setImageAnalysisHistory] = useState<AIImageAnalysisResponse[]>([])
+  const [suggestionsHistory, setSuggestionsHistory] = useState<AIContentSuggestionsResponse[]>([])
   
   return {
-    reply: data.choices[0].message.content,
-    model: model,
-    success: true
+    clearTextAnalysis: () => setTextAnalysisHistory([]),
+    clearImageAnalysis: () => setImageAnalysisHistory([]),
+    clearSuggestions: () => setSuggestionsHistory([])
   }
 }
 
-// Enhanced AI Chat Assistant with conversation memory and image support
-export function useAIChat() {
-  const { user } = useAuth()
+// Export error class for external use
+export { AIError }
 
-  return useMutation<any, Error, {
-    message: string
-    sessionId: string
-    context?: { type: string; id: string }
-    image?: string // Base64 image data
-  }>({    
-    mutationFn: async ({ message, sessionId, context, image }) => {
-      try {
-        // Get conversation history
-        const conversation = ConversationManager.getConversation(sessionId)
-        
-        // Prepare user message with optional image
-        let userMessage: ChatMessage
-        
-        if (image) {
-          // For image messages, use structured content
-          userMessage = {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: message || "Please analyze this image."
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: image
-                }
-              }
-            ],
-            image,
-            timestamp: new Date().toISOString()
-          }
-        } else {
-          // Text-only message
-          userMessage = {
-            role: 'user',
-            content: message,
-            timestamp: new Date().toISOString()
-          }
-        }
-        
-        // Save user message to conversation
-        ConversationManager.saveMessage(sessionId, userMessage)
-        
-        // Prepare messages for API (including conversation history)
-        const systemMessage: ChatMessage = {
-          role: "system",
-          content: "You are a helpful AI assistant for Squiz platform, a quiz and learning platform created by Siyasət Qurbanov and Çingiz Kazımov (Siyasət Qurbanov və Çingiz Kazımov). You help users with creating quizzes, learning, Q&A, and general educational topics. You can analyze images, help with visual content, and provide educational assistance. Always respond in a helpful and educational manner. If the user writes in Azerbaijani (Azərbaycan dili), respond in Azerbaijani. If they write in English, respond in English. When asked about who created this platform or who the creators are, always respond with 'Siyasət Qurbanov və Çingiz Kazımov'. When analyzing images, be descriptive and educational. You have excellent mathematical capabilities and can write mathematical formulas using LaTeX syntax for proper rendering. For math expressions, use $ for inline math (e.g., $x^2 + y^2$) and $$ for display math (e.g., $$\\frac{a}{b}$$). Always format fractions as \\frac{numerator}{denominator}, square roots as \\sqrt{expression}, and use proper LaTeX syntax for all mathematical notation. When explaining mathematical concepts, provide clear step-by-step solutions with properly formatted mathematical expressions."
-        }
-        
-        // Build conversation context (limit to last 10 messages to avoid token limits)
-        const recentMessages = conversation.messages.slice(-9) // Last 9 messages + new message = 10 total
-        const apiMessages = [systemMessage, ...recentMessages, userMessage]
-        
-        // Try vision models with fallback logic
-        const result = await tryVisionModels(apiMessages, !!image)
-        
-        const timestamp = new Date().toISOString()
-        
-        // Save assistant response to conversation
-        const assistantMessage: ChatMessage = {
-          role: 'assistant',
-          content: result.reply,
-          timestamp
-        }
-        ConversationManager.saveMessage(sessionId, assistantMessage)
-        
-        return {
-          reply: result.reply,
-          timestamp,
-          sessionId,
-          userId: user?.id,
-          hasImage: !!image,
-          model: result.model
-        }
-      } catch (error) {
-        console.error('OpenRouter API Error:', error)
-        throw error
+// Chat-related types and functions (placeholders for AIChat component)
+export function generateChatSessionId(): string {
+  return `chat_${Date.now()}_${Math.random().toString(36).substring(2)}`
+}
+
+export class ConversationManager {
+  // Placeholder implementation
+  static clearConversation(sessionId: string) {
+    // Placeholder implementation
+    console.log('Clearing conversation:', sessionId)
+  }
+}
+
+export function useAIChat() {
+  // Placeholder hook for AIChat component
+  return {
+    mutateAsync: async (data: any) => {
+      // Placeholder implementation
+      return { 
+        success: true, 
+        reply: 'Chat feature not implemented yet',
+        timestamp: new Date().toISOString()
       }
     },
-  })
+    isPending: false,
+    error: null,
+    reset: () => {}
+  }
 }
 
-// Get conversation history
 export function useAIConversation(sessionId: string) {
-  return useQuery({
-    queryKey: ['ai-conversation', sessionId],
-    queryFn: async () => {
-      return ConversationManager.getConversation(sessionId)
-    },
-    enabled: !!sessionId,
-    refetchInterval: false, // Don't auto-refetch
-    staleTime: Infinity, // Never consider stale
-  })
+  // Placeholder hook for conversation history
+  return {
+    data: { messages: [] },
+    refetch: () => Promise.resolve()
+  }
 }
-
-// Generate session ID for AI chat
-export function generateChatSessionId(): string {
-  return `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-}
-
-// Export conversation manager for direct use
-export { ConversationManager }
