@@ -312,7 +312,7 @@ export default function AIChat() {
               setIsDragging(false)
             }}
             className={cn(
-              "fixed bottom-6 right-6 z-50 w-96 h-[500px] max-w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] cursor-move",
+              "fixed bottom-6 right-6 z-50 w-96 h-[500px] max-w-[calc(100vw-1rem)] max-h-[calc(100vh-2rem)] cursor-move",
               isDragging && "shadow-2xl scale-105"
             )}
             style={{ x: position.x, y: position.y }}
@@ -369,7 +369,7 @@ export default function AIChat() {
               
               <CardContent className="flex-1 flex flex-col p-0">
                 {/* Messages Area */}
-                <div className="flex-1 overflow-y-auto p-2 space-y-3 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-1 space-y-3 custom-scrollbar">
                   {messages.length === 0 ? (
                     <div className="text-center text-slate-500 py-8">
                       <Bot className="h-12 w-12 mx-auto mb-4 text-slate-400" />
