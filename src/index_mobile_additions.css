@@ -169,7 +169,8 @@
   }
   
   .ai-chat-mobile-bottom {
-    @apply fixed bottom-0 left-0 right-0 z-50;
+    @apply fixed left-0 right-0 z-50;
+    bottom: 1rem; /* Move up from bottom */
     max-height: 75vh;
     /* Completely lock position on mobile */
     touch-action: pan-y; /* Only allow vertical scrolling inside */

@@ -322,7 +322,7 @@ export default function AIChat() {
               isMobile ? (
                 isFullScreen 
                   ? "inset-0 w-full h-full" // Full screen on mobile
-                  : "bottom-0 left-0 right-0 w-full h-[75vh] max-h-[600px]" // Fixed bottom on mobile
+                  : "bottom-4 left-0 right-0 w-full h-[75vh] max-h-[600px]" // Fixed bottom on mobile with some spacing
               ) : (
                 // Desktop: Full screen or floating window
                 isFullScreen
