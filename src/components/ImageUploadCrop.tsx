@@ -234,7 +234,7 @@ export default function ImageUploadCrop({
               <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
                 Choose an image file to upload. Max size: {maxSizeInMB}MB
               </p>
-              <Button onClick={() => fileInputRef.current?.click()}>
+              <Button type="button" onClick={() => fileInputRef.current?.click()}>
                 <Upload className="h-4 w-4 mr-2" />
                 Select Image
               </Button>
@@ -258,6 +258,7 @@ export default function ImageUploadCrop({
               </div>
               <div className="flex space-x-2">
                 <Button
+                  type="button"
                   variant="outline"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isProcessing}
@@ -267,6 +268,7 @@ export default function ImageUploadCrop({
                 </Button>
                 {allowCrop && originalImageSrc && (
                   <Button
+                    type="button"
                     variant="outline"
                     onClick={() => setShowCropModal(true)}
                     disabled={isProcessing}
@@ -276,6 +278,7 @@ export default function ImageUploadCrop({
                   </Button>
                 )}
                 <Button
+                  type="button"
                   variant="outline"
                   onClick={removeImage}
                   disabled={isProcessing}
@@ -304,6 +307,7 @@ export default function ImageUploadCrop({
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Crop Image</h3>
               <Button
+                type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => setShowCropModal(false)}
@@ -406,6 +410,7 @@ export default function ImageUploadCrop({
               
               <div className="flex justify-end space-x-2">
                 <Button
+                  type="button"
                   variant="outline"
                   onClick={() => setShowCropModal(false)}
                   disabled={isProcessing}
@@ -413,6 +418,7 @@ export default function ImageUploadCrop({
                   Cancel
                 </Button>
                 <Button
+                  type="button"
                   onClick={handleCropAndUpload}
                   disabled={isProcessing || !croppedAreaPixels}
                 >
