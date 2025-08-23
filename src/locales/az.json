@@ -27,9 +27,12 @@
     "noDescription": "Təsvir yoxdur",
     "readMore": "Daha çox",
     "showLess": "Daha az",
-    "mostRecent": "Ən son",
+    "mostRecent": "Ən yeni",
     "mostPopular": "Ən məşhur",
     "allCategories": "Bütün kateqoriyalar",
+    "allLevels": "Bütün səviyyələr",
+    "clearFilter": "Filtri təmizlə",
+    "seeAll": "Hamısını gör",
     "accessGranted": "Giriş icazəsi verildi",
     "invalidAccessCode": "Yanlış giriş kodu"
   },
@@ -70,7 +73,13 @@
     "myStats": "Mənim statistikam",
     "createQuiz": "Test yarat",
     "browseQuizzes": "Testlərə bax",
-    "askQuestion": "Sual ver"
+    "askQuestion": "Sual ver",
+    "noActivity": "Hələ heç bir fəaliyyət yoxdur",
+    "takeQuizOrAsk": "Quiz həll edin və ya sual verin",
+    "progress": "Tərəqqi",
+    "thisWeekActivity": "Bu həftə fəaliyyət",
+    "quizCompletion": "Quiz tamamlama",
+    "monthlyGoal": "Aylıq hədəf"
   },
   "quiz": {
     "title": "Başlıq",
@@ -82,7 +91,7 @@
     "createQuiz": "Test yarat",
     "editQuiz": "Testi redaktə et",
     "takeQuiz": "Testə başla",
-    "finishQuiz": "Testi bitir",
+    "finishQuiz": "Quiz Bitir",
     "quizResults": "Test nəticələri",
     "score": "Bal",
     "correctAnswers": "Düzgün cavablar",
@@ -105,7 +114,22 @@
     "options": "Variantlar",
     "correctAnswer": "Düzgün cavab",
     "explanation": "İzahat",
-    "points": "Bal"
+    "points": "Bal",
+    "quizCreated": "Quiz Yaradıldı",
+    "quizTaken": "Quiz İcra Edildi",
+    "questionAsked": "Sual Verildi",
+    "totalScore": "Ümumi Bal",
+    "successRate": "Uğur Nisbəti",
+    "popularQuizzes": "Populyar Quizlər",
+    "recentlyPopularAndNew": "Son dövrdə populyar və yeni quizlər",
+    "exploreQuizzes": "Mövcud quizləri araşdırın və biliklərinizi sınayın",
+    "newQuiz": "Yeni Quiz",
+    "searchQuizzes": "Quizləri axtarın…",
+    "noQuizzesFound": "Quiz tapılmadı",
+    "noQuizzesMatch": "Axtarış şərtlərinizə uyğun quiz mövcud deyil. Filtrləri dəyişdirməyi və ya yeni quiz yaratmağı sınayın.",
+    "questionOf": "Sual {current} / {total}",
+    "createFirstQuiz": "İlk Quizinizi Yaradın",
+    "noQuizzesYet": "Hələ heç bir quiz yoxdur"
   },
   "qa": {
     "askQuestion": "Sual ver",
@@ -123,7 +147,12 @@
     "bestAnswer": "Ən yaxşı cavab",
     "acceptAnswer": "Cavabı qəbul et",
     "upvote": "Bəyən",
-    "downvote": "Bəyənmə"
+    "downvote": "Bəyənmə",
+    "createNewQuizQA": "Yeni Quiz Yarat Sual-Cavab",
+    "askQuestionsGetAnswers": "Suallarınızı soruşun, cavablar tapın və bilik paylaşın",
+    "searchQuestions": "Sualları axtarın…",
+    "noQuestionsFound": "Sual tapılmadı",
+    "noQuestionsYet": "Hələ ki sual yoxdur. İlk sualı sən ver və icmanın böyüməsinə kömək et!"
   },
   "forum": {
     "posts": "Yazılar",
@@ -137,7 +166,7 @@
     "sharedQuiz": "Paylaşılan test"
   },
   "forms": {
-    "createForm": "Form yarat",
+    "createForm": "Form Yarat",
     "formTitle": "Form başlığı",
     "formDescription": "Form təsviri",
     "addField": "Sahə əlavə et",
@@ -151,7 +180,9 @@
     "mostSubmissions": "Ən çox göndəriş",
     "noFormsTitle": "Form tapılmadı",
     "noFormsFiltered": "Axtarış kriteriyalarınıza uyğun form tapılmadı. Filtrlərinizi düzəldin.",
-    "noFormsEmpty": "Hələ heç bir form yoxdur. İlk formu yaratmaq üçün başlayın!"
+    "noFormsEmpty": "Hələ heç bir form yoxdur. İlk formu yaratmaq üçün başlayın!",
+    "createAndFillForms": "Formlar yaradın və məlumat toplamaq üçün doldurun",
+    "searchForms": "Formları Axtar…"
   },
   "profile": {
     "profile": "Profil",
@@ -171,6 +202,19 @@
     "editProfile": "Profili redaktə et",
     "updateProfile": "Profili yenilə",
     "profileUpdated": "Profil yeniləndi"
+  },
+  "stats": {
+    "totalQuizzes": "Ümumi Kviz Sayı",
+    "averageScore": "Orta Bal",
+    "bestResult": "Ən Yaxşı Nəticə",
+    "perfectResults": "Mükəməl Nəticələr",
+    "recentResults": "Son Nəticələr",
+    "scoreDistribution": "Bal Paylanması",
+    "weeklyActivity": "Haftalıq Aktivlik",
+    "lastWeekQuizCount": "Son Həftə Kviz Sayı",
+    "goalTenQuizzesPerWeek": "Məqsəd: həftədə 10 kviz",
+    "totalTime": "Ümumi Vaxt",
+    "averageTime": "Orta Vaxt"
   },
   "settings": {
     "settings": "Parametrlər",
@@ -196,7 +240,7 @@
     "systemTheme": "Sistem",
     "emailCannotChange": "Email ünvanı dəyişdirilə bilməz",
     "roleSetByAdmin": "Rol administratorlar tərəfindən təyin edilir",
-    "strongPasswordDesc": "Hesabınızın təhlükəsizliyi üçün güclü şifrə seçin",
+    "strongPasswordDesc": "Hesabınızın təhlükəsizliği üçün güclü şifrə seçin",
     "manageProfileVisibility": "Profilinizin görünürlüyünü idarə edin",
     "manageNotifications": "Aldığınız bildirişləri idarə edin",
     "emailNotificationsDesc": "Yeni mesajlar və yeniliklər üçün email alın",

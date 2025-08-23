@@ -6,27 +6,39 @@
 
 @layer base {
   :root {
-    /* Light Theme - Optimized for WCAG AA Contrast (4.5:1 minimum) */
+    /* Light Theme - Purple Color Scheme */
     --background: 255 255 255; /* pure white for better contrast */
     --foreground: 17 24 39; /* very dark for maximum contrast - 15.3:1 ratio */
     --card: 255 255 255; /* pure-white */
     --card-foreground: 17 24 39; /* very dark for maximum contrast */
     --popover: 255 255 255; /* pure-white */
     --popover-foreground: 17 24 39; /* very dark for maximum contrast */
-    --primary: 37 99 235; /* blue-600 for better contrast */
+    --primary: 147 51 234; /* purple-600 for primary color */
     --primary-foreground: 255 255 255; /* pure-white */
     --secondary: 248 250 252; /* slate-50 for subtle backgrounds */
     --secondary-foreground: 51 65 85; /* slate-700 for good contrast - 7.2:1 ratio */
     --muted: 248 250 252; /* slate-50 */
     --muted-foreground: 71 85 105; /* slate-600 for readable secondary text - 5.7:1 ratio */
-    --accent: 37 99 235; /* blue-600 */
+    --accent: 147 51 234; /* purple-600 */
     --accent-foreground: 255 255 255; /* pure-white */
     --destructive: 220 38 38; /* red-600 for better contrast */
     --destructive-foreground: 255 255 255; /* pure-white */
     --border: 226 232 240; /* slate-200 */
     --input: 241 245 249; /* slate-100 for better input visibility */
-    --ring: 37 99 235; /* blue-600 */
+    --ring: 147 51 234; /* purple-600 */
     --radius: 16px; /* design-system border radius */
+
+    /* Purple theme specific colors */
+    --purple-50: 250 245 255;
+    --purple-100: 243 232 255;
+    --purple-200: 233 213 255;
+    --purple-300: 216 180 254;
+    --purple-400: 196 145 253;
+    --purple-500: 168 85 247;
+    --purple-600: 147 51 234;
+    --purple-700: 126 34 206;
+    --purple-800: 107 33 168;
+    --purple-900: 88 28 135;
 
     /* Aliases for compatibility across styles (light) */
     --primary-bg: var(--background);
@@ -36,33 +48,45 @@
     --border-color: var(--border);
     --input-bg: var(--input);
     --accent-primary: var(--primary);
-    --accent-hover: var(--primary); /* can be tuned to a lighter shade if needed */
+    --accent-hover: 126 34 206; /* purple-700 for hover */
     --success-color: 16 185 129; /* emerald-500 */
     --warning-color: 245 158 11; /* amber-500 */
     --error-color: 239 68 68; /* red-500 */
   }
 
   .dark {
-    /* Dark Theme - Optimized for WCAG AA Contrast (4.5:1 minimum) */
+    /* Dark Theme - Purple Color Scheme */
     --background: 9 9 11; /* zinc-950 for deep dark background */
     --foreground: 250 250 250; /* zinc-50 for maximum contrast - 19.4:1 ratio */
     --card: 24 24 27; /* zinc-900 for card backgrounds */
     --card-foreground: 250 250 250; /* zinc-50 for maximum contrast */
     --popover: 24 24 27; /* zinc-900 */
     --popover-foreground: 250 250 250; /* zinc-50 */
-    --primary: 99 102 241; /* indigo-500 for accessible primary color */
+    --primary: 168 85 247; /* purple-500 for accessible primary color */
     --primary-foreground: 250 250 250; /* zinc-50 */
     --secondary: 39 39 42; /* zinc-800 for secondary backgrounds */
     --secondary-foreground: 212 212 216; /* zinc-300 for good contrast - 8.1:1 ratio */
     --muted: 39 39 42; /* zinc-800 */
     --muted-foreground: 161 161 170; /* zinc-400 for readable secondary text - 5.9:1 ratio */
-    --accent: 99 102 241; /* indigo-500 */
+    --accent: 168 85 247; /* purple-500 */
     --accent-foreground: 250 250 250; /* zinc-50 */
     --destructive: 239 68 68; /* red-500 for good contrast */
     --destructive-foreground: 250 250 250; /* zinc-50 */
     --border: 63 63 70; /* zinc-700 for visible borders */
     --input: 39 39 42; /* zinc-800 for input backgrounds */
-    --ring: 99 102 241; /* indigo-500 */
+    --ring: 168 85 247; /* purple-500 */
+
+    /* Purple theme specific colors for dark mode */
+    --purple-50: 88 28 135;
+    --purple-100: 107 33 168;
+    --purple-200: 126 34 206;
+    --purple-300: 147 51 234;
+    --purple-400: 168 85 247;
+    --purple-500: 196 145 253;
+    --purple-600: 216 180 254;
+    --purple-700: 233 213 255;
+    --purple-800: 243 232 255;
+    --purple-900: 250 245 255;
 
     /* Aliases for compatibility across styles (dark) */
     --primary-bg: var(--background);
@@ -72,7 +96,7 @@
     --border-color: var(--border);
     --input-bg: var(--input);
     --accent-primary: var(--primary);
-    --accent-hover: 129 140 248; /* indigo-400 */
+    --accent-hover: 196 145 253; /* purple-400 for hover */
     --success-color: 16 185 129; /* emerald-500 */
     --warning-color: 245 158 11; /* amber-500 */
     --error-color: 239 68 68; /* red-500 */
@@ -106,69 +130,95 @@
 }
 
 @layer components {
-  /* Modern Design System Components */
+  /* Modern Design System Components with Purple Theme */
   
   /* Modern Card Component */
   .card-modern {
-    @apply bg-pure-white rounded-design-system border border-light-grey shadow-card;
+    @apply bg-white dark:bg-zinc-900 rounded-2xl border border-purple-100 dark:border-purple-800 shadow-sm;
     transition: all 0.2s ease-in-out;
   }
   
   .card-modern:hover {
-    @apply shadow-card-hover;
+    @apply shadow-lg border-purple-200 dark:border-purple-700;
     transform: translateY(-2px);
   }
   
-  /* Modern Button Components */
+  /* Modern Button Components with Purple Theme */
   .btn-primary {
-    @apply bg-vibrant-blue text-pure-white hover:bg-primary-600 focus:bg-primary-700 rounded-button px-6 py-3 font-medium transition-all duration-200 focus:ring-2 focus:ring-primary-200 focus:ring-offset-2 active:scale-95;
+    @apply bg-purple-600 text-white hover:bg-purple-700 focus:bg-purple-800 rounded-xl px-6 py-3 font-medium transition-all duration-200 focus:ring-2 focus:ring-purple-200 focus:ring-offset-2 active:scale-95;
   }
   
   .btn-secondary {
-    @apply bg-pure-white text-vibrant-blue border border-vibrant-blue hover:bg-primary-50 focus:bg-primary-100 rounded-button px-6 py-3 font-medium transition-all duration-200 focus:ring-2 focus:ring-primary-200 focus:ring-offset-2 active:scale-95;
+    @apply bg-white text-purple-600 border border-purple-600 hover:bg-purple-50 focus:bg-purple-100 rounded-xl px-6 py-3 font-medium transition-all duration-200 focus:ring-2 focus:ring-purple-200 focus:ring-offset-2 active:scale-95;
   }
   
   .btn-tertiary {
-    @apply bg-transparent text-vibrant-blue hover:bg-primary-50 focus:bg-primary-100 rounded-button px-6 py-3 font-medium transition-all duration-200 focus:ring-2 focus:ring-primary-200 focus:ring-offset-2 active:scale-95;
+    @apply bg-transparent text-purple-600 hover:bg-purple-50 focus:bg-purple-100 rounded-xl px-6 py-3 font-medium transition-all duration-200 focus:ring-2 focus:ring-purple-200 focus:ring-offset-2 active:scale-95;
+  }
+  
+  /* Compact Quiz Answer Options */
+  .quiz-answer-option {
+    @apply p-3 mb-2 border border-purple-100 dark:border-purple-800 rounded-lg cursor-pointer transition-all duration-200 text-sm;
+  }
+  
+  .quiz-answer-option:hover {
+    @apply bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700;
+  }
+  
+  .quiz-answer-option.selected {
+    @apply bg-purple-100 dark:bg-purple-900/40 border-purple-300 dark:border-purple-600 text-purple-800 dark:text-purple-200;
+  }
+  
+  .quiz-answer-option.correct {
+    @apply bg-green-100 dark:bg-green-900/40 border-green-300 dark:border-green-600 text-green-800 dark:text-green-200;
+  }
+  
+  .quiz-answer-option.incorrect {
+    @apply bg-red-100 dark:bg-red-900/40 border-red-300 dark:border-red-600 text-red-800 dark:text-red-200;
+  }
+  
+  /* Compact Answer Option Text */
+  .quiz-answer-text {
+    @apply text-sm font-medium leading-relaxed;
   }
   
   /* Modern Input Component */
   .input-modern {
-    @apply bg-pure-white border border-light-grey rounded-button px-4 py-3 text-body placeholder:text-medium-grey focus:border-vibrant-blue focus:ring-2 focus:ring-primary-200 focus:ring-offset-1 transition-all duration-200;
+    @apply bg-white dark:bg-zinc-800 border border-purple-100 dark:border-purple-800 rounded-xl px-4 py-3 text-sm placeholder:text-slate-500 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 focus:ring-offset-1 transition-all duration-200;
   }
   
-  /* Design System Gradient Utilities */
+  /* Design System Gradient Utilities with Purple Theme */
   .gradient-primary {
-    @apply bg-gradient-to-br from-primary-50 to-primary-100;
+    @apply bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20;
   }
   
   .gradient-success {
-    @apply bg-gradient-to-br from-success-50 to-success-100;
+    @apply bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20;
   }
   
   .gradient-warning {
-    @apply bg-gradient-to-br from-warning-50 to-warning-100;
+    @apply bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20;
   }
   
   .gradient-purple {
-    @apply bg-gradient-to-br from-purple-50 to-purple-100;
+    @apply bg-gradient-to-br from-purple-50 to-purple-200 dark:from-purple-900/20 dark:to-purple-700/20;
   }
   
   /* Bottom Navigation for Mobile */
   .bottom-nav {
-    @apply fixed bottom-0 left-0 right-0 bg-pure-white border-t border-light-grey z-50 safe-area-bottom;
+    @apply fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-purple-100 dark:border-purple-800 z-50 safe-area-bottom;
   }
   
   .bottom-nav-item {
-    @apply flex flex-col items-center justify-center py-2 px-1 text-caption text-medium-grey transition-colors duration-200;
+    @apply flex flex-col items-center justify-center py-2 px-1 text-xs text-slate-500 transition-colors duration-200;
   }
   
   .bottom-nav-item.active {
-    @apply text-vibrant-blue;
+    @apply text-purple-600 dark:text-purple-400;
   }
   
   .bottom-nav-item:hover {
-    @apply text-vibrant-blue;
+    @apply text-purple-600 dark:text-purple-400;
   }
 }
 

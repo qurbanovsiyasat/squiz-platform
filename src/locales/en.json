@@ -30,6 +30,9 @@
     "mostRecent": "Most Recent",
     "mostPopular": "Most Popular",
     "allCategories": "All Categories",
+    "allLevels": "All Levels",
+    "clearFilter": "Clear Filter",
+    "seeAll": "See All",
     "accessGranted": "Access granted",
     "invalidAccessCode": "Invalid access code"
   },
@@ -70,7 +73,13 @@
     "myStats": "My Statistics",
     "createQuiz": "Create Quiz",
     "browseQuizzes": "Browse Quizzes",
-    "askQuestion": "Ask Question"
+    "askQuestion": "Ask Question",
+    "noActivity": "No activity yet",
+    "takeQuizOrAsk": "Take a quiz or ask a question",
+    "progress": "Progress",
+    "thisWeekActivity": "This Week Activity",
+    "quizCompletion": "Quiz Completion",
+    "monthlyGoal": "Monthly Goal"
   },
   "quiz": {
     "title": "Title",
@@ -105,7 +114,22 @@
     "options": "Options",
     "correctAnswer": "Correct Answer",
     "explanation": "Explanation",
-    "points": "Points"
+    "points": "Points",
+    "quizCreated": "Quiz Created",
+    "quizTaken": "Quiz Taken",
+    "questionAsked": "Question Asked",
+    "totalScore": "Total Score",
+    "successRate": "Success Rate",
+    "popularQuizzes": "Popular Quizzes",
+    "recentlyPopularAndNew": "Recently Popular and New Quizzes",
+    "exploreQuizzes": "Explore Available Quizzes and Test Your Knowledge",
+    "newQuiz": "New Quiz",
+    "searchQuizzes": "Search Quizzes…",
+    "noQuizzesFound": "No Quizzes Found",
+    "noQuizzesMatch": "No quizzes match your search. Try changing filters or creating a new quiz.",
+    "questionOf": "Question {current} of {total}",
+    "createFirstQuiz": "Create Your First Quiz",
+    "noQuizzesYet": "No quizzes yet"
   },
   "qa": {
     "askQuestion": "Ask a Question",
@@ -123,7 +147,12 @@
     "bestAnswer": "Best Answer",
     "acceptAnswer": "Accept Answer",
     "upvote": "Upvote",
-    "downvote": "Downvote"
+    "downvote": "Downvote",
+    "createNewQuizQA": "Create New Quiz / Q&A",
+    "askQuestionsGetAnswers": "Ask Questions, Get Answers, and Share Knowledge",
+    "searchQuestions": "Search Questions…",
+    "noQuestionsFound": "No Questions Found",
+    "noQuestionsYet": "No questions yet. Be the first to ask and help grow the community!"
   },
   "forum": {
     "posts": "Posts",
@@ -151,7 +180,9 @@
     "mostSubmissions": "Most Submissions",
     "noFormsTitle": "No forms found",
     "noFormsFiltered": "No forms match your search criteria. Try adjusting your filters.",
-    "noFormsEmpty": "No forms available yet. Create the first form to get started!"
+    "noFormsEmpty": "No forms available yet. Create the first form to get started!",
+    "createAndFillForms": "Create and fill out forms to collect and share information",
+    "searchForms": "Search forms…"
   },
   "profile": {
     "profile": "Profile",
@@ -171,6 +202,19 @@
     "editProfile": "Edit Profile",
     "updateProfile": "Update Profile",
     "profileUpdated": "Profile updated"
+  },
+  "stats": {
+    "totalQuizzes": "Total Quizzes",
+    "averageScore": "Average Score",
+    "bestResult": "Best Result",
+    "perfectResults": "Perfect Results",
+    "recentResults": "Recent Results",
+    "scoreDistribution": "Score Distribution",
+    "weeklyActivity": "Weekly Activity",
+    "lastWeekQuizCount": "Last Week Quiz Count",
+    "goalTenQuizzesPerWeek": "Goal: 10 quizzes per week",
+    "totalTime": "Total Time",
+    "averageTime": "Average Time"
   },
   "settings": {
     "settings": "Settings",
