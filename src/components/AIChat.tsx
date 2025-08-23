@@ -189,7 +189,15 @@ export default function AIChat() {
       refetchConversation()
     } catch (error) {
       console.error('AI chat error:', error)
-      toast.error('AI köməkçisi ilə əlaqə zamanı xəta baş verdi')
+      
+      // Provide more specific error messages
+      const errorMessage = error instanceof Error ? error.message : 'Bilinməyən xəta'
+      
+      if (errorMessage.includes('vision') || errorMessage.includes('404')) {
+        toast.error('Şəkil təhlili müvəqqəti əlçatan deyil. Zəhmət olmasa şəkili təsvir edin və ya sonra yenidən cəhd edin.')
+      } else {
+        toast.error('AI köməkçisi ilə əlaqə zamanı xəta baş verdi')
+      }
     }
   }
 

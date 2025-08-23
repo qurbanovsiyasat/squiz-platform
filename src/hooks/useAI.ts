@@ -4,9 +4,15 @@ import { useAuth } from '@/contexts/AuthContext'
 // OpenRouter API configuration
 const OPENROUTER_API_KEY = "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"
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-// Using a vision-capable model for image analysis
-const MODEL_NAME = "google/gemini-pro-1.5-exp:free" // Vision-capable model
-const FALLBACK_MODEL = "tngtech/deepseek-r1t2-chimera:free" // Fallback for text-only
+// Primary working model - guaranteed to work
+const TEXT_MODEL = "tngtech/deepseek-r1t2-chimera:free" // Known working text model
+// Vision models to try (may not be available)
+const VISION_MODELS = [
+  "anthropic/claude-3-haiku",
+  "anthropic/claude-3-haiku:beta", 
+  "google/gemini-pro-vision",
+  "openai/gpt-4-vision-preview"
+]
 
 // Enhanced message interface with image support
 interface ChatMessage {
@@ -132,6 +138,90 @@ class ConversationManager {
 // Initialize cleanup on module load
 ConversationManager.cleanupOldConversations()
 
+// Helper function to try multiple vision models with guaranteed text fallback
+async function tryVisionModels(apiMessages: ChatMessage[], hasImage: boolean) {
+  // If no image, just use the working text model
+  if (!hasImage) {
+    return await callModel(TEXT_MODEL, apiMessages)
+  }
+  
+  // Try vision models first
+  for (const visionModel of VISION_MODELS) {
+    try {
+      console.log(`Trying vision model: ${visionModel}`)
+      const result = await callModel(visionModel, apiMessages)
+      console.log(`Success with vision model: ${visionModel}`)
+      return result
+    } catch (error) {
+      console.warn(`Vision model ${visionModel} failed:`, error)
+      continue
+    }
+  }
+  
+  // All vision models failed, fall back to text-only processing
+  console.log('All vision models failed, falling back to text-only')
+  
+  // Convert image messages to text descriptions for text-only model
+  const textOnlyMessages = apiMessages.map(msg => {
+    if (Array.isArray(msg.content)) {
+      const textPart = msg.content.find(c => c.type === 'text')
+      const hasImagePart = msg.content.some(c => c.type === 'image_url')
+      return {
+        ...msg,
+        content: `${textPart?.text || ''} ${hasImagePart ? '\n\n[Qeyd: İstifadəçi şəkil göndərib, lakin şəkil təhlili hal-hazırda əlçatan deyil. Lütfən şəkili təsvir etməyi xahiş edin.]' : ''}`.trim()
+      }
+    }
+    return msg
+  })
+  
+  try {
+    const result = await callModel(TEXT_MODEL, textOnlyMessages)
+    return {
+      ...result,
+      reply: `[Şəkil təhlili müvəqqəti əlçatan deyil]\n\n${result.reply}`,
+      model: `${TEXT_MODEL} (text-only fallback)`
+    }
+  } catch (error) {
+    console.error('Even text-only model failed:', error)
+    throw new Error('Bütün AI modelləri işləmir. Zəhmət olmasa sonra yenidən cəhd edin.')
+  }
+}
+
+// Helper function to call a specific model
+async function callModel(model: string, messages: ChatMessage[]) {
+  const response = await fetch(OPENROUTER_API_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: model,
+      messages: messages,
+      max_tokens: 1000,
+      temperature: 0.7,
+    })
+  })
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    const errorMsg = errorData.error?.message || `HTTP ${response.status}`
+    throw new Error(`Model ${model} failed: ${errorMsg}`)
+  }
+  
+  const data = await response.json()
+  
+  if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+    throw new Error(`Invalid response from model ${model}`)
+  }
+  
+  return {
+    reply: data.choices[0].message.content,
+    model: model,
+    success: true
+  }
+}
+
 // Enhanced AI Chat Assistant with conversation memory and image support
 export function useAIChat() {
   const { user } = useAuth()
@@ -191,52 +281,26 @@ export function useAIChat() {
         const recentMessages = conversation.messages.slice(-9) // Last 9 messages + new message = 10 total
         const apiMessages = [systemMessage, ...recentMessages, userMessage]
         
-        // Choose model based on whether image is included
-        const model = image ? MODEL_NAME : FALLBACK_MODEL
+        // Try vision models with fallback logic
+        const result = await tryVisionModels(apiMessages, !!image)
         
-        const response = await fetch(OPENROUTER_API_URL, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: model,
-            messages: apiMessages,
-            max_tokens: 1000,
-            temperature: 0.7,
-          })
-        })
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}))
-          throw new Error(`OpenRouter API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`)
-        }
-
-        const data = await response.json()
-        
-        if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-          throw new Error('Invalid response format from OpenRouter API')
-        }
-
-        const reply = data.choices[0].message.content
         const timestamp = new Date().toISOString()
         
         // Save assistant response to conversation
         const assistantMessage: ChatMessage = {
           role: 'assistant',
-          content: reply,
+          content: result.reply,
           timestamp
         }
         ConversationManager.saveMessage(sessionId, assistantMessage)
         
         return {
-          reply,
+          reply: result.reply,
           timestamp,
           sessionId,
           userId: user?.id,
           hasImage: !!image,
-          model: model
+          model: result.model
         }
       } catch (error) {
         console.error('OpenRouter API Error:', error)
