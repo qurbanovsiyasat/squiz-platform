@@ -64,7 +64,7 @@ export interface FormReply {
 export interface FormAttachment {
   id: string
   form_id: string
-  uploaded_by: string
+  user_id: string
   file_name: string
   original_name: string
   mime_type: string
