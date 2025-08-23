@@ -3,6 +3,38 @@ import { useMutation } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 
+// AI Chat Assistant Types
+export interface AIChatRequest {
+  message?: string
+  messages?: Array<{
+    role: 'user' | 'assistant'
+    content: string
+  }>
+  model?: string
+}
+
+export interface AIChatResponse {
+  id: string
+  object: string
+  created: number
+  model: string
+  choices: Array<{
+    index: number
+    message: {
+      role: 'assistant'
+      content: string
+    }
+    finish_reason: string
+  }>
+  usage: {
+    prompt_tokens: number
+    completion_tokens: number
+    total_tokens: number
+  }
+  provider: string
+  timestamp: string
+}
+
 // AI Analysis Types
 export interface AITextAnalysisRequest {
   text: string
@@ -87,6 +119,64 @@ const handleAIError = (error: any, operation: string): AIError => {
     'AI_ERROR',
     error
   )
+}
+
+/**
+ * Google Gemini AI Assistant Hook
+ */
+export function useAIAssistant() {
+  const [chatHistory, setChatHistory] = useState<AIChatResponse[]>([])
+  
+  return useMutation({
+    mutationFn: async (request: AIChatRequest): Promise<AIChatResponse> => {
+      if (!request.message && !request.messages) {
+        throw new AIError('Mesaj veya mesaj geçmişi gerekli', 'VALIDATION_ERROR')
+      }
+      
+      if (request.message && request.message.trim().length === 0) {
+        throw new AIError('Boş mesaj gönderilemez', 'VALIDATION_ERROR')
+      }
+      
+      if (request.message && request.message.length > 2000) {
+        throw new AIError('Mesaj çok uzun (maksimum 2000 karakter)', 'MESSAGE_TOO_LONG')
+      }
+      
+      try {
+        const { data, error } = await supabase.functions.invoke('ai-assistant', {
+          body: {
+            message: request.message,
+            messages: request.messages,
+            model: request.model || 'gemini-2.0-flash'
+          }
+        })
+        
+        if (error) {
+          throw handleAIError(error, 'AI asistan çağrısı')
+        }
+        
+        if (!data || data.error) {
+          throw new AIError(data?.error?.message || 'AI asistan yanıt vermedi', 'API_ERROR')
+        }
+        
+        // Chat geçmişine ekle
+        setChatHistory(prev => [data, ...prev.slice(0, 9)]) // Son 10 sohbeti tut
+        
+        return data
+      } catch (error) {
+        if (error instanceof AIError) {
+          throw error
+        }
+        throw handleAIError(error, 'AI asistan çağrısı')
+      }
+    },
+    onSuccess: (data) => {
+      console.log('AI Assistant response:', data.choices[0]?.message?.content)
+    },
+    onError: (error: AIError) => {
+      console.error('AI asistan hatası:', error)
+      toast.error(error.message || 'AI asistan çağrısı başarısız oldu')
+    }
+  })
 }
 
 /**

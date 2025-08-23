@@ -48,6 +48,7 @@ import AboutPage from '@/pages/AboutPage'
 import FeaturesPage from '@/pages/FeaturesPage'
 import ContactPage from '@/pages/ContactPage'
 import SocialMediaPage from '@/pages/SocialMediaPage'
+import GeminiTestPage from '@/pages/GeminiTestPage'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -304,6 +305,12 @@ function AppRoutes() {
           <Route path="/form/:id/share" element={
             <ProtectedRoute>
               <FormSharePage />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/gemini-test" element={
+            <ProtectedRoute>
+              <GeminiTestPage />
             </ProtectedRoute>
           } />
           
