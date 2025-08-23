@@ -192,6 +192,13 @@
     padding-bottom: env(safe-area-inset-bottom);
     /* Prevent zoom on input focus */
   }
+
+  /* Full-screen AI chat input area spacing */
+  .ai-chat-mobile .ai-chat-input-area {
+    /* Extra bottom spacing in full-screen mode */
+    padding-bottom: calc(env(safe-area-inset-bottom) + 2rem);
+    margin-bottom: 1rem;
+  }
   
   /* Prevent mobile selection and dragging */
   .ai-chat-mobile *,
