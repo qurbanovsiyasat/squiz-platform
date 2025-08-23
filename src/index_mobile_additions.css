@@ -197,8 +197,8 @@
   /* Full-screen AI chat input area spacing */
   .ai-chat-mobile .ai-chat-input-area {
     /* Extra bottom spacing in full-screen mode */
-    padding-bottom: calc(env(safe-area-inset-bottom) + 2rem);
-    margin-bottom: 1rem;
+    padding-bottom: calc(env(safe-area-inset-bottom) + 3rem);
+    margin-bottom: 2rem;
   }
   
   /* Prevent mobile selection and dragging */

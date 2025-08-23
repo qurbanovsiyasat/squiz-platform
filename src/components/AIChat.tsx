@@ -524,8 +524,8 @@ export default function AIChat() {
                   isMobile ? "p-3" : "p-3",
                   // Extra bottom padding on mobile to account for safe areas
                   isMobile && !isFullScreen && "pb-4",
-                  // Additional bottom spacing for full-screen mode
-                  isMobile && isFullScreen && "pb-8",
+                  // Additional bottom spacing for full-screen mode - more space from bottom
+                  isMobile && isFullScreen && "pb-12 mb-4",
                   // Add safe area padding for mobile devices
                   isMobile && "pb-[env(safe-area-inset-bottom,1rem)]"
                 )}>
