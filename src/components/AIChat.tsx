@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import toast from 'react-hot-toast'
 import { MathRenderer } from '@/components/ui/MathRenderer'
-import { useMobile } from '@/hooks/use-mobile'
+import { useIsMobile } from '@/hooks/use-mobile'
 import 'katex/dist/katex.min.css'
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
@@ -84,7 +84,7 @@ export default function AIChat() {
   const [uploadingImage, setUploadingImage] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const isMobile = useMobile()
+  const isMobile = useIsMobile()
   
   const chatMutation = useAIChat()
   const { data: conversationData, refetch: refetchConversation } = useAIConversation(sessionId)
@@ -302,48 +302,58 @@ export default function AIChat() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
+            // Only allow dragging on desktop when not in full screen
             drag={!isMobile && !isFullScreen}
             dragMomentum={false}
             dragElastic={0.1}
-            dragConstraints={{
+            dragConstraints={!isMobile && !isFullScreen ? {
               top: 0,
               left: -(window.innerWidth - 400),
               right: 0,
               bottom: -(window.innerHeight - 520)
-            }}
-            onDragStart={() => setIsDragging(true)}
+            } : undefined}
+            onDragStart={() => !isMobile && setIsDragging(true)}
             onDragEnd={() => {
-              setIsDragging(false)
+              !isMobile && setIsDragging(false)
             }}
             className={cn(
               "fixed z-50 transition-all duration-200",
-              // Mobile: Full screen or fixed bottom
+              // Mobile: Fixed positioning - no movement allowed
               isMobile ? (
                 isFullScreen 
-                  ? "inset-0 w-full h-full"
-                  : "bottom-0 left-0 right-0 w-full h-[70vh] max-h-[600px]"
+                  ? "inset-0 w-full h-full" // Full screen on mobile
+                  : "bottom-0 left-0 right-0 w-full h-[75vh] max-h-[600px]" // Fixed bottom on mobile
               ) : (
                 // Desktop: Full screen or floating window
                 isFullScreen
                   ? "inset-4 w-auto h-auto"
                   : "bottom-6 right-6 w-96 h-[500px] max-w-[calc(100vw-1rem)] max-h-[calc(100vh-2rem)]"
               ),
+              // Only show cursor-move on desktop when draggable
               !isMobile && !isFullScreen && "cursor-move",
               isDragging && "shadow-2xl scale-105"
             )}
-            style={!isMobile && !isFullScreen ? { x: position.x, y: position.y } : {}}
+            // Position only applies to desktop non-fullscreen mode
+            style={(!isMobile && !isFullScreen) ? { x: position.x, y: position.y } : {}}
           >
             <Card className={cn(
               "h-full flex flex-col transition-all duration-200 border-gray-200/50 dark:border-gray-700/50 shadow-lg",
-              isDragging ? "shadow-2xl ring-2 ring-purple-300/50" : "shadow-lg",
-              isMobile && !isFullScreen && "rounded-t-lg rounded-b-none",
-              isMobile && isFullScreen && "rounded-none"
+              isDragging && !isMobile ? "shadow-2xl ring-2 ring-purple-300/50" : "shadow-lg",
+              // Mobile specific styling
+              isMobile && !isFullScreen && "rounded-t-lg rounded-b-none border-b-0",
+              isMobile && isFullScreen && "rounded-none border-0",
+              // Prevent any mobile interaction that could move the chat
+              isMobile && "select-none touch-none"
             )}>
               <CardHeader className={cn(
-                "bg-gradient-to-r from-purple-600 to-purple-700 text-white py-4",
+                "bg-gradient-to-r from-purple-600 to-purple-700 text-white py-4 flex-shrink-0",
+                // Mobile specific header styling
                 isMobile && !isFullScreen ? "rounded-t-lg" : "rounded-t-lg",
                 isMobile && isFullScreen && "rounded-none",
-                !isMobile && !isFullScreen && "cursor-move"
+                // Only show cursor-move on desktop when draggable
+                !isMobile && !isFullScreen && "cursor-move",
+                // Prevent text selection on mobile
+                isMobile && "select-none"
               )}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
@@ -422,19 +432,29 @@ export default function AIChat() {
                 {/* Messages Area */}
                 <div className={cn(
                   "flex-1 overflow-y-auto space-y-3 custom-scrollbar",
-                  isMobile ? "p-3" : "p-4"
+                  isMobile ? "p-3" : "p-4",
+                  // Ensure smooth scrolling on mobile
+                  isMobile && "overscroll-contain"
                 )}>
                   {messages.length === 0 ? (
                     <div className="text-center text-slate-500 py-8">
                       <Bot className="h-12 w-12 mx-auto mb-4 text-slate-400" />
-                      <p className="text-sm">
+                      <p className={cn(
+                        "text-sm",
+                        isMobile && "px-2 text-xs leading-relaxed"
+                      )}>
                         Salam! Mən Squiz AI köməkçisiyəm. 
                         <br />
                         Quiz yaratma, öyrənmə və digər mövzularda sizə kömək edə bilərəm.
                         <br />
                         <strong className="text-purple-600">Şəkil yükləyə və təhlil edə bilərəm!</strong>
                         <br />
-                        <span className="text-xs text-gray-500">Məsləhət: Ctrl+V ilə şəkil yapışdıra bilərsiniz</span>
+                        {!isMobile && (
+                          <span className="text-xs text-gray-500">Məsləhət: Ctrl+V ilə şəkil yapışdıra bilərsiniz</span>
+                        )}
+                        {isMobile && (
+                          <span className="text-xs text-gray-500">Şəkil yükləmək üçün kamera düyməsini toxunun</span>
+                        )}
                       </p>
                     </div>
                   ) : (
@@ -500,9 +520,12 @@ export default function AIChat() {
                 
                 {/* Input Area */}
                 <div className={cn(
-                  "border-t border-gray-200/50 dark:border-gray-700/50 space-y-2",
+                  "border-t border-gray-200/50 dark:border-gray-700/50 space-y-2 flex-shrink-0",
                   isMobile ? "p-3" : "p-3",
-                  isMobile && !isFullScreen && "pb-4" // Extra bottom padding on mobile
+                  // Extra bottom padding on mobile to account for safe areas
+                  isMobile && !isFullScreen && "pb-4",
+                  // Add safe area padding for mobile devices
+                  isMobile && "pb-[env(safe-area-inset-bottom,1rem)]"
                 )}>
                   {/* Selected Image Preview */}
                   {selectedImage && (

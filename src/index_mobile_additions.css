@@ -161,21 +161,53 @@
   /* AI Chat Mobile Optimizations */
   .ai-chat-mobile {
     @apply fixed inset-0 z-50;
+    /* Prevent any movement or interaction that could shift position */
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
   }
   
   .ai-chat-mobile-bottom {
     @apply fixed bottom-0 left-0 right-0 z-50;
-    max-height: 70vh;
+    max-height: 75vh;
+    /* Completely lock position on mobile */
+    touch-action: pan-y; /* Only allow vertical scrolling inside */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    /* Prevent any accidental movement */
+    overscroll-behavior: contain;
   }
   
   .ai-chat-messages {
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
+    /* Contain scrolling to prevent page movement */
+    overscroll-behavior: contain;
   }
   
   .ai-chat-input-area {
     /* Ensure input area stays above keyboard on mobile */
     padding-bottom: env(safe-area-inset-bottom);
+    /* Prevent zoom on input focus */
+  }
+  
+  /* Prevent mobile selection and dragging */
+  .ai-chat-mobile *,
+  .ai-chat-mobile-bottom * {
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    user-drag: none;
+  }
+  
+  /* Mobile input optimizations */
+  .ai-chat-mobile input,
+  .ai-chat-mobile-bottom input {
+    font-size: 16px !important; /* Prevent zoom */
+    -webkit-appearance: none;
   }
 }
 
