@@ -2,12 +2,13 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/AuthContext'
 
 // OpenRouter API configuration
-const OPENROUTER_API_KEY = "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"
+const OPENROUTER_API_KEY = "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"
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-// Primary working model - guaranteed to work
-const TEXT_MODEL = "tngtech/deepseek-r1t2-chimera:free" // Known working text model
+// Primary working model - MoonshotAI Kimi-K2
+const TEXT_MODEL = "moonshotai/kimi-k2:free" // MoonshotAI model for text
 // Vision models to try (may not be available)
 const VISION_MODELS = [
+  "moonshotai/kimi-k2:free", // Try main model for vision first
   "anthropic/claude-3-haiku",
   "anthropic/claude-3-haiku:beta", 
   "google/gemini-pro-vision",
@@ -159,7 +160,7 @@ async function tryVisionModels(apiMessages: ChatMessage[], hasImage: boolean) {
   }
   
   // All vision models failed, fall back to text-only processing
-  console.log('All vision models failed, falling back to text-only')
+  console.log('All vision models failed, falling back to text-only with MoonshotAI')
   
   // Convert image messages to text descriptions for text-only model
   const textOnlyMessages = apiMessages.map(msg => {
@@ -178,12 +179,12 @@ async function tryVisionModels(apiMessages: ChatMessage[], hasImage: boolean) {
     const result = await callModel(TEXT_MODEL, textOnlyMessages)
     return {
       ...result,
-      reply: `[Şəkil təhlili müvəqqəti əlçatan deyil]\n\n${result.reply}`,
+      reply: `[Şəkil təhlili MoonshotAI ilə məhdudlaşdırılıb]\n\n${result.reply}`,
       model: `${TEXT_MODEL} (text-only fallback)`
     }
   } catch (error) {
-    console.error('Even text-only model failed:', error)
-    throw new Error('Bütün AI modelləri işləmir. Zəhmət olmasa sonra yenidən cəhd edin.')
+    console.error('Even MoonshotAI text-only model failed:', error)
+    throw new Error('AI xidməti hal-hazırda əlçatan deyil. Zəhmət olmasa bir az sonra yenidən cəhd edin.')
   }
 }
 
@@ -274,7 +275,7 @@ export function useAIChat() {
         // Prepare messages for API (including conversation history)
         const systemMessage: ChatMessage = {
           role: "system",
-          content: "You are a helpful AI assistant for Squiz platform, a quiz and learning platform. You help users with creating quizzes, learning, Q&A, and general educational topics. You can analyze images, help with visual content, and provide educational assistance. Always respond in a helpful and educational manner. If the user writes in Azerbaijani, respond in Azerbaijani. If they write in English, respond in English. When analyzing images, be descriptive and educational."
+          content: "You are a helpful AI assistant for Squiz platform, a quiz and learning platform. You help users with creating quizzes, learning, Q&A, and general educational topics. You can analyze images, help with visual content, and provide educational assistance. Always respond in a helpful and educational manner. If the user writes in Azerbaijani (Azərbaycan dili), respond in Azerbaijani. If they write in English, respond in English. When analyzing images, be descriptive and educational. You have excellent mathematical capabilities and can write mathematical formulas using LaTeX syntax for proper rendering. For math expressions, use $ for inline math (e.g., $x^2 + y^2$) and $$ for display math (e.g., $$\\frac{a}{b}$$). Always format fractions as \\frac{numerator}{denominator}, square roots as \\sqrt{expression}, and use proper LaTeX syntax for all mathematical notation. When explaining mathematical concepts, provide clear step-by-step solutions with properly formatted mathematical expressions."
         }
         
         // Build conversation context (limit to last 10 messages to avoid token limits)

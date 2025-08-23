@@ -138,39 +138,49 @@ export function CategoryManager() {
     }
   })
   
-  // Delete category mutation using improved RPC function with fallback
+  // Delete category mutation using improved RPC function with enhanced error handling
   const deleteCategoryMutation = useMutation({
     mutationFn: async (categoryId: string) => {
-      // Try RPC function first
+      // Try enhanced RPC function first
       const { data, error } = await supabase.rpc('delete_category', {
         p_category_id: categoryId,
         force_delete: false,
         reassign_to_default: true
       })
 
-      // If RPC function doesn't exist (404), fall back to direct delete
+      // If RPC function doesn't exist (404), fall back to simple delete
       if (error && error.message && (error.message.includes('404') || error.message.includes('not found'))) {
-        console.warn('RPC delete_category not found, using direct delete method')
-        const { error: deleteError } = await supabase
-          .from('categories')
-          .delete()
-          .eq('id', categoryId)
-        if (deleteError) throw deleteError
-        return { success: true, message: 'Category deleted successfully' }
+        console.warn('Enhanced delete_category not found, using simple version')
+        const { data: simpleData, error: simpleError } = await supabase.rpc('delete_category', {
+          p_category_id: categoryId
+        })
+        
+        if (simpleError && (simpleError.message.includes('404') || simpleError.message.includes('not found'))) {
+          console.warn('RPC delete_category not found, using direct delete method')
+          const { error: deleteError } = await supabase
+            .from('categories')
+            .delete()
+            .eq('id', categoryId)
+          if (deleteError) throw deleteError
+          return { success: true, message: 'Category deleted successfully', items_reassigned: 0 }
+        }
+        
+        if (simpleError) throw simpleError
+        return { success: !!simpleData, message: 'Category deleted successfully', items_reassigned: 0 }
       }
 
       if (error) throw error
 
-      // Eğer Supabase fonksiyonu "returns table" ise data bir array olur.
+      // Handle the enhanced response format
       if (Array.isArray(data) && data.length > 0) {
         return data[0]
       }
-      return data
+      return data || { success: true, message: 'Category deleted successfully', items_reassigned: 0 }
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['categories'] })
 
-      // Gelen veri array ise ilk elemanı al, değilse kendisini kullan
+      // Handle enhanced response format
       const data = Array.isArray(result) && result.length > 0 ? result[0] : result
       if (data && typeof data === 'object') {
         if (data.success) {

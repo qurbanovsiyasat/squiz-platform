@@ -365,7 +365,7 @@ function CreateQuizContent() {
     }
 
     const questionData: Question = {
-      id: questions[currentQuestionIndex]?.id || `temp-${Date.now()}`,
+      id: questions[currentQuestionIndex]?.id || `temp-${Date.now()}-${Math.random()}`,
       question_text: questionText,
       question_type: questionType,
       options: questionType === 'multiple_choice' ? options.filter(opt => opt.trim()) : undefined,
@@ -376,14 +376,19 @@ function CreateQuizContent() {
       math_expression: questionType === 'math' ? mathExpression : undefined
     }
 
-    const newQuestions = [...questions]
-    if (currentQuestionIndex < questions.length) {
-      newQuestions[currentQuestionIndex] = questionData
-    } else {
-      newQuestions.push(questionData)
-    }
+    // Use functional state update to ensure we're working with the latest state
+    setQuestions(prevQuestions => {
+      const newQuestions = [...prevQuestions]
+      if (currentQuestionIndex < prevQuestions.length) {
+        // Update existing question
+        newQuestions[currentQuestionIndex] = questionData
+      } else {
+        // Add new question
+        newQuestions.push(questionData)
+      }
+      return newQuestions
+    })
     
-    setQuestions(newQuestions)
     return true
   }
 
@@ -402,7 +407,15 @@ function CreateQuizContent() {
       setMathDenominator('')
       setShowMathPreview(false)
       
-      setCurrentQuestionIndex(questions.length)
+      // Use a callback to get the updated questions length
+      setQuestions(prevQuestions => {
+        const newQuestionIndex = prevQuestions.length
+        // Set the index to the next available position
+        setCurrentQuestionIndex(newQuestionIndex)
+        toast.success(`Sual ${newQuestionIndex} əlavə edildi`)
+        return prevQuestions // Don't change the questions array here
+      })
+      
       setCurrentStep(2) // Stay on questions step
     }
   }
@@ -434,20 +447,48 @@ function CreateQuizContent() {
   }
 
   const deleteQuestion = (index: number) => {
-    const newQuestions = questions.filter((_, i) => i !== index)
-    setQuestions(newQuestions)
-    
-    if (currentQuestionIndex >= newQuestions.length) {
-      setCurrentQuestionIndex(Math.max(0, newQuestions.length - 1))
-    }
-    
-    if (newQuestions.length > 0) {
-      loadQuestion(Math.min(currentQuestionIndex, newQuestions.length - 1))
-    } else {
-      // Reset to empty question form
-      setQuestionText('')
-      setQuestionType('multiple_choice')
-      setOptions(['', '', '', ''])
+    setQuestions(prevQuestions => {
+      const newQuestions = prevQuestions.filter((_, i) => i !== index)
+      
+      // Adjust currentQuestionIndex after deletion
+      if (currentQuestionIndex >= newQuestions.length && newQuestions.length > 0) {
+        const newIndex = Math.max(0, newQuestions.length - 1)
+        setCurrentQuestionIndex(newIndex)
+        // Load the question at the new index
+        if (newQuestions[newIndex]) {
+          const question = newQuestions[newIndex]
+          setQuestionText(question.question_text)
+          setQuestionType(question.question_type)
+          setOptions(question.options || ['', '', '', ''])
+          setCorrectAnswer(question.correct_answer)
+          setExplanation(question.explanation || '')
+          setPoints(question.points)
+          setQuestionImage(question.image_url || null)
+          setMathExpression(question.math_expression || '')
+        }
+      } else if (newQuestions.length === 0) {
+        // Reset to empty question form when no questions left
+        setCurrentQuestionIndex(0)
+        setQuestionText('')
+        setQuestionType('multiple_choice')
+        setOptions(['', '', '', ''])
+        setCorrectAnswer('')
+        setExplanation('')
+        setPoints(1)
+        setQuestionImage(null)
+        setMathExpression('')
+        setMathNumerator('')
+        setMathDenominator('')
+        setShowMathPreview(false)
+      } else if (currentQuestionIndex < newQuestions.length) {
+        // Load question at current index if it still exists
+        loadQuestion(currentQuestionIndex)
+      }
+      
+      toast.success(`Sual ${index + 1} silindi`)
+      return newQuestions
+    })
+  }
       setCorrectAnswer('')
       setExplanation('')
       setPoints(1)
@@ -954,13 +995,13 @@ function CreateQuizContent() {
                           name="correct-answer"
                           checked={correctAnswer === option}
                           onChange={() => setCorrectAnswer(option)}
-                          className="w-4 h-4 text-purple-600 focus:ring-purple-500"
+                          className="w-4 h-4 text-purple-600 focus:ring-purple-500 bg-white border-purple-300 focus:border-purple-500"
                         />
                         <Input
                           value={option}
                           onChange={(e) => updateOption(index, e.target.value)}
                           placeholder={`Variant ${index + 1}`}
-                          className="flex-1"
+                          className="flex-1 text-sm focus:ring-purple-500 focus:border-purple-500 border-gray-300"
                         />
                         {options.length > 2 && (
                           <Button
@@ -968,7 +1009,7 @@ function CreateQuizContent() {
                             variant="ghost"
                             size="sm"
                             onClick={() => removeOption(index)}
-                            className="text-red-500 hover:text-red-700"
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 h-8 w-8"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -976,7 +1017,7 @@ function CreateQuizContent() {
                       </div>
                     ))}
                     {options.length < 6 && (
-                      <Button type="button" variant="outline" size="sm" onClick={addOption}>
+                      <Button type="button" variant="outline" size="sm" onClick={addOption} className="w-full sm:w-auto">
                         <Plus className="h-4 w-4 mr-1" />
                         Variant əlavə et
                       </Button>
@@ -1306,8 +1347,72 @@ function CreateQuizContent() {
           {currentStep === 3 && renderPreview()}
         </div>
 
-        {/* Navigation */}
-        <div className="flex items-center justify-between">
+        {/* Navigation - Mobile Optimized */}
+        <div className="bg-white border-t border-gray-200 p-4 -mx-6 -mb-6">
+          {/* Mobile Layout - Stacked */}
+          <div className="flex flex-col space-y-3 sm:hidden">
+            <div className="flex justify-between items-center">
+              {currentStep > 1 && (
+                <Button variant="outline" onClick={prevStep} size="sm">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Əvvəlki
+                </Button>
+              )}
+              
+              {currentStep < 3 ? (
+                <Button onClick={nextStep} className="ml-auto">
+                  Növbəti
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              ) : (
+                <Button onClick={saveQuiz} disabled={loading} className="ml-auto">
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Saxlanır...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Yarad
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+            
+            <div className="flex justify-between items-center text-sm">
+              <Button 
+                variant="ghost" 
+                onClick={handleSaveDraft} 
+                disabled={savingDraft}
+                size="sm"
+                className="text-purple-600 hover:text-purple-700"
+              >
+                {savingDraft ? (
+                  <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                ) : (
+                  <Save className="h-3 w-3 mr-1" />
+                )}
+                Saxla
+              </Button>
+              
+              <Button variant="outline" onClick={() => navigate('/quizzes')} size="sm">
+                Ləğv
+              </Button>
+            </div>
+            
+            {/* Mobile Draft Status */}
+            {currentDraftId && lastSaved && (
+              <div className="flex items-center justify-center text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
+                <CheckCircle className="h-3 w-3 mr-1" />
+                Avtomatik saxlanıldı {lastSaved.toLocaleTimeString('az-AZ')}
+              </div>
+            )}
+          </div>
+          
+          {/* Desktop Layout - Horizontal */}
+          <div className="hidden sm:flex items-center justify-between">
           <div className="flex items-center space-x-4">
             {currentStep > 1 && (
               <Button variant="outline" onClick={prevStep}>

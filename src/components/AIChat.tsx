@@ -30,7 +30,22 @@ const renderMessageContent = (content: string) => {
           <pre className="bg-gray-100 dark:bg-gray-800 p-2 rounded text-xs overflow-x-auto">
             {children}
           </pre>
-        )
+        ),
+        // Handle math rendering errors gracefully
+        math: ({ value }) => {
+          try {
+            return <span className="math-inline">{value}</span>
+          } catch (error) {
+            console.warn('Math rendering error:', error)
+            return <span className="text-red-500 text-xs">[Math Error: {value}]</span>
+          }
+        },
+        div: ({ className, children }) => {
+          if (className === 'math-display') {
+            return <div className="text-center py-2 my-2">{children}</div>
+          }
+          return <div className={className}>{children}</div>
+        }
       }}
     >
       {content}
@@ -136,7 +151,39 @@ export default function AIChat() {
     }
   }
 
-  // Remove selected image
+  // Handle clipboard paste events
+  const handlePaste = useCallback(async (e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items
+    if (!items) return
+    
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i]
+      if (item.type.indexOf('image') !== -1) {
+        e.preventDefault()
+        const file = item.getAsFile()
+        if (file) {
+          // Validate file size (5MB limit)
+          if (file.size > 5 * 1024 * 1024) {
+            toast.error('Şəkil ölçüsü 5MB-dan çox ola bilməz')
+            return
+          }
+          
+          setUploadingImage(true)
+          try {
+            const base64Image = await convertImageToBase64(file)
+            setSelectedImage(base64Image)
+            toast.success('Şəkil mübadilə buferindən yükləndi')
+          } catch (error) {
+            console.error('Clipboard image conversion error:', error)
+            toast.error('Şəkil yüklənmədi')
+          } finally {
+            setUploadingImage(false)
+          }
+        }
+        break
+      }
+    }
+  }, [])
   const removeSelectedImage = () => {
     setSelectedImage(null)
     if (fileInputRef.current) {
@@ -331,7 +378,7 @@ export default function AIChat() {
               
               <CardContent className="flex-1 flex flex-col p-0">
                 {/* Messages Area */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
                   {messages.length === 0 ? (
                     <div className="text-center text-slate-500 py-8">
                       <Bot className="h-12 w-12 mx-auto mb-4 text-slate-400" />
@@ -341,6 +388,8 @@ export default function AIChat() {
                         Quiz yaratma, öyrənmə və digər mövzularda sizə kömək edə bilərəm.
                         <br />
                         <strong className="text-purple-600">Şəkil yükləyə və təhlil edə bilərəm!</strong>
+                        <br />
+                        <span className="text-xs text-gray-500">Məsləhət: Ctrl+V ilə şəkil yapışdıra bilərsiniz</span>
                       </p>
                     </div>
                   ) : (
@@ -351,7 +400,7 @@ export default function AIChat() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3 }}
                         className={cn(
-                          'flex space-x-3 mb-4',
+                          'flex space-x-2 mb-3',
                           msg.role === 'user' ? 'justify-end' : 'justify-start'
                         )}
                       >
@@ -363,10 +412,10 @@ export default function AIChat() {
                         
                         <div
                           className={cn(
-                            'max-w-[80%] px-4 py-3 rounded-xl leading-relaxed',
+                            'max-w-[80%] px-3 py-2 rounded-xl leading-relaxed',
                             msg.role === 'user'
-                              ? 'bg-purple-600 text-white border border-purple-600/20 shadow-sm'
-                              : 'bg-gray-50 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-200/50 dark:border-gray-700/50 shadow-sm'
+                              ? 'bg-purple-600 text-white shadow-sm'
+                              : 'bg-gray-50 text-gray-800 dark:bg-gray-800 dark:text-gray-200 shadow-sm'
                           )}
                         >
                           {renderMessage(msg)}
@@ -461,7 +510,8 @@ export default function AIChat() {
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       onKeyPress={handleKeyPress}
-                      placeholder={selectedImage ? "Şəkil haqqında sual yazın..." : "Sualınızı yazın..."}
+                      onPaste={handlePaste}
+                      placeholder={selectedImage ? "Şəkil haqqında sual yazın..." : "Sualınızı yazın... (Ctrl+V ilə şəkil yapışdırın)"}
                       disabled={chatMutation.isPending}
                       className="flex-1 text-sm border-gray-200/50 focus:border-purple-400 transition-colors"
                     />
