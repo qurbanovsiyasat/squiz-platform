@@ -35,21 +35,15 @@ const values = [
 
 const team = [
   {
-    name: 'Elşən Məmmədov',
-    role: 'Baş İcraçı Direktor',
-    description: 'Təhsil texnologiyaları sahəsində 10+ il təcrübə',
+    name: 'Siyasət Qurbanov',
+    role: 'Platform Yaradıcısı və Baş İcraçı Direktor',
+    description: 'AI texnologiyaları və təhsil platformaları sahəsində ekspert',
     image: '/api/placeholder/300/300'
   },
   {
-    name: 'Aysel Həsənova',
-    role: 'Texniki Direktor',
-    description: 'AI və machine learning mütəxəssisi',
-    image: '/api/placeholder/300/300'
-  },
-  {
-    name: 'Rəşad Quliyev',
-    role: 'Məhsul Meneceri',
-    description: 'UX/UI və məhsul inkişafı üzrə ekspert',
+    name: 'Çingiz Kazımov',
+    role: 'Həmtəsisçi və Texniki Direktor',
+    description: 'Fullstack development və sistem arxitekturası mütəxəssisi',
     image: '/api/placeholder/300/300'
   },
 ]
@@ -169,9 +163,9 @@ export default function AboutPage() {
               </h2>
               <div className="prose prose-lg prose-slate dark:prose-invert max-w-none">
                 <p>
-                  Squiz 2024-cü ildə bir qrup gənc texnoloq və təhsilçi tərəfindən yaradıldı. 
-                  Bizim məqsədimiz ənənəvi öyrənmə üsullarını AI texnologiyası ilə birləşdirərək 
-                  daha təsirli və maraqlı təhsil platforması yaratmaq idi.
+                  Squiz 2024-cü ildə Siyasət Qurbanov və Çingiz Kazımov tərəfindən yaradıldı. 
+                  Bu platform yaradıcıları ənənəvi öyrənmə üsullarını AI texnologiyası ilə birləşdirərək 
+                  daha təsirli və maraqlı təhsil platforması yaratmaq məqsədi güdürdülər.
                 </p>
                 <p>
                   Platformamız istifadəçilərə yalnız quiz yaratmaq və həll etmək imkanı deyil, 

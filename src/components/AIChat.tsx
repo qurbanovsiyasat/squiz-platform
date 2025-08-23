@@ -31,15 +31,6 @@ const renderMessageContent = (content: string) => {
             {children}
           </pre>
         ),
-        // Handle math rendering errors gracefully
-        math: ({ value }) => {
-          try {
-            return <span className="math-inline">{value}</span>
-          } catch (error) {
-            console.warn('Math rendering error:', error)
-            return <span className="text-red-500 text-xs">[Math Error: {value}]</span>
-          }
-        },
         div: ({ className, children }) => {
           if (className === 'math-display') {
             return <div className="text-center py-2 my-2">{children}</div>

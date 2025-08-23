@@ -489,14 +489,6 @@ function CreateQuizContent() {
       return newQuestions
     })
   }
-      setCorrectAnswer('')
-      setExplanation('')
-      setPoints(1)
-      setQuestionImage(null)
-      setMathExpression('')
-      setCurrentQuestionIndex(0)
-    }
-  }
 
   const nextStep = () => {
     if (currentStep === 1) {
@@ -1490,6 +1482,7 @@ function CreateQuizContent() {
               </Button>
             )}
           </div>
+        </div>
         </div>
       </div>
     </div>
