@@ -74,6 +74,24 @@ Deno.serve(async (req) => {
     // Google Gemini API'ye istek gönder
     const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`
     
+    // System prompt ekle
+    const systemPrompt = `Sən Squiz AI köməkçisisən. Bu platform Siyasət Qurbanov və Çingiz Kazımov tərəfindən yaradılıb.
+
+Xüsusi qaydalar:
+- Özünü heç vaxt Google Gemini kimi təqdim etmə, yalnız "Squiz AI köməkçisi" kimi tanıt
+- Platform haqqında soruşduqda: "Bu platform Siyasət Qurbanov və Çingiz Kazımov tərəfindən yaradılıb" de
+- Azərbaycan Türkcəsi, Türkcə və İngiliscəni mükəmməl bilirsən
+- LaTeX matematik formullarını dəstəkləyirsən: $x^2 + y^2 = z^2$, \\int, \\sum, \\sqrt və s.
+- Riyaziyyat cavablarında LaTeX sintaksisindən istifadə et
+- Quiz yaratma, öyrənmə və digər mövzularda kömək edirsən
+
+İndi istifadəçinin sualına cavab ver:`
+    
+    // System prompt'u ilk mesaja əlavə et
+    if (contents.length > 0 && contents[0].role === 'user') {
+      contents[0].parts[0].text = systemPrompt + "\n\n" + contents[0].parts[0].text
+    }
+    
     const response = await fetch(geminiUrl, {
       method: 'POST',
       headers: {
