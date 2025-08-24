@@ -40,3 +40,64 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Add styles to prevent text overflow in the preview section */
+.preview-section {
+  overflow-wrap: break-word; /* Allow breaking long words */
+  word-wrap: break-word; /* For older browsers */
+  overflow: hidden; /* Hide overflow */
+  text-overflow: ellipsis; /* Add ellipsis for overflowed text */
+}
+
+/* Ensure question input fields are adequately wide */
+.question-input {
+  width: 100%; /* Full width */
+  max-width: 100%; /* Prevent exceeding container width */
+}
+
+/* Additional styles for better LaTeX rendering */
+.katex {
+  font-size: 1.1em; /* Slightly larger for better readability */
+}
+
+.katex-display {
+  margin: 0.5em 0; /* Adjust spacing for block math */
+}
+
+/* Ensure proper LaTeX rendering in quiz questions */
+.quiz-question-text .katex {
+  font-size: 1.1em;
+  line-height: 1.4;
+}
+
+.quiz-question-text .katex-display {
+  margin: 0.5em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Limit image size in quiz questions */
+.quiz-question-image {
+  max-width: 300px;
+  max-height: 200px;
+  width: auto;
+  height: auto;
+  border-radius: 8px;
+  margin: 0.5em 0;
+}
+
+/* Ensure responsive images */
+.quiz-question-image img {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Additional styles for better LaTeX rendering in options */
+.quiz-answer-text .katex {
+  font-size: 1em;
+}
+
+.quiz-answer-text .katex-display {
+  margin: 0.25em 0;
+}

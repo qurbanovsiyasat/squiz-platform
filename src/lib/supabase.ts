@@ -29,12 +29,14 @@ export async function uploadImage(file: File, folder: string = 'general'): Promi
       reader.readAsDataURL(file)
     })
 
-    // Call the edge function
+    // Call the edge function with the correct parameters
     const { data, error } = await supabase.functions.invoke('file-upload', {
       body: {
-        imageData: base64Data,
+        fileData: base64Data,
         fileName: file.name,
-        folder
+        fileType: file.type,
+        formId: 'quiz-upload', // Use a default form ID for quiz images
+        userId: (await supabase.auth.getUser()).data.user?.id || null
       }
     })
 

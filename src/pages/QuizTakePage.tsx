@@ -496,19 +496,19 @@ export default function QuizTakePage() {
         >
           <Card>
             <CardHeader className="p-3 sm:p-6">
-              <CardTitle className="text-base sm:text-lg leading-relaxed">
+              <CardTitle className="text-base sm:text-lg leading-relaxed quiz-question-text">
                 {currentQuestion?.question_type === 'math' ? (
-                  <NewMathRenderer latex={currentQuestion?.question_text || ''} displayMode={false} />
+                  <MathRenderer>{currentQuestion?.question_text || ''}</MathRenderer>
                 ) : (
                   <MixedContentRenderer content={currentQuestion?.question_text || ''} />
                 )}
               </CardTitle>
               {currentQuestion?.image_url && (
-                <div className="mt-3 sm:mt-4">
+                <div className="mt-3 sm:mt-4 quiz-question-image">
                   <img 
                     src={currentQuestion.image_url} 
                     alt="Question illustration" 
-                    className="max-w-full h-auto rounded-lg"
+                    className="max-w-xs h-auto rounded-lg"
                   />
                 </div>
               )}

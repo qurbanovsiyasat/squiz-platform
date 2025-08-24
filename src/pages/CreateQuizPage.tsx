@@ -639,6 +639,7 @@ function CreateQuizContent() {
                 onChange={(e) => setQuizTitle(e.target.value)}
                 placeholder="Test adını daxil edin"
                 required
+                className="question-input"
               />
             </div>
             
@@ -650,6 +651,7 @@ function CreateQuizContent() {
                 onChange={(e) => setQuizDescription(e.target.value)}
                 placeholder="Test haqqında qısa məlumat"
                 rows={3}
+                className="question-input"
               />
             </div>
             
@@ -993,7 +995,7 @@ function CreateQuizContent() {
                           value={option}
                           onChange={(e) => updateOption(index, e.target.value)}
                           placeholder={`Variant ${index + 1}`}
-                          className="flex-1 text-sm focus:ring-purple-500 focus:border-purple-500 border-gray-300"
+                          className="flex-1 text-sm focus:ring-purple-500 focus:border-purple-500 border-gray-300 question-input"
                         />
                         {options.length > 2 && (
                           <Button
@@ -1174,7 +1176,7 @@ function CreateQuizContent() {
                 <Badge variant="outline">{question.points} bal</Badge>
               </div>
               
-              <div className="font-medium mb-2">
+              <div className="font-medium mb-2 preview-section">
                 <MathRenderer>{question.question_text}</MathRenderer>
               </div>
               
