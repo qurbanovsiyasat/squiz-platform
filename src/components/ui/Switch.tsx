@@ -41,7 +41,7 @@ const Switch = React.forwardRef<
         // base color
         "bg-[#aeaaae]",
         // smooth movement
-        "transition-transform duration-400 will-change-transform",
+        "transition-transform duration-300 will-change-transform",
         // when checked, apply translate and color
         "data-[state=checked]:translate-x-[1.9em] data-[state=checked]:bg-[#84da89]"
       )}
