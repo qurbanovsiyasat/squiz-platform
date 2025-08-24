@@ -59,6 +59,12 @@ export default function DashboardPage() {
   const { checkPermissionAndNavigate } = useQuizCreatePermission()
   const { data: stats, isLoading: statsLoading, error: statsError } = useUserStatistics()
 
+  // Read dashboard prefs from user.settings.preferences.dashboard
+  const dashboardPrefs = useMemo(() => {
+    const prefs = (user?.settings as any)?.preferences?.dashboard || {}
+    return { ...defaultDashboardPrefs, ...prefs }
+  }, [user?.settings])
+
   // Fixed query following Supabase best practices
   const { data: recentQuizzes, isLoading: quizzesLoading } = useQuery({
     queryKey: ['recent-quizzes'],
