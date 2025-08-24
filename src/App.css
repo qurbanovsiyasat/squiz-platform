@@ -41,32 +41,149 @@
   color: #888;
 }
 
-/* Add styles to prevent text overflow in the preview section */
-.preview-section {
-  overflow-wrap: break-word; /* Allow breaking long words */
-  word-wrap: break-word; /* For older browsers */
-  overflow: hidden; /* Hide overflow */
-  text-overflow: ellipsis; /* Add ellipsis for overflowed text */
+/* COMPREHENSIVE TEXT OVERFLOW FIXES */
+
+/* Universal input field overflow prevention */
+input[type="text"], input[type="email"], input[type="password"], 
+input[type="search"], input[type="url"], textarea {
+  overflow-x: auto;
+  word-wrap: break-word;
+  word-break: break-word;
+  width: 100%;
   max-width: 100%;
+  box-sizing: border-box;
+  white-space: pre-wrap;
+}
+
+/* All preview areas and content display */
+.preview-section, .preview-area, .content-preview, 
+.form-preview, .quiz-preview, .submission-preview {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  overflow-x: auto;
+  overflow-y: visible;
+  max-width: 100%;
+  word-break: break-word;
+  hyphens: auto;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+/* Enhanced text input improvements */
+.text-input, .form-input, .quiz-input, 
+input, textarea, select {
+  overflow-x: auto;
+  word-wrap: break-word;
+  word-break: break-word;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+/* Comprehensive content container fixes */
+.content-container, .text-container, .input-container,
+.form-container, .quiz-container {
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-y: visible;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* All div elements that might contain long text */
+div[class*="text"], div[class*="content"], div[class*="preview"] {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* Tailwind utility override for text overflow */
+.overflow-x-auto {
+  overflow-x: auto !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+.break-words {
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
 }
 
 /* Form and Quiz creation interface improvements */
 .form-creation-container {
   max-width: 100%;
   overflow-x: hidden;
+  word-wrap: break-word;
 }
 
 .quiz-creation-container {
   max-width: 100%;
   overflow-x: hidden;
+  word-wrap: break-word;
 }
 
-/* Question input improvements */
-.question-input {
-  width: 100%; /* Full width */
-  max-width: 100%; /* Prevent exceeding container width */
-  min-height: 120px; /* Minimum height for better usability */
-  resize: vertical; /* Allow vertical resize only */
+/* Enhanced question input areas - much wider for better usability */
+.question-input, .question-textarea, .form-question-input {
+  width: 100%;
+  max-width: 100%;
+  min-width: 700px; /* Increased from 600px */
+  min-height: 180px; /* Increased from 150px */
+  resize: vertical;
+  overflow-x: auto;
+  overflow-y: auto;
+  word-wrap: break-word;
+  word-break: break-word;
+  line-height: 1.6; /* Better line spacing */
+  padding: 16px; /* Increased padding */
+  font-size: 15px; /* Slightly larger font */
+}
+
+/* Enhanced textarea inputs throughout the application */
+textarea {
+  min-height: 120px;
+  resize: vertical;
+  line-height: 1.6;
+  padding: 12px;
+}
+
+/* Specific styling for quiz and form creation textareas */
+.quiz-creation-container textarea,
+.form-creation-container textarea {
+  min-height: 140px;
+  min-width: 100%;
+  width: 100%;
+  padding: 16px;
+  font-size: 15px;
+  line-height: 1.6;
+  border-radius: 8px;
+}
+
+/* Answer option inputs should be wider too */
+.answer-option-input, .option-input {
+  min-height: 80px;
+  width: 100%;
+  max-width: 100%;
+  padding: 12px;
+  resize: vertical;
+  overflow-x: auto;
+  word-wrap: break-word;
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 768px) {
+  .question-input, .question-textarea, .form-question-input {
+    min-width: 100%;
+    width: 100%;
+    min-height: 150px;
+  }
+  
+  .quiz-creation-container textarea,
+  .form-creation-container textarea {
+    min-height: 120px;
+  }
 }
 
 /* Math editor improvements */
@@ -74,6 +191,141 @@
   max-width: 100%;
   overflow-x: auto;
   overflow-y: visible;
+  word-wrap: break-word;
+}
+
+/* Enhanced dropdown positioning fixes */
+.dropdown-menu, .dropdown-content, .select-dropdown {
+  z-index: 9999 !important; /* Higher z-index */
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  margin-top: 4px;
+}
+
+.dark .dropdown-menu, .dark .dropdown-content, .dark .select-dropdown {
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Prevent dropdown overlap - ensure proper stacking */
+.dropdown-trigger, .select-trigger {
+  position: relative;
+  z-index: 10;
+}
+
+.dropdown-trigger.open, .select-trigger.open {
+  z-index: 10000 !important;
+}
+
+/* Additional dropdown component styles */
+.dropdown-portal {
+  z-index: 9999 !important;
+}
+
+/* Radix UI dropdown overrides */
+[data-radix-popper-content-wrapper] {
+  z-index: 9999 !important;
+}
+
+/* Select component specific fixes */
+.select-content {
+  z-index: 9999 !important;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* Modal and overlay fixes */
+.modal-overlay, .dialog-overlay {
+  z-index: 8000;
+}
+
+.modal-content, .dialog-content {
+  z-index: 8001;
+}
+
+/* Enhanced examples list alignment and layout */
+.examples-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* More flexible */
+  gap: 1.5rem; /* Increased gap */
+  align-items: start;
+  justify-items: stretch; /* Better alignment */
+  margin: 1rem 0;
+  padding: 0;
+}
+
+/* Math examples specific styling */
+.math-examples-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: stretch;
+  width: 100%;
+}
+
+.math-examples-list .example-item {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background: rgba(248, 250, 252, 0.5);
+  align-items: flex-start;
+}
+
+.dark .math-examples-list .example-item {
+  background: rgba(30, 41, 59, 0.3);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* General list improvements */
+ul, ol {
+  margin: 0;
+  padding-left: 1.5rem;
+  line-height: 1.6;
+}
+
+li {
+  margin-bottom: 0.5rem;
+}
+
+/* Button group alignment */
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Form field group alignment */
+.field-group, .form-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  align-items: stretch;
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 640px) {
+  .examples-list {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .button-group {
+    justify-content: center;
+  }
 }
 
 /* Form attachment grid improvements */

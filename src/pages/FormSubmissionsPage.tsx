@@ -292,9 +292,93 @@ export default function FormSubmissionsPage() {
                                 ))}
                               </div>
                             ) : value ? (
-                              <p className="bg-slate-50 dark:bg-slate-800 rounded p-2 text-sm">
-                                {value}
-                              </p>
+                              // Enhanced rendering for file and image fields
+                              field.field_type === 'image' && typeof value === 'string' && (value.startsWith('http') || value.startsWith('/')) ? (
+                                <div className="attachment-grid">
+                                  <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3 border">
+                                    <img 
+                                      src={value} 
+                                      alt={field.label}
+                                      className="max-w-full max-h-48 object-contain rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
+                                      onClick={() => window.open(value, '_blank')}
+                                      onError={(e) => {
+                                        const target = e.target as HTMLImageElement;
+                                        target.style.display = 'none';
+                                        target.nextElementSibling?.classList.remove('hidden');
+                                      }}
+                                    />
+                                    <div className="hidden text-center py-4">
+                                      <FileText className="h-8 w-8 text-slate-400 mx-auto mb-2" />
+                                      <p className="text-sm text-slate-500">Failed to load image</p>
+                                      <Button 
+                                        variant="outline" 
+                                        size="sm" 
+                                        className="mt-2"
+                                        onClick={() => window.open(value, '_blank')}
+                                      >
+                                        <Download className="h-3 w-3 mr-1" />
+                                        Download
+                                      </Button>
+                                    </div>
+                                    <div className="flex items-center justify-between mt-2">
+                                      <span className="text-xs text-slate-500 truncate" title={value}>
+                                        {value.split('/').pop() || 'Uploaded Image'}
+                                      </span>
+                                      <Button 
+                                        variant="ghost" 
+                                        size="sm" 
+                                        className="text-xs"
+                                        onClick={() => window.open(value, '_blank')}
+                                      >
+                                        <Eye className="h-3 w-3 mr-1" />
+                                        View
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : field.field_type === 'file' && typeof value === 'string' && (value.startsWith('http') || value.startsWith('/')) ? (
+                                <div className="attachment-grid">
+                                  <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-4 border flex items-center justify-between">
+                                    <div className="flex items-center space-x-3">
+                                      <div className="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-lg flex items-center justify-center">
+                                        <FileText className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <p className="font-medium text-sm text-slate-900 dark:text-white truncate" title={value}>
+                                          {value.split('/').pop() || 'Uploaded File'}
+                                        </p>
+                                        <p className="text-xs text-slate-500 truncate">
+                                          Attached file
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <Button 
+                                        variant="outline" 
+                                        size="sm" 
+                                        className="text-xs"
+                                        onClick={() => window.open(value, '_blank')}
+                                      >
+                                        <Download className="h-3 w-3 mr-1" />
+                                        Download
+                                      </Button>
+                                      <Button 
+                                        variant="ghost" 
+                                        size="sm" 
+                                        className="text-xs"
+                                        onClick={() => window.open(value, '_blank')}
+                                      >
+                                        <Eye className="h-3 w-3 mr-1" />
+                                        View
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : (
+                                <p className="bg-slate-50 dark:bg-slate-800 rounded p-2 text-sm break-words overflow-wrap-break-word">
+                                  {value}
+                                </p>
+                              )
                             ) : (
                               <span className="text-slate-400 italic">No response</span>
                             )}
