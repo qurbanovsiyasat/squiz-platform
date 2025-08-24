@@ -62,6 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               email: session.user.email || '',
               full_name: userProfile?.full_name || session.user.email || '',
               role: 'student' as User['role'],
+              can_create_quiz: false,
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString()
             }
