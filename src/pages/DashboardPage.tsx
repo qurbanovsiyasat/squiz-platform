@@ -48,6 +48,12 @@ interface ActivityItem {
 }
 
 export default function DashboardPage() {
+  const defaultDashboardPrefs = {
+    showRecentQuizzes: true,
+    showMyStats: true,
+    showForumFeed: true
+  }
+
   const { user } = useAuth()
   const { t } = useLanguage()
   const { checkPermissionAndNavigate } = useQuizCreatePermission()
