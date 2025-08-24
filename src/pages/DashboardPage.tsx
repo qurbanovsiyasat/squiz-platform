@@ -411,6 +411,7 @@ export default function DashboardPage() {
             className="space-y-6"
           >
             {/* Recent Activity */}
+            {dashboardPrefs.showForumFeed && (
             <Card className="card-modern">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2 text-section-title">
