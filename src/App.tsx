@@ -129,7 +129,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
       
       <div className="flex-1 flex flex-col overflow-hidden">
         <Navbar onMenuClick={() => setIsSidebarOpen(true)} />
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-soft-grey pb-20 lg:pb-0">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-soft-grey pb-[96px] lg:pb-0">
           {children}
         </main>
         
