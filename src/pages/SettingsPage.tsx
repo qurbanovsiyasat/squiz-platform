@@ -11,7 +11,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Separator } from '@/components/ui/Separator'
 import { Badge } from '@/components/ui/Badge'
 import { toast } from 'react-hot-toast'
-import { motion } from 'framer-motion'
+// Removed framer-motion to prevent runtime ReferenceError in some environments
+// import { motion } from 'framer-motion'
 import {
   Settings as SettingsIcon,
   User,
