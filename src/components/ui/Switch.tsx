@@ -35,7 +35,7 @@ const Switch = React.forwardRef<
   <SwitchPrimitive.Root
     ref={ref}
     className={cn(
-      "group relative inline-flex select-none items-center cursor-pointer",
+      "group relative inline-flex select-none items-center cursor-pointer align-middle leading-none flex-shrink-0",
       // Track sizes
       SIZES[size].track,
       // Base (light) + dark
@@ -59,8 +59,8 @@ const Switch = React.forwardRef<
         SIZES[size].thumb,
         // Base thumb colors
         "bg-[#BFBAC6] ring-1 ring-[#8C8891] dark:bg-[#8D8A92] dark:ring-[#6C6A72]",
-        // Move right on checked (both sizes translate 18px)
-        "data-[state=checked]:translate-x-[18px]",
+        // Move right on checked (translate depends on size)
+        size === 'sm' ? 'data-[state=checked]:translate-x-[16px]' : 'data-[state=checked]:translate-x-[18px]',
         // Subtle elevate on checked
         "data-[state=checked]:bg-white data-[state=checked]:ring-white/60",
         // Motion
