@@ -319,10 +319,10 @@ export default function AIChat() {
             className={cn(
               "fixed z-50 transition-all duration-200",
               // Mobile: Fixed positioning - no movement allowed
-              isMobile ? (
+isMobile ? (
                 isFullScreen 
                   ? "inset-0 w-full h-full" // Full screen on mobile
-                  : "bottom-4 left-0 right-0 w-full h-[75vh] max-h-[600px]" // Fixed bottom on mobile with some spacing
+                  : "bottom-16 left-0 right-0 w-full h-[75vh] max-h-[600px]" // Adjusted bottom to avoid overlap
               ) : (
                 // Desktop: Full screen or floating window
                 isFullScreen
