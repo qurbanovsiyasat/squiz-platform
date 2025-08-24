@@ -70,10 +70,10 @@ export default function BottomNavigation() {
                 (item.href !== '/dashboard' &amp;&amp; location.pathname.startsWith(item.href)))
 
               const Content = (
-                <motion.div whileTap={{ scale: 0.95 }} className="flex items-center justify-center w-full">
+                <motion.div whileTap={{ scale: 0.95 }} className="flex flex-col items-center justify-center w-full">
                   <div
                     className={cn(
-                      'relative flex items-center justify-center h-9 w-9 rounded-xl transition-all duration-200',
+                      'relative flex items-center justify-center h-8 w-8 rounded-xl transition-all duration-200',
                       isActive ? 'bg-gray-100 dark:bg-transparent' : 'bg-transparent'
                     )}
                   >
@@ -87,6 +87,13 @@ export default function BottomNavigation() {
                       <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-purple-600/90 dark:bg-purple-400/90" />
                     )}
                   </div>
+                  {/* Bring back short label only on sm screens and up */}
+                  <span className={cn(
+                    'hidden sm:block mt-1 text-[11px] font-medium leading-tight text-center truncate max-w-full',
+                    isActive ? 'text-purple-600 dark:text-purple-400' : 'text-gray-700 dark:text-gray-400'
+                  )}>
+                    {item.label}
+                  </span>
                 </motion.div>
               )
 
@@ -94,7 +101,7 @@ export default function BottomNavigation() {
                 <Link
                   key={item.href}
                   to={item.href}
-                  className="flex items-center justify-center px-1 py-2 rounded-xl transition-all duration-200 min-h-[60px]"
+                  className="flex items-center justify-center px-1 py-2 rounded-xl transition-all duration-200 min-h-[64px]"
                 >
                   {Content}
                 </Link>
@@ -102,7 +109,7 @@ export default function BottomNavigation() {
                 <button
                   key={item.label}
                   onClick={item.onClick}
-                  className="flex items-center justify-center px-1 py-2 rounded-xl transition-all duration-200 min-h-[60px]"
+                  className="flex items-center justify-center px-1 py-2 rounded-xl transition-all duration-200 min-h-[64px]"
                 >
                   {Content}
                 </button>
