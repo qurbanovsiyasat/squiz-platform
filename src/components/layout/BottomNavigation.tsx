@@ -60,101 +60,58 @@ export default function BottomNavigation() {
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      // IMPORTANT: prevent any accidental overlay from capturing clicks outside of nav
-      className="pointer-events-none fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-xl lg:hidden dark:bg-gray-900/95 dark:border-gray-700 pb-[env(safe-area-inset-bottom,0px)]"
+      className="pointer-events-none fixed bottom-3 left-0 right-0 z-30 lg:hidden pb-[env(safe-area-inset-bottom,0px)]"
     >
-      <div className="grid grid-cols-5 gap-1 px-2 py-3 max-w-screen-sm mx-auto">
-        {navigation.map((item, index) => {
-          const isActive = item.href && (location.pathname === item.href || 
-            (item.href !== '/dashboard' && location.pathname.startsWith(item.href)))
-          
-          return item.href ? (
-            <Link
-              key={item.href}
-              to={item.href}
-              // Allow pointer events only on interactive elements
-              className={cn(
-                'pointer-events-auto flex flex-col items-center justify-center px-2 py-2 rounded-xl transition-all duration-200 relative group',
-                'min-h-[60px] hover:scale-105 active:scale-95',
-                isActive
-                  ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
-                  : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
-              )}
-            >
-              <motion.div
-                whileTap={{ scale: 0.9 }}
-                className="flex flex-col items-center space-y-1"
-              >
-                <div className={cn(
-                  'relative p-1 rounded-lg transition-all duration-200',
-                  isActive && 'bg-white/20'
-                )}>
-                  <item.icon 
-                    className={cn(
-                      'h-5 w-5 transition-colors',
-                      isActive ? 'text-white' : 'text-gray-600 dark:text-gray-400'
-                    )} 
-                  />
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeTab"
-                      className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-white rounded-full"
+      <div className="px-4">
+        <div className="max-w-md mx-auto rounded-2xl bg-white/95 backdrop-blur ring-1 ring-black/5 shadow-lg pointer-events-auto dark:bg-[#111216]/95 dark:ring-white/10">
+          <div className="grid grid-cols-5 gap-1 px-2 py-3">
+            {navigation.map((item) => {
+              const isActive = item.href && (location.pathname === item.href || 
+                (item.href !== '/dashboard' && location.pathname.startsWith(item.href)))
+              
+              const Content = (
+                <motion.div whileTap={{ scale: 0.95 }} className="flex flex-col items-center justify-center">
+                  <div className="relative h-6 flex items-center justify-center">
+                    <item.icon 
+                      className={cn(
+                        'h-5 w-5 transition-colors',
+                        isActive ? 'text-purple-600 dark:text-purple-400' : 'text-gray-600 dark:text-gray-400'
+                      )} 
                     />
-                  )}
-                </div>
-                <span className={cn(
-                  'text-xs font-medium leading-tight text-center truncate max-w-full',
-                  isActive ? 'text-white' : 'text-gray-600 dark:text-gray-400'
-                )}>
-                  {item.label}
-                </span>
-              </motion.div>
-            </Link>
-          ) : (
-            <button
-              key={item.label}
-              onClick={item.onClick}
-              className={cn(
-                'pointer-events-auto flex flex-col items-center justify-center px-2 py-2 rounded-xl transition-all duration-200 relative group',
-                'min-h-[60px] hover:scale-105 active:scale-95',
-                isActive
-                  ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
-                  : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
-              )}
-            >
-              <motion.div
-                whileTap={{ scale: 0.9 }}
-                className="flex flex-col items-center space-y-1"
-              >
-                <div className={cn(
-                  'relative p-1 rounded-lg transition-all duration-200',
-                  isActive && 'bg-white/20'
-                )}>
-                  <item.icon 
-                    className={cn(
-                      'h-5 w-5 transition-colors',
-                      isActive ? 'text-white' : 'text-gray-600 dark:text-gray-400'
-                    )} 
-                  />
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeTab"
-                      className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-white rounded-full"
-                    />
-                  )}
-                </div>
-                <span className={cn(
-                  'text-xs font-medium leading-tight text-center truncate max-w-full',
-                  isActive ? 'text-white' : 'text-gray-600 dark:text-gray-400'
-                )}>
-                  {item.label}
-                </span>
-              </motion.div>
-            </button>
-          )
-        })}
+                    {isActive && (
+                      <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-purple-600/90 dark:bg-purple-400/90" />
+                    )}
+                  </div>
+                  <span className={cn(
+                    'mt-1 text-[11px] font-medium leading-tight text-center truncate max-w-full',
+                    isActive ? 'text-purple-600 dark:text-purple-400' : 'text-gray-600 dark:text-gray-400'
+                  )}>
+                    {item.label}
+                  </span>
+                </motion.div>
+              )
+              
+              return item.href ? (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  className="flex items-center justify-center px-2 py-2 rounded-xl transition-all duration-200 min-h-[56px]"
+                >
+                  {Content}
+                </Link>
+              ) : (
+                <button
+                  key={item.label}
+                  onClick={item.onClick}
+                  className="flex items-center justify-center px-2 py-2 rounded-xl transition-all duration-200 min-h-[56px]"
+                >
+                  {Content}
+                </button>
+              )
+            })}
+          </div>
+        </div>
       </div>
-      
       {/* Safe area for devices with home indicator */}
       <div className="h-[calc(env(safe-area-inset-bottom,0px)+8px)]" />
     </motion.nav>
