@@ -31,3 +31,14 @@ agent_communication:
     message: "Starting comprehensive testing of redesigned Settings page with grouped sections (HESAB, TƏRCİHLƏR, ÜMUMİ) and all dialog interactions including password change, notifications, theme, language, and dashboard settings."
   - agent: "testing"
     message: "CRITICAL ISSUE: Cannot test Settings page functionality due to authentication requirement. App uses Supabase authentication but no backend is running and test credentials don't work. Frontend code analysis shows proper implementation with all required sections and dialogs, but functional testing is blocked. Need either: 1) Backend setup with Supabase connection, 2) Demo/test credentials, or 3) Authentication bypass for testing."
+
+updates_by_e1:
+  - date: 2025-07-24
+    items:
+      - "Applied global custom Switch (toggle) design to match user's reference across the app by updating src/components/ui/Switch.tsx. This affects all places importing { Switch } from '@/components/ui/Switch' (Settings, Admin, SuperAdmin, etc.)."
+      - "Fixed Settings page crash (ReferenceError: motion is not defined). Removed framer-motion usage from SettingsPage header to avoid runtime errors in certain environments."
+      - "Adjusted HomePage redirect for authenticated users to go to /dashboard instead of /quizzes to reduce surprise navigation while testing settings."
+      - "Ensured new users do NOT get quiz creation permission by default. When a profile is auto-created in AuthContext, can_create_quiz is explicitly set to false."
+    notes: |
+      Settings dialogs (notifications/theme/language/dashboard) open via state and no longer navigate away due to the prior crash. Supabase keys are already wired via src/lib/supabase.ts using VITE_ env vars with provided defaults.
+      If backend RLS defaults grant can_create_quiz, app-side creation still sets it to false. Admin/Super Admin pages can toggle it later.
