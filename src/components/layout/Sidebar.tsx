@@ -114,17 +114,17 @@ export default function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
   )
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-pure-white border-r border-light-grey">
+    <div className="flex flex-col h-full bg-pure-white border-r border-light-grey dark:bg-[#0B0B0F] dark:border-[#232325]">
       {/* Header */}
-      <div className="p-6 border-b border-light-grey">
+      <div className="p-6 border-b border-light-grey dark:border-[#232325]">
         <div className="flex items-center justify-between">
           <div className="flex items-center pl-1 pb-2 space-x-2 select-none">
-            <img src={logo} alt="Logo" className="h-16 w-16 md:h-20 md:w-20 object-cover rounded-2xl shadow-sm border border-light-grey bg-white" style={{ boxShadow: '0 2px 12px 0 rgb(80 0 180 / 9%)' }} />
+            <img src={logo} alt="Logo" className="h-16 w-16 md:h-20 md:w-20 object-cover rounded-2xl shadow-sm border border-light-grey bg-white dark:border-[#2a2a2e] dark:bg-[#111216]" style={{ boxShadow: '0 2px 12px 0 rgb(80 0 180 / 9%)' }} />
             <div className="flex flex-col justify-center ml-1">
-              <span className="text-3xl md:text-4xl font-extrabold text-purple-700 leading-tight tracking-tight drop-shadow-sm">
+              <span className="text-3xl md:text-4xl font-extrabold text-purple-700 leading-tight tracking-tight drop-shadow-sm dark:text-white">
                 Squiz
               </span>
-              <span className="text-xs text-medium-grey font-medium mt-1 md:mt-2 pl-0.5">
+              <span className="text-xs text-medium-grey font-medium mt-1 md:mt-2 pl-0.5 dark:text-dark-text-muted">
                 Təhsil Platforması
               </span>
             </div>
@@ -164,17 +164,17 @@ export default function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
                   to={item.href}
                   onClick={() => isMobile && onClose?.()}
                   className={cn(
-                    'flex items-center justify-between w-full p-3 rounded-xl text-ui-label transition-all duration-200 group',
+                    'flex items-center justify-between w-full p-3 rounded-xl text-ui-label transition-all duration-200 group ring-1 ring-black/[0.04] dark:ring-white/[0.04]',
                     isActive
-                      ? 'bg-vibrant-blue text-pure-white shadow-md'
-                      : 'text-medium-grey hover:bg-soft-grey hover:text-dark-charcoal'
+                      ? 'bg-gray-100 text-gray-900 dark:bg-[#1A1A20] dark:text-white'
+                      : 'text-medium-grey hover:bg-soft-grey hover:text-dark-charcoal dark:text-dark-text-muted dark:hover:bg-[#141418] dark:hover:text-white'
                   )}
                 >
                   <div className="flex items-center space-x-3">
                     <item.icon 
                       className={cn(
                         'h-5 w-5 transition-colors',
-                        isActive ? 'text-pure-white' : 'text-medium-grey group-hover:text-vibrant-blue'
+                        isActive ? 'text-purple-600 dark:text-purple-400' : 'text-medium-grey group-hover:text-vibrant-blue dark:text-dark-text-muted dark:group-hover:text-purple-400'
                       )} 
                     />
                     <span>{item.label}</span>
@@ -189,7 +189,7 @@ export default function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
                       </Badge>
                     )}
                     {!isActive && (
-                      <ChevronRight className="h-4 w-4 text-medium-grey opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <ChevronRight className="h-4 w-4 text-medium-grey opacity-0 group-hover:opacity-100 transition-opacity dark:text-dark-text-muted" />
                     )}
                   </div>
                 </Link>
@@ -197,13 +197,13 @@ export default function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
                 <button
                   onClick={handleClick}
                   className={cn(
-                    'flex items-center justify-between w-full p-3 rounded-xl text-ui-label transition-all duration-200 group',
-                    'text-medium-grey hover:bg-soft-grey hover:text-dark-charcoal'
+                    'flex items-center justify-between w-full p-3 rounded-xl text-ui-label transition-all duration-200 group ring-1 ring-black/[0.04] dark:ring-white/[0.04]',
+                    'text-medium-grey hover:bg-soft-grey hover:text-dark-charcoal dark:text-dark-text-muted dark:hover:bg-[#141418] dark:hover:text-white'
                   )}
                 >
                   <div className="flex items-center space-x-3">
                     <item.icon 
-                      className="h-5 w-5 transition-colors text-medium-grey group-hover:text-vibrant-blue" 
+                      className="h-5 w-5 transition-colors text-medium-grey group-hover:text-vibrant-blue dark:text-dark-text-muted dark:group-hover:text-purple-400" 
                     />
                     <span>{item.label}</span>
                   </div>
@@ -216,7 +216,7 @@ export default function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
                         {item.badge}
                       </Badge>
                     )}
-                    <ChevronRight className="h-4 w-4 text-medium-grey opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <ChevronRight className="h-4 w-4 text-medium-grey opacity-0 group-hover:opacity-100 transition-opacity dark:text-dark-text-muted" />
                   </div>
                 </button>
               )}
@@ -226,16 +226,16 @@ export default function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
       </nav>
 
       {/* User Profile Section */}
-      <div className="p-4 border-t border-light-grey">
-        <Card className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-100">
+      <div className="p-4 border-t border-light-grey dark:border-[#232325]">
+        <Card className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-100 dark:from-[#141418] dark:to-[#111216] dark:border-[#232325]">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-vibrant-blue rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-vibrant-blue rounded-full flex items-center justify-center dark:bg-purple-600">
               <span className="text-sm font-semibold text-pure-white">
                 {user?.full_name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'U'}
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-ui-label text-dark-charcoal truncate">
+              <p className="text-ui-label text-dark-charcoal truncate dark:text-white">
                 {user?.is_private ? 'Abituriyent' : (user?.full_name || user?.email?.split('@')[0] || 'İstifadəçi')}
               </p>
               <div className="flex items-center space-x-2">
