@@ -60,7 +60,7 @@ export default function HomePage() {
   }
   
   if (user) {
-    return <Navigate to="/quizzes" replace />
+    return <Navigate to="/dashboard" replace />
   }
   
   return (
