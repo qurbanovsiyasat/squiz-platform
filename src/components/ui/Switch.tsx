@@ -15,7 +15,7 @@ type SwitchSize = 'sm' | 'lg'
 
 const SIZES: Record<SwitchSize, { track: string; thumb: string }> = {
   sm: {
-    track: 'w-[40px] h-[22px]',
+    track: 'w-[36px] h-[22px]',
     thumb: 'h-[18px] w-[18px] left-[2px]'
   },
   lg: {
