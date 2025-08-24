@@ -3,25 +3,43 @@ import * as SwitchPrimitive from "@radix-ui/react-switch"
 import { cn } from "@/lib/utils"
 
 /*
- Global Switch redesign to match the provided reference:
- - Compact pill track
- - Off: neutral grey track, thumb with inner ring ("o")
- - On: purple track, thumb shows a check icon
- - Icon-only, super-minimal, smooth transitions
+ Global Switch redesign to match the provided reference.
+ Sizes:
+  - sm: 40x22 track, 18x18 thumb (DEFAULT)
+  - lg: 44x26 track, 22x22 thumb
+ Off: neutral grey track, thumb with inner ring (o)
+ On: purple track (#6E56CF), check icon appears; smooth transitions
 */
+
+type SwitchSize = 'sm' | 'lg'
+
+const SIZES: Record<SwitchSize, { track: string; thumb: string }> = {
+  sm: {
+    track: 'w-[40px] h-[22px]',
+    thumb: 'h-[18px] w-[18px] left-[2px]'
+  },
+  lg: {
+    track: 'w-[44px] h-[26px]',
+    thumb: 'h-[22px] w-[22px] left-[2px]'
+  }
+}
+
+interface Props extends React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root> {
+  size?: SwitchSize
+}
 
 const Switch = React.forwardRef<
   React.ElementRef<typeof SwitchPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root>
->(({ className, ...props }, ref) => (
+  Props
+>(({ className, size = 'sm', ...props }, ref) => (
   <SwitchPrimitive.Root
     ref={ref}
     className={cn(
       "group relative inline-flex select-none items-center cursor-pointer",
-      // Track size (compact like reference)
-      "w-[42px] h-[24px] rounded-full",
+      // Track sizes
+      SIZES[size].track,
       // Base (light) + dark
-      "bg-[#E6E2EA] ring-1 ring-[#A9A6AD]",
+      "rounded-full bg-[#E6E2EA] ring-1 ring-[#A9A6AD]",
       "dark:bg-[#2A2A2E] dark:ring-[#4A4A50]",
       // Checked state track
       "data-[state=checked]:bg-[#6E56CF] data-[state=checked]:ring-[#6E56CF]",
@@ -37,10 +55,11 @@ const Switch = React.forwardRef<
     <SwitchPrimitive.Thumb
       className={cn(
         // Thumb size and positioning
-        "absolute left-[2px] top-1/2 -translate-y-1/2 h-[20px] w-[20px] rounded-full",
+        "absolute top-1/2 -translate-y-1/2 rounded-full",
+        SIZES[size].thumb,
         // Base thumb colors
         "bg-[#BFBAC6] ring-1 ring-[#8C8891] dark:bg-[#8D8A92] dark:ring-[#6C6A72]",
-        // Move right on checked (42 - 24 = 18px)
+        // Move right on checked (both sizes translate 18px)
         "data-[state=checked]:translate-x-[18px]",
         // Subtle elevate on checked
         "data-[state=checked]:bg-white data-[state=checked]:ring-white/60",
@@ -53,11 +72,12 @@ const Switch = React.forwardRef<
       {/* OFF inner ring (small hollow dot) */}
       <span
         className={cn(
-          "block h-[10px] w-[10px] rounded-full ring-2 ring-[#6C6A72] bg-transparent",
+          // ring-1 as requested
+          "block h-[10px] w-[10px] rounded-full ring-1 ring-[#6C6A72] bg-transparent",
           "opacity-100 group-data-[state=checked]:opacity-0 transition-opacity duration-200"
         )}
       />
-      {/* ON check icon */}
+      {/* ON check icon (purple) */}
       <svg
         className={cn(
           "absolute h-[12px] w-[12px] text-[#6E56CF]",
