@@ -34,7 +34,8 @@
     "clearFilter": "Filtri təmizlə",
     "seeAll": "Hamısını gör",
     "accessGranted": "Giriş icazəsi verildi",
-    "invalidAccessCode": "Yanlış giriş kodu"
+    "invalidAccessCode": "Yanlış giriş kodu",
+    "changesSaved": "Dəyişikliklər yadda saxlanıldı"
   },
   "nav": {
     "dashboard": "Ana səhifə",
@@ -260,7 +261,7 @@
     "systemTheme": "Sistem",
     "emailCannotChange": "Email ünvanı dəyişdirilə bilməz",
     "roleSetByAdmin": "Rol administratorlar tərəfindən təyin edilir",
-    "strongPasswordDesc": "Hesabınızın təhlükəsizliği üçün güclü şifrə seçin",
+    "strongPasswordDesc": "Hesabınızın təhlükəsizliyi üçün güclü şifrə seçin",
     "manageProfileVisibility": "Profilinizin görünürlüyünü idarə edin",
     "manageNotifications": "Aldığınız bildirişləri idarə edin",
     "emailNotificationsDesc": "Yeni mesajlar və yeniliklər üçün email alın",
@@ -275,7 +276,9 @@
     "languageChanged": "Dil dəyişdirildi",
     "languageChangeError": "Dil dəyişdiriərkən xəta baş verdi",
     "notificationsUpdated": "Bildiriş ayarları yeniləndi",
-    "notificationsUpdateError": "Bildiriş ayarları yenilənərkən xəta baş verdi"
+    "notificationsUpdateError": "Bildiriş ayarları yenilənərkən xəta baş verdi",
+    "dashboardSettings": "İdarə paneli parametrləri",
+    "dashboardSettingsDesc": "Ana səhifəni özəlləşdirin"
   },
   "admin": {
     "adminPanel": "Administrator paneli",

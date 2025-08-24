@@ -34,7 +34,8 @@
     "clearFilter": "Clear Filter",
     "seeAll": "See All",
     "accessGranted": "Access granted",
-    "invalidAccessCode": "Invalid access code"
+    "invalidAccessCode": "Invalid access code",
+    "changesSaved": "Changes saved"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -275,7 +276,9 @@
     "languageChanged": "Language changed",
     "languageChangeError": "Error changing language",
     "notificationsUpdated": "Notifications updated",
-    "notificationsUpdateError": "Error updating notifications"
+    "notificationsUpdateError": "Error updating notifications",
+    "dashboardSettings": "Dashboard Settings",
+    "dashboardSettingsDesc": "Customize your home screen"
   },
   "admin": {
     "adminPanel": "Admin Panel",
