@@ -200,6 +200,42 @@ export default function ForumPage() {
                               {post.content}
                             </p>
                             
+                            {/* Post Images */}
+                            {(post.image_urls && post.image_urls.length > 0) && (
+                              <div className="mb-3">
+                                {post.image_urls.length === 1 ? (
+                                  // Single image - larger display
+                                  <div className="relative group">
+                                    <img 
+                                      src={post.image_urls[0]} 
+                                      alt="Post image"
+                                      className="max-w-full max-h-48 object-cover rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
+                                      onClick={() => window.open(post.image_urls![0], '_blank')}
+                                    />
+                                  </div>
+                                ) : (
+                                  // Multiple images - grid layout
+                                  <div className="grid grid-cols-2 gap-2">
+                                    {post.image_urls.slice(0, 4).map((imageUrl, index) => (
+                                      <div key={index} className="relative group">
+                                        <img 
+                                          src={imageUrl} 
+                                          alt={`Post image ${index + 1}`}
+                                          className="w-full h-24 object-cover rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
+                                          onClick={() => window.open(imageUrl, '_blank')}
+                                        />
+                                        {index === 3 && post.image_urls!.length > 4 && (
+                                          <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center text-white font-medium">
+                                            +{post.image_urls!.length - 4}
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-6 text-sm text-slate-500">
                                 <span>

@@ -15,6 +15,7 @@ export interface ForumPost {
   is_pinned: boolean
   is_locked: boolean
   image_url?: string
+  image_urls?: string[]
   shared_quiz_id?: string
   replies_count: number
   created_at: string
@@ -184,6 +185,7 @@ export function useCreateForumPost() {
       category?: string
       tags?: string[]
       image_url?: string
+      image_urls?: string[]
       shared_quiz_id?: string
     }) => {
       if (!user) throw new Error('User not authenticated')
@@ -196,6 +198,7 @@ export function useCreateForumPost() {
           category: post.category,
           tags: post.tags,
           image_url: post.image_url,
+          image_urls: post.image_urls,
           shared_quiz_id: post.shared_quiz_id,
           author_id: user.id,
         })

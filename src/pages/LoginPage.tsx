@@ -16,19 +16,23 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  })
+  
+  // Separate state for each field to prevent any potential mirroring
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
 
   const from = location.state?.from?.pathname || '/dashboard'
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => {
-      const newData = { ...prev, [name]: value }
-      return newData
-    })
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value)
+    // Clear error message when user starts typing
+    if (errorMessage) {
+      setErrorMessage('')
+    }
+  }
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value)
     // Clear error message when user starts typing
     if (errorMessage) {
       setErrorMessage('')
@@ -39,8 +43,20 @@ export default function LoginPage() {
     e.preventDefault()
     setErrorMessage('')
     
-    if (!formData.email || !formData.password) {
+    // Trim whitespace and validate
+    const trimmedEmail = email.trim()
+    const trimmedPassword = password.trim()
+    
+    if (!trimmedEmail || !trimmedPassword) {
       const errorMsg = 'Bütün sahələri doldurun'
+      setErrorMessage(errorMsg)
+      toast.error(errorMsg)
+      return
+    }
+
+    // Basic email validation
+    if (!trimmedEmail.includes('@') || !trimmedEmail.includes('.')) {
+      const errorMsg = 'Düzgün email ünvanı daxil edin'
       setErrorMessage(errorMsg)
       toast.error(errorMsg)
       return
@@ -49,7 +65,7 @@ export default function LoginPage() {
     setIsLoading(true)
     
     try {
-      const result = await signIn(formData.email, formData.password)
+      const result = await signIn(trimmedEmail, trimmedPassword)
       toast.success('Uğurla giriş etdiniz!')
       
       // Small delay to ensure state is updated, then navigate
@@ -70,6 +86,7 @@ export default function LoginPage() {
       
       setErrorMessage(errorMsg)
       toast.error(errorMsg)
+    } finally {
       setIsLoading(false)
     }
   }
@@ -98,38 +115,40 @@ export default function LoginPage() {
             )}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="login-email">Email</Label>
                 <Input
-                  id="email"
-                  name="email"
+                  id="login-email"
                   type="email"
                   placeholder="email@example.com"
-                  value={formData.email}
-                  onChange={handleChange}
+                  value={email}
+                  onChange={handleEmailChange}
                   disabled={isLoading}
                   className="focus-ring"
+                  autoComplete="username"
+                  autoFocus
                   required
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="password">Şifrə</Label>
+                <Label htmlFor="login-password">Şifrə</Label>
                 <div className="relative">
                   <Input
-                    id="password"
-                    name="password"
+                    id="login-password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Şifrənizi daxil edin"
-                    value={formData.password}
-                    onChange={handleChange}
+                    value={password}
+                    onChange={handlePasswordChange}
                     disabled={isLoading}
                     className="focus-ring pr-10"
+                    autoComplete="current-password"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+                    tabIndex={-1}
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -143,7 +162,7 @@ export default function LoginPage() {
               <Button 
                 type="submit" 
                 className="w-full" 
-                disabled={isLoading}
+                disabled={isLoading || !email.trim() || !password.trim()}
               >
                 {isLoading ? (
                   <>

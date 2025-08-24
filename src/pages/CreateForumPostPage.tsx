@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useCreateForumPost, useShareQuizToForum } from '@/hooks/useForum'
 import { useQuizzes } from '@/hooks/useQuiz'
+import { uploadImage } from '@/lib/supabase'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/input'
@@ -183,15 +184,34 @@ export default function CreateForumPostPage() {
     }
     
     try {
-      // TODO: Upload images to Supabase Storage when available
+      // Upload images to Supabase Storage
       const imageUrls: string[] = []
+      
+      if (formData.images.length > 0) {
+        toast.info(`Şəkillər yüklənir... (${formData.images.length} şəkil)`)
+        
+        for (const image of formData.images) {
+          try {
+            const imageUrl = await uploadImage(image, 'forum-posts')
+            imageUrls.push(imageUrl)
+          } catch (error) {
+            console.error('Error uploading image:', error)
+            toast.error(`Şəkil yüklənərkən xəta: ${image.name}`)
+            // Continue with other images even if one fails
+          }
+        }
+        
+        if (imageUrls.length > 0) {
+          toast.success(`${imageUrls.length} şəkil uğurla yükləndi`)
+        }
+      }
       
       const postData = {
         title: formData.title.trim(),
         content: formData.content.trim(),
         category: formData.category || 'Ümumi',
         tags: formData.tags,
-        image_urls: imageUrls,
+        image_urls: imageUrls.length > 0 ? imageUrls : undefined,
         shared_quiz_id: formData.shareQuiz ? formData.sharedQuizId : null
       }
       
