@@ -61,7 +61,7 @@ export default function BottomNavigation() {
       animate={{ y: 0 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       // IMPORTANT: prevent any accidental overlay from capturing clicks outside of nav
-      className="pointer-events-none fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-xl lg:hidden dark:bg-gray-900/95 dark:border-gray-700"
+      className="pointer-events-none fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-xl lg:hidden dark:bg-gray-900/95 dark:border-gray-700 pb-[env(safe-area-inset-bottom,0px)]"
     >
       <div className="grid grid-cols-5 gap-1 px-2 py-3 max-w-screen-sm mx-auto">
         {navigation.map((item, index) => {
