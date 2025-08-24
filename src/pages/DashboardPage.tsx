@@ -401,6 +401,7 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           </motion.div>
+          )}
 
           {/* Recent Activity & Progress */}
           <motion.div 
