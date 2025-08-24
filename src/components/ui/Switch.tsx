@@ -36,8 +36,8 @@ const Switch = React.forwardRef<
   >
     <SwitchPrimitive.Thumb
       className={cn(
-        // exact sizes and position from CSS
-        "pointer-events-none absolute left-[0.2em] bottom-[0.2em] h-[1.4em] w-[1.4em] rounded-[20px]",
+        // exact sizes and centered position
+        "pointer-events-none absolute left-[0.2em] top-1/2 -translate-y-1/2 h-[1.4em] w-[1.4em] rounded-[20px]",
         // base color
         "bg-[#aeaaae]",
         // smooth movement
