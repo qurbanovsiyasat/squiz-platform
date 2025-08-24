@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuiz, useCompleteQuizAttempt } from '@/hooks/useQuiz'
 import { useAuth } from '@/contexts/AuthContext'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/input'
@@ -34,6 +35,7 @@ export default function QuizTakePage() {
   const { id } = useParams<{ id: string }>()
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { t } = useLanguage()
   const { data: quiz, isLoading, error } = useQuiz(id!)
   const completeQuizMutation = useCompleteQuizAttempt()
   
@@ -45,6 +47,8 @@ export default function QuizTakePage() {
   const [accessCode, setAccessCode] = useState('')
   const [quizStarted, setQuizStarted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showCompletionModal, setShowCompletionModal] = useState(false)
+  const [unansweredCount, setUnansweredCount] = useState(0)
 
   // Quiz state persistence key
   const quizStateKey = `quiz_state_${id}`
@@ -207,13 +211,18 @@ export default function QuizTakePage() {
     }) || []
     
     if (unansweredQuestions.length > 0) {
-      const confirmSubmit = window.confirm(
-        `You have ${unansweredQuestions.length} unanswered question(s). Are you sure you want to submit?`
-      )
-      if (!confirmSubmit) return
+      setUnansweredCount(unansweredQuestions.length)
+      setShowCompletionModal(true)
+      return
     }
     
+    await submitQuiz()
+  }
+  
+  const submitQuiz = async () => {
+    
     setIsSubmitting(true)
+    setShowCompletionModal(false)
     
     try {
       const result = await completeQuizMutation.mutateAsync({
@@ -363,17 +372,17 @@ export default function QuizTakePage() {
           <div className="space-y-3">
             <div className="flex items-center space-x-2 text-sm text-slate-600 dark:text-slate-400">
               <Type className="h-4 w-4" />
-              <span>Text Answer</span>
+              <span>{t('quiz.textAnswer')}</span>
             </div>
             <div className="p-4 border border-purple-100 dark:border-purple-800 rounded-lg bg-purple-50/50 dark:bg-purple-900/10">
               <Input
                 value={currentAnswer || ''}
                 onChange={(e) => handleAnswerChange(e.target.value)}
-                placeholder="Enter your answer..."
+                placeholder={t('quiz.enterAnswer')}
                 className="text-sm min-h-[44px] bg-white dark:bg-slate-900 border-purple-200 dark:border-purple-700 focus:border-purple-500 focus:ring-purple-200"
               />
               <p className="text-xs text-slate-500 mt-2">
-                Type your answer in the text field above
+                {t('quiz.typeAnswerHint')}
               </p>
             </div>
           </div>
@@ -384,17 +393,17 @@ export default function QuizTakePage() {
           <div className="space-y-3">
             <div className="flex items-center space-x-2 text-sm text-slate-600 dark:text-slate-400">
               <Calculator className="h-4 w-4" />
-              <span>Mathematical Expression</span>
+              <span>{t('quiz.mathematicalExpression')}</span>
             </div>
             <div className="p-4 border border-purple-100 dark:border-purple-800 rounded-lg bg-purple-50/50 dark:bg-purple-900/10">
               <MathInput
                 value={currentAnswer || ''}
                 onChange={handleAnswerChange}
-                placeholder="Enter mathematical expression using LaTeX..."
+                placeholder={t('quiz.enterMathExpression')}
                 className="bg-white dark:bg-slate-900 border-purple-200 dark:border-purple-700 focus:border-purple-500"
               />
               <p className="text-xs text-slate-500 mt-2">
-                Use LaTeX syntax for mathematical expressions (e.g., \frac{"{1}"}{"{2}"}, x^2, \sqrt{"{x}"})
+                {t('quiz.latexSyntaxHint')}
               </p>
             </div>
           </div>
@@ -447,19 +456,19 @@ export default function QuizTakePage() {
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
         <Card className="max-w-md w-full">
           <CardHeader>
-            <CardTitle>Access Code Required</CardTitle>
+            <CardTitle>{t('quiz.accessCodeRequired')}</CardTitle>
             <CardDescription>
-              This quiz requires an access code to continue.
+              {t('quiz.accessCodeDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="access-code">Access Code</Label>
+              <Label htmlFor="access-code">{t('quiz.accessCode')}</Label>
               <Input
                 id="access-code"
                 value={accessCode}
                 onChange={(e) => setAccessCode(e.target.value)}
-                placeholder="Enter access code"
+                placeholder={t('quiz.enterAccessCode')}
                 className="text-center uppercase"
                 maxLength={10}
               />
@@ -470,14 +479,74 @@ export default function QuizTakePage() {
                 onClick={() => navigate('/dashboard')}
                 className="flex-1"
               >
-                Cancel
+                {t('quiz.cancel')}
               </Button>
               <Button 
                 onClick={handleAccessCodeSubmit}
                 disabled={!accessCode.trim()}
                 className="flex-1"
               >
-                Start Quiz
+                {t('quiz.startQuiz')}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Completion confirmation modal
+  if (showCompletionModal) {
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <Card className="max-w-md w-full">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Flag className="h-5 w-5 text-purple-600" />
+              <span>{t('quiz.completeQuiz')}</span>
+            </CardTitle>
+            <CardDescription>
+              {unansweredCount > 0 ? (
+                <span>
+                  {t('quiz.unansweredQuestions', { count: unansweredCount })}
+                </span>
+              ) : (
+                <span>
+                  Great job! You've answered all questions. Ready to submit your quiz?
+                </span>
+              )}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg">
+              <div className="flex items-center justify-between text-sm">
+                <span>{t('quiz.questionsAnswered')}</span>
+                <span className="font-medium">{totalQuestions - unansweredCount} / {totalQuestions}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm mt-2">
+                <span>{t('quiz.timeElapsed')}</span>
+                <span className="font-mono font-medium">{formatTime(timeElapsed)}</span>
+              </div>
+            </div>
+            <div className="flex space-x-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowCompletionModal(false)}
+                className="flex-1"
+              >
+                {t('quiz.continue')}
+              </Button>
+              <Button 
+                onClick={submitQuiz}
+                disabled={isSubmitting}
+                className="flex-1"
+              >
+                {isSubmitting ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                )}
+                {t('quiz.finishQuiz')}
               </Button>
             </div>
           </CardContent>
@@ -499,22 +568,22 @@ export default function QuizTakePage() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="font-medium">Questions:</span> {totalQuestions}
+                <span className="font-medium">{t('quiz.questions')}:</span> {totalQuestions}
               </div>
               <div>
-                <span className="font-medium">Difficulty:</span>
+                <span className="font-medium">{t('quiz.difficulty')}:</span>
                 <Badge variant="outline" className="ml-2">
                   {quiz.difficulty}
                 </Badge>
               </div>
               {quiz.time_limit && (
                 <div className="col-span-2">
-                  <span className="font-medium">Time Limit:</span> {quiz.time_limit} minutes
+                  <span className="font-medium">{t('quiz.timeLimit')}:</span> {quiz.time_limit} {t('common.minutes')}
                 </div>
               )}
             </div>
             <Button onClick={startQuiz} className="w-full" size="lg">
-              Start Quiz
+              {t('quiz.startQuiz')}
             </Button>
           </CardContent>
         </Card>
@@ -531,7 +600,7 @@ export default function QuizTakePage() {
             <div className="min-w-0">
               <CardTitle className="text-lg sm:text-xl truncate">{quiz.title}</CardTitle>
               <CardDescription className="text-sm">
-                Question {currentQuestionIndex + 1} of {totalQuestions}
+                {t('quiz.questionOf', { current: currentQuestionIndex + 1, total: totalQuestions })}
               </CardDescription>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4 text-xs sm:text-sm">
@@ -541,7 +610,7 @@ export default function QuizTakePage() {
               </div>
               {quiz.time_limit && (
                 <Badge variant="outline" className="text-xs">
-                  Limit: {quiz.time_limit}m
+                  {t('quiz.timeLimitShort', { minutes: quiz.time_limit })}
                 </Badge>
               )}
             </div>
@@ -581,7 +650,7 @@ export default function QuizTakePage() {
                       </div>
                     </div>
                   </div>
-                  <p className="text-xs text-gray-500 text-center mt-2">Click to view full size</p>
+                  <p className="text-xs text-gray-500 text-center mt-2">{t('quiz.viewFullSize')}</p>
                 </div>
               )}
             </CardHeader>

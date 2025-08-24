@@ -1,28 +1,32 @@
-# Quiz Functionality Fixes - TODO List
+# Bilingual Quiz Interface Implementation
 
-## Issues to Fix:
-1. [x] LaTeX text shows as plain code instead of rendering correctly
-2. [x] Preview section text overflows - should be displayed properly
-3. [x] Question input section should be wider
-4. [x] Image upload gives an error
-5. [x] Ensure LaTeX formatting works in active quiz section
-6. [x] Reduce the size of images in questions
+## Tasks Completed:
+- [ ] Analyze current localization system and identify hardcoded English text
+- [ ] Create comprehensive implementation plan
 
-## Implementation Steps:
-- [x] Analyze LaTeX rendering in CreateQuizPage.tsx
-- [x] Fix LaTeX rendering to ensure proper display
-- [x] Adjust preview section CSS to prevent text overflow
-- [x] Ensure question input fields are adequately wide
-- [x] Investigate and fix image upload error
-- [x] Apply CSS classes for LaTeX rendering in quiz questions
-- [x] Add image size constraints for question images
-- [ ] Test all fixes thoroughly
+## Tasks Remaining:
+1. Add missing translation keys to en.json
+2. Add Azerbaijani translations to az.json
+3. Update QuizTakePage.tsx to use translations
+4. Update QuizDetailPage.tsx to use translations
+5. Test the implementation
 
-## Files Modified:
-- src/pages/CreateQuizPage.tsx - Applied preview-section class and question-input class
-- src/App.css - Added CSS styles for preview section, question input fields, LaTeX rendering, and image sizing
-- src/lib/supabase.ts - Fixed image upload function parameters
-- src/pages/QuizTakePage.tsx - Applied quiz-question-text and quiz-question-image classes
-
-## Remaining Tasks:
-- Test the application to ensure all fixes work correctly
+## New Translation Keys to Add:
+- quiz.startQuiz: "Start Quiz"
+- quiz.finishQuiz: "Finish Quiz" 
+- quiz.completeQuiz: "Complete Quiz?"
+- quiz.unansweredQuestions: "You have {count} unanswered question(s). You can continue answering or submit the quiz as is."
+- quiz.questionsAnswered: "Questions answered:"
+- quiz.timeElapsed: "Time elapsed:"
+- quiz.continue: "continue"
+- quiz.textAnswer: "Text Answer"
+- quiz.mathematicalExpression: "Mathematical Expression"
+- quiz.quizNotFound: "Quiz Not Found"
+- quiz.accessCodeRequired: "Access Code Required"
+- quiz.accessCodeDescription: "This quiz requires an access code to continue."
+- quiz.enterAccessCode: "Enter access code"
+- quiz.cancel: "Cancel"
+- quiz.noQuestions: "This quiz has no questions yet"
+- quiz.questionOf: "Question {current} of {total}"
+- quiz.timeLimitShort: "Limit: {minutes}m"
+- quiz.viewFullSize: "Click to view full size"

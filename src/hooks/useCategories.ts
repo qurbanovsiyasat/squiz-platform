@@ -91,9 +91,9 @@ export function useCreateCategory() {
       try {
         // Try RPC function first
         const { data, error } = await supabase.rpc('create_category', {
-          p_name: name.trim(),
-          p_type: type,
-          p_description: description || ''
+          category_name: name.trim(),
+          category_type: type,
+          category_description: description || ''
         })
         
         if (error) {
