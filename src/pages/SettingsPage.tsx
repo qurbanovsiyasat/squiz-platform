@@ -1,3 +1,4 @@
+// FIX: Replace escaped HTML entities with real TSX
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLanguage } from '@/contexts/LanguageContext'
@@ -7,7 +8,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/Label'
 import { Switch } from '@/components/ui/Switch'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/Separator'
 import { Badge } from '@/components/ui/Badge'
 import { toast } from 'react-hot-toast'
@@ -92,7 +92,7 @@ export default function SettingsPage() {
   useEffect(() => {
     if (user && !authLoading) {
       setIsPrivate(user.is_private || false)
-      setTheme(user.settings?.preferences?.theme || (user.settings?.theme as any) || 'light')
+      setTheme((user.settings?.preferences?.theme as any) || (user.settings?.theme as any) || 'light')
       setLanguage(user.settings?.preferences?.language || currentLanguage)
       setNotifications({
         ...defaultNotificationSettings,
@@ -224,7 +224,7 @@ export default function SettingsPage() {
       toast.error(t('errors.passwordMismatch'))
       return
     }
-    if (passwordForm.newPassword.length &lt; 8) {
+    if (passwordForm.newPassword.length < 8) {
       toast.error(t('errors.passwordTooShort'))
       return
     }
@@ -242,17 +242,17 @@ export default function SettingsPage() {
     }
   }
 
-  const getThemeLabel = (v: string) => v === 'light' ? t('settings.lightTheme') : v === 'dark' ? t('settings.darkTheme') : t('settings.systemTheme')
+  const getThemeLabel = (v: string) => (v === 'light' ? t('settings.lightTheme') : v === 'dark' ? t('settings.darkTheme') : t('settings.systemTheme'))
 
   // Loading state
   if (authLoading || !user) {
     return (
-      &lt;div className="min-h-screen bg-soft-grey flex items-center justify-center"&gt;
-        &lt;div className="text-center"&gt;
-          &lt;div className="w-8 h-8 border-4 border-slate-300 border-t-slate-600 rounded-full animate-spin mx-auto mb-4"&gt;&lt;/div&gt;
-          &lt;p className="text-slate-600 dark:text-slate-400"&gt;{t('common.loading')}&lt;/p&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
+      <div className="min-h-screen bg-soft-grey flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-slate-300 border-t-slate-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-600 dark:text-slate-400">{t('common.loading')}</p>
+        </div>
+      </div>
     )
   }
 
@@ -269,333 +269,331 @@ export default function SettingsPage() {
     description?: string
     right?: React.ReactNode
     onClick?: () => void
-  }) =&gt; (
-    &lt;button
+  }) => (
+    <button
       onClick={onClick}
       className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-900/50 rounded-xl border border-light-grey transition-colors text-left"
-    &gt;
-      &lt;div className="flex items-center space-x-3"&gt;
-        &lt;div className="w-10 h-10 rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center"&gt;
-          &lt;Icon className="h-5 w-5 text-slate-600 dark:text-slate-300" /&gt;
-        &lt;/div&gt;
-        &lt;div&gt;
-          &lt;div className="text-sm font-medium text-dark-charcoal dark:text-white"&gt;{title}&lt;/div&gt;
-          {description &amp;&amp; (
-            &lt;div className="text-xs text-medium-grey mt-0.5"&gt;{description}&lt;/div&gt;
+    >
+      <div className="flex items-center space-x-3">
+        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center">
+          <Icon className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+        </div>
+        <div>
+          <div className="text-sm font-medium text-dark-charcoal dark:text-white">{title}</div>
+          {description && (
+            <div className="text-xs text-medium-grey mt-0.5">{description}</div>
           )}
-        &lt;/div&gt;
-      &lt;/div&gt;
-      &lt;div className="flex items-center space-x-2"&gt;
+        </div>
+      </div>
+      <div className="flex items-center space-x-2">
         {right}
-        &lt;ChevronRight className="h-4 w-4 text-medium-grey" /&gt;
-      &lt;/div&gt;
-    &lt;/button&gt;
+        <ChevronRight className="h-4 w-4 text-medium-grey" />
+      </div>
+    </button>
   )
 
   return (
-    &lt;div className="min-h-screen bg-soft-grey p-4 sm:p-6 lg:p-8"&gt;
-      &lt;div className="max-w-3xl mx-auto space-y-8"&gt;
+    <div className="min-h-screen bg-soft-grey p-4 sm:p-6 lg:p-8">
+      <div className="max-w-3xl mx-auto space-y-8">
         {/* Header */}
-        &lt;motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}&gt;
-          &lt;div className="flex items-center space-x-4 mb-2"&gt;
-            &lt;div className="w-12 h-12 bg-gradient-to-br from-slate-600 to-slate-800 rounded-design-system flex items-center justify-center"&gt;
-              &lt;SettingsIcon className="h-6 w-6 text-pure-white" /&gt;
-            &lt;/div&gt;
-            &lt;div&gt;
-              &lt;h1 className="text-page-title"&gt;{t('settings.settings')}&lt;/h1&gt;
-              &lt;p className="text-body"&gt;{t('settings.general')}&lt;/p&gt;
-            &lt;/div&gt;
-          &lt;/div&gt;
-        &lt;/motion.div&gt;
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+          <div className="flex items-center space-x-4 mb-2">
+            <div className="w-12 h-12 bg-gradient-to-br from-slate-600 to-slate-800 rounded-design-system flex items-center justify-center">
+              <SettingsIcon className="h-6 w-6 text-pure-white" />
+            </div>
+            <div>
+              <h1 className="text-page-title">{t('settings.settings')}</h1>
+              <p className="text-body">{t('settings.general')}</p>
+            </div>
+          </div>
+        </motion.div>
 
         {/* ACCOUNT */}
-        &lt;Card className="card-modern"&gt;
-          &lt;CardHeader&gt;
-            &lt;CardTitle className="text-section-title"&gt;HESAB&lt;/CardTitle&gt;
-            &lt;CardDescription&gt;{t('profile.profile')}&lt;/CardDescription&gt;
-          &lt;/CardHeader&gt;
-          &lt;CardContent className="space-y-3"&gt;
-            &lt;SettingsRow
+        <Card className="card-modern">
+          <CardHeader>
+            <CardTitle className="text-section-title">HESAB</CardTitle>
+            <CardDescription>{t('profile.profile')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <SettingsRow
               icon={User}
               title={t('profile.profile')}
               description={t('profile.editProfile')}
               right={
-                &lt;Badge variant="outline" className="capitalize"&gt;
+                <Badge variant="outline" className="capitalize">
                   {user?.role === 'admin' ? t('admin.admin') :
                    user?.role === 'teacher' ? t('admin.teacher') : t('admin.student')}
-                &lt;/Badge&gt;
+                </Badge>
               }
-              onClick={() =&gt; (window.location.href = `/profile/${user.id}`)}
-            /&gt;
+              onClick={() => (window.location.href = `/profile/${user.id}`)}
+            />
 
-            &lt;SettingsRow
+            <SettingsRow
               icon={Shield}
               title={t('settings.changePassword')}
               description={t('settings.strongPasswordDesc')}
-              onClick={() =&gt; setOpenPassword(true)}
-            /&gt;
+              onClick={() => setOpenPassword(true)}
+            />
 
-            &lt;div className="flex items-center justify-between p-4 rounded-xl border border-light-grey"&gt;
-              &lt;div className="flex items-center space-x-3"&gt;
-                &lt;div className="w-10 h-10 rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center"&gt;
-                  &lt;Lock className="h-5 w-5 text-slate-600 dark:text-slate-300" /&gt;
-                &lt;/div&gt;
-                &lt;div&gt;
-                  &lt;div className="text-sm font-medium text-dark-charcoal dark:text-white"&gt;{t('settings.privateProfile')}&lt;/div&gt;
-                  &lt;div className="text-xs text-medium-grey mt-0.5"&gt;{t('settings.manageProfileVisibility')}&lt;/div&gt;
-                &lt;/div&gt;
-              &lt;/div&gt;
-              &lt;Switch checked={isPrivate} onCheckedChange={handlePrivacyToggle} disabled={loading} /&gt;
-            &lt;/div&gt;
-          &lt;/CardContent&gt;
-        &lt;/Card&gt;
+            <div className="flex items-center justify-between p-4 rounded-xl border border-light-grey">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center">
+                  <Lock className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-dark-charcoal dark:text-white">{t('settings.privateProfile')}</div>
+                  <div className="text-xs text-medium-grey mt-0.5">{t('settings.manageProfileVisibility')}</div>
+                </div>
+              </div>
+              <Switch checked={isPrivate} onCheckedChange={handlePrivacyToggle} disabled={loading} />
+            </div>
+          </CardContent>
+        </Card>
 
         {/* PREFERENCES */}
-        &lt;Card className="card-modern"&gt;
-          &lt;CardHeader&gt;
-            &lt;CardTitle className="text-section-title"&gt;TƏRCİHLƏR&lt;/CardTitle&gt;
-            &lt;CardDescription&gt;{t('settings.manageNotifications')}&lt;/CardDescription&gt;
-          &lt;/CardHeader&gt;
-          &lt;CardContent className="space-y-3"&gt;
-            &lt;SettingsRow
+        <Card className="card-modern">
+          <CardHeader>
+            <CardTitle className="text-section-title">TƏRCİHLƏR</CardTitle>
+            <CardDescription>{t('settings.manageNotifications')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <SettingsRow
               icon={Bell}
               title={t('settings.notifications')}
               description={t('settings.manageNotifications')}
-              onClick={() =&gt; setOpenNotifications(true)}
+              onClick={() => setOpenNotifications(true)}
               right={
-                &lt;div className="text-xs text-medium-grey"&gt;
+                <div className="text-xs text-medium-grey">
                   {Object.values(notifications).filter(Boolean).length} / {Object.keys(notifications).length}
-                &lt;/div&gt;
+                </div>
               }
-            /&gt;
+            />
 
-            &lt;SettingsRow
+            <SettingsRow
               icon={Palette}
               title={t('settings.theme')}
               description={t('settings.theme')}
-              onClick={() =&gt; setOpenTheme(true)}
+              onClick={() => setOpenTheme(true)}
               right={
-                &lt;div className="flex items-center space-x-2 text-xs text-medium-grey"&gt;
-                  {theme === 'light' &amp;&amp; &lt;Sun className="h-4 w-4" /&gt;}
-                  {theme === 'dark' &amp;&amp; &lt;Moon className="h-4 w-4" /&gt;}
-                  {theme === 'system' &amp;&amp; &lt;Monitor className="h-4 w-4" /&gt;}
-                  &lt;span&gt;{getThemeLabel(theme)}&lt;/span&gt;
-                &lt;/div&gt;
+                <div className="flex items-center space-x-2 text-xs text-medium-grey">
+                  {theme === 'light' && <Sun className="h-4 w-4" />}
+                  {theme === 'dark' && <Moon className="h-4 w-4" />}
+                  {theme === 'system' && <Monitor className="h-4 w-4" />}
+                  <span>{getThemeLabel(theme)}</span>
+                </div>
               }
-            /&gt;
+            />
 
-            &lt;SettingsRow
+            <SettingsRow
               icon={LayoutGrid}
               title={t('settings.dashboardSettings')}
               description={t('settings.dashboardSettingsDesc')}
-              onClick={() =&gt; setOpenDashboard(true)}
-            /&gt;
+              onClick={() => setOpenDashboard(true)}
+            />
 
-            &lt;SettingsRow
+            <SettingsRow
               icon={Globe}
               title={t('settings.language')}
               description={currentLanguage === 'az' ? 'Azərbaycan' : 'English'}
-              onClick={() =&gt; setOpenLanguage(true)}
-              right={
-                &lt;div className="text-xs text-medium-grey"&gt;{language?.toUpperCase()}&lt;/div&gt;
-              }
-            /&gt;
-          &lt;/CardContent&gt;
-        &lt;/Card&gt;
+              onClick={() => setOpenLanguage(true)}
+              right={<div className="text-xs text-medium-grey">{language?.toUpperCase()}</div>}
+            />
+          </CardContent>
+        </Card>
 
         {/* GENERAL */}
-        &lt;Card className="card-modern"&gt;
-          &lt;CardHeader&gt;
-            &lt;CardTitle className="text-section-title"&gt;ÜMUMİ&lt;/CardTitle&gt;
-            &lt;CardDescription&gt;{t('settings.general')}&lt;/CardDescription&gt;
-          &lt;/CardHeader&gt;
-          &lt;CardContent className="space-y-3"&gt;
-            &lt;SettingsRow
+        <Card className="card-modern">
+          <CardHeader>
+            <CardTitle className="text-section-title">ÜMUMİ</CardTitle>
+            <CardDescription>{t('settings.general')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <SettingsRow
               icon={Info}
               title="About"
               description="App version, policies"
-              onClick={() =&gt; (window.location.href = '/about')}
-            /&gt;
-          &lt;/CardContent&gt;
-        &lt;/Card&gt;
+              onClick={() => (window.location.href = '/about')}
+            />
+          </CardContent>
+        </Card>
 
         {/* Footer */}
-        &lt;div className="pt-2"&gt;
-          &lt;Button variant="destructive" className="w-full" onClick={() =&gt; signOut()}&gt;
+        <div className="pt-2">
+          <Button variant="destructive" className="w-full" onClick={() => signOut()}>
             {t('nav.logout')}
-          &lt;/Button&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
+          </Button>
+        </div>
+      </div>
 
       {/* Password Dialog */}
-      &lt;Dialog open={openPassword} onOpenChange={setOpenPassword}&gt;
-        &lt;DialogContent className="sm:max-w-lg"&gt;
-          &lt;DialogHeader&gt;
-            &lt;DialogTitle className="flex items-center space-x-2"&gt;
-              &lt;Key className="h-5 w-5" /&gt;
-              &lt;span&gt;{t('settings.changePassword')}&lt;/span&gt;
-            &lt;/DialogTitle&gt;
-            &lt;DialogDescription&gt;{t('settings.strongPasswordDesc')}&lt;/DialogDescription&gt;
-          &lt;/DialogHeader&gt;
-          &lt;form onSubmit={handlePasswordChange} className="space-y-4"&gt;
-            &lt;div className="space-y-2"&gt;
-              &lt;Label htmlFor="current-password" className="text-ui-label"&gt;{t('settings.currentPassword')}&lt;/Label&gt;
-              &lt;Input
+      <Dialog open={openPassword} onOpenChange={setOpenPassword}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <Key className="h-5 w-5" />
+              <span>{t('settings.changePassword')}</span>
+            </DialogTitle>
+            <DialogDescription>{t('settings.strongPasswordDesc')}</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handlePasswordChange} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="current-password" className="text-ui-label">{t('settings.currentPassword')}</Label>
+              <Input
                 id="current-password"
                 type="password"
                 value={passwordForm.currentPassword}
-                onChange={(e) =&gt; setPasswordForm(prev =&gt; ({ ...prev, currentPassword: e.target.value }))}
+                onChange={(e) => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
                 className="input-modern"
-              /&gt;
-            &lt;/div&gt;
-            &lt;div className="space-y-2"&gt;
-              &lt;Label htmlFor="new-password" className="text-ui-label"&gt;{t('settings.newPassword')}&lt;/Label&gt;
-              &lt;Input
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new-password" className="text-ui-label">{t('settings.newPassword')}</Label>
+              <Input
                 id="new-password"
                 type="password"
                 value={passwordForm.newPassword}
-                onChange={(e) =&gt; setPasswordForm(prev =&gt; ({ ...prev, newPassword: e.target.value }))}
+                onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
                 className="input-modern"
-              /&gt;
-            &lt;/div&gt;
-            &lt;div className="space-y-2"&gt;
-              &lt;Label htmlFor="confirm-password" className="text-ui-label"&gt;{t('settings.confirmPassword')}&lt;/Label&gt;
-              &lt;Input
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password" className="text-ui-label">{t('settings.confirmPassword')}</Label>
+              <Input
                 id="confirm-password"
                 type="password"
                 value={passwordForm.confirmPassword}
-                onChange={(e) =&gt; setPasswordForm(prev =&gt; ({ ...prev, confirmPassword: e.target.value }))}
+                onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
                 className="input-modern"
-              /&gt;
-            &lt;/div&gt;
-            &lt;DialogFooter&gt;
-              &lt;Button type="button" variant="outline" onClick={() =&gt; setOpenPassword(false)}&gt;{t('common.cancel')}&lt;/Button&gt;
-              &lt;Button type="submit" disabled={loading}&gt;{loading ? t('common.loading') : t('common.save')}&lt;/Button&gt;
-            &lt;/DialogFooter&gt;
-          &lt;/form&gt;
-        &lt;/DialogContent&gt;
-      &lt;/Dialog&gt;
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setOpenPassword(false)}>{t('common.cancel')}</Button>
+              <Button type="submit" disabled={loading}>{loading ? t('common.loading') : t('common.save')}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Notifications Dialog */}
-      &lt;Dialog open={openNotifications} onOpenChange={setOpenNotifications}&gt;
-        &lt;DialogContent className="sm:max-w-lg"&gt;
-          &lt;DialogHeader&gt;
-            &lt;DialogTitle className="flex items-center space-x-2"&gt;
-              &lt;Bell className="h-5 w-5" /&gt;
-              &lt;span&gt;{t('settings.notifications')}&lt;/span&gt;
-            &lt;/DialogTitle&gt;
-            &lt;DialogDescription&gt;{t('settings.manageNotifications')}&lt;/DialogDescription&gt;
-          &lt;/DialogHeader&gt;
-          &lt;div className="space-y-3"&gt;
+      <Dialog open={openNotifications} onOpenChange={setOpenNotifications}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <Bell className="h-5 w-5" />
+              <span>{t('settings.notifications')}</span>
+            </DialogTitle>
+            <DialogDescription>{t('settings.manageNotifications')}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
             {([
               { key: 'email', label: t('settings.emailNotifications') },
               { key: 'push', label: t('settings.pushNotifications') },
               { key: 'forum', label: t('settings.forumNotifications') },
               { key: 'quiz', label: t('settings.quizNotifications') }
-            ] as const).map(item =&gt; (
-              &lt;div key={item.key} className="flex items-center justify-between p-3 rounded-xl border border-light-grey"&gt;
-                &lt;div className="text-sm font-medium"&gt;{item.label}&lt;/div&gt;
-                &lt;Switch
-                  checked={Boolean(notifications[item.key as keyof typeof notifications])}
-                  onCheckedChange={(v) =&gt; handleNotificationUpdate(item.key, v)}
+            ] as const).map(item => (
+              <div key={item.key} className="flex items-center justify-between p-3 rounded-xl border border-light-grey">
+                <div className="text-sm font-medium">{item.label}</div>
+                <Switch
+                  checked={Boolean((notifications as any)[item.key])}
+                  onCheckedChange={(v) => handleNotificationUpdate(item.key, v)}
                   disabled={loading}
-                /&gt;
-              &lt;/div&gt;
+                />
+              </div>
             ))}
-          &lt;/div&gt;
-          &lt;DialogFooter&gt;
-            &lt;Button variant="outline" onClick={() =&gt; setOpenNotifications(false)}&gt;{t('common.close')}&lt;/Button&gt;
-          &lt;/DialogFooter&gt;
-        &lt;/DialogContent&gt;
-      &lt;/Dialog&gt;
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenNotifications(false)}>{t('common.close')}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Theme Dialog */}
-      &lt;Dialog open={openTheme} onOpenChange={setOpenTheme}&gt;
-        &lt;DialogContent className="sm:max-w-md"&gt;
-          &lt;DialogHeader&gt;
-            &lt;DialogTitle className="flex items-center space-x-2"&gt;
-              &lt;Palette className="h-5 w-5" /&gt;
-              &lt;span&gt;{t('settings.theme')}&lt;/span&gt;
-            &lt;/DialogTitle&gt;
-          &lt;/DialogHeader&gt;
-          &lt;div className="grid grid-cols-3 gap-3"&gt;
+      <Dialog open={openTheme} onOpenChange={setOpenTheme}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <Palette className="h-5 w-5" />
+              <span>{t('settings.theme')}</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-3 gap-3">
             {([
               { value: 'light', icon: Sun, label: t('settings.lightTheme') },
               { value: 'dark', icon: Moon, label: t('settings.darkTheme') },
               { value: 'system', icon: Monitor, label: t('settings.systemTheme') }
-            ] as const).map(opt =&gt; (
-              &lt;Button
+            ] as const).map(opt => (
+              <Button
                 key={opt.value}
                 variant={theme === opt.value ? 'default' : 'outline'}
                 className={`h-20 flex flex-col space-y-2 ${theme === opt.value ? 'bg-vibrant-blue text-pure-white' : ''}`}
-                onClick={() =&gt; handleThemeChange(opt.value as any)}
+                onClick={() => handleThemeChange(opt.value as any)}
                 disabled={loading}
-              &gt;
-                &lt;opt.icon className="h-5 w-5" /&gt;
-                &lt;span className="text-ui-label"&gt;{opt.label}&lt;/span&gt;
-              &lt;/Button&gt;
+              >
+                <opt.icon className="h-5 w-5" />
+                <span className="text-ui-label">{opt.label}</span>
+              </Button>
             ))}
-          &lt;/div&gt;
-          &lt;DialogFooter&gt;
-            &lt;Button variant="outline" onClick={() =&gt; setOpenTheme(false)}&gt;{t('common.close')}&lt;/Button&gt;
-          &lt;/DialogFooter&gt;
-        &lt;/DialogContent&gt;
-      &lt;/Dialog&gt;
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenTheme(false)}>{t('common.close')}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Language Dialog */}
-      &lt;Dialog open={openLanguage} onOpenChange={setOpenLanguage}&gt;
-        &lt;DialogContent className="sm:max-w-md"&gt;
-          &lt;DialogHeader&gt;
-            &lt;DialogTitle className="flex items-center space-x-2"&gt;
-              &lt;Globe className="h-5 w-5" /&gt;
-              &lt;span&gt;{t('settings.language')}&lt;/span&gt;
-            &lt;/DialogTitle&gt;
-          &lt;/DialogHeader&gt;
-          &lt;div className="space-y-3"&gt;
-            &lt;Button variant={language === 'az' ? 'default' : 'outline'} className="w-full justify-start" onClick={() =&gt; handleLanguageChange('az')}&gt;
+      <Dialog open={openLanguage} onOpenChange={setOpenLanguage}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <Globe className="h-5 w-5" />
+              <span>{t('settings.language')}</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Button variant={language === 'az' ? 'default' : 'outline'} className="w-full justify-start" onClick={() => handleLanguageChange('az')}>
               🇦🇿 Azərbaycan dili
-            &lt;/Button&gt;
-            &lt;Button variant={language === 'en' ? 'default' : 'outline'} className="w-full justify-start" onClick={() =&gt; handleLanguageChange('en')}&gt;
+            </Button>
+            <Button variant={language === 'en' ? 'default' : 'outline'} className="w-full justify-start" onClick={() => handleLanguageChange('en')}>
               🇺🇸 English
-            &lt;/Button&gt;
-          &lt;/div&gt;
-          &lt;DialogFooter&gt;
-            &lt;Button variant="outline" onClick={() =&gt; setOpenLanguage(false)}&gt;{t('common.close')}&lt;/Button&gt;
-          &lt;/DialogFooter&gt;
-        &lt;/DialogContent&gt;
-      &lt;/Dialog&gt;
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenLanguage(false)}>{t('common.close')}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Dashboard Settings Dialog */}
-      &lt;Dialog open={openDashboard} onOpenChange={setOpenDashboard}&gt;
-        &lt;DialogContent className="sm:max-w-lg"&gt;
-          &lt;DialogHeader&gt;
-            &lt;DialogTitle className="flex items-center space-x-2"&gt;
-              &lt;LayoutGrid className="h-5 w-5" /&gt;
-              &lt;span&gt;{t('settings.dashboardSettings')}&lt;/span&gt;
-            &lt;/DialogTitle&gt;
-            &lt;DialogDescription&gt;{t('settings.dashboardSettingsDesc')}&lt;/DialogDescription&gt;
-          &lt;/DialogHeader&gt;
-          &lt;div className="space-y-3"&gt;
+      <Dialog open={openDashboard} onOpenChange={setOpenDashboard}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <LayoutGrid className="h-5 w-5" />
+              <span>{t('settings.dashboardSettings')}</span>
+            </DialogTitle>
+            <DialogDescription>{t('settings.dashboardSettingsDesc')}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
             {([
               { key: 'showRecentQuizzes', label: t('dashboard.recentQuizzes') },
               { key: 'showMyStats', label: t('dashboard.myStats') },
               { key: 'showForumFeed', label: t('nav.forum') }
-            ] as const).map(item =&gt; (
-              &lt;div key={item.key} className="flex items-center justify-between p-3 rounded-xl border border-light-grey"&gt;
-                &lt;div className="text-sm font-medium"&gt;{item.label}&lt;/div&gt;
-                &lt;Switch
-                  checked={Boolean(dashboardPrefs[item.key as keyof typeof dashboardPrefs])}
-                  onCheckedChange={(v) =&gt; setDashboardPrefs(prev =&gt; ({ ...prev, [item.key]: v }))}
-                /&gt;
-              &lt;/div&gt;
+            ] as const).map(item => (
+              <div key={item.key} className="flex items-center justify-between p-3 rounded-xl border border-light-grey">
+                <div className="text-sm font-medium">{item.label}</div>
+                <Switch
+                  checked={Boolean((dashboardPrefs as any)[item.key])}
+                  onCheckedChange={(v) => setDashboardPrefs(prev => ({ ...prev, [item.key]: v }))}
+                />
+              </div>
             ))}
-          &lt;/div&gt;
-          &lt;DialogFooter&gt;
-            &lt;Button variant="outline" onClick={() =&gt; setOpenDashboard(false)}&gt;{t('common.cancel')}&lt;/Button&gt;
-            &lt;Button onClick={handleDashboardPrefsSave} disabled={loading}&gt;{loading ? t('common.loading') : t('common.save')}&lt;/Button&gt;
-          &lt;/DialogFooter&gt;
-        &lt;/DialogContent&gt;
-      &lt;/Dialog&gt;
-    &lt;/div&gt;
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenDashboard(false)}>{t('common.cancel')}</Button>
+            <Button onClick={handleDashboardPrefsSave} disabled={loading}>{loading ? t('common.loading') : t('common.save')}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   )
 }
