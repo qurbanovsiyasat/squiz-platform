@@ -59,16 +59,8 @@ export default function QuizzesPage() {
       }
     })
 
-  // Debug logging
-  console.log('QuizzesPage Debug:', { 
-    quizzes, 
-    filteredQuizzes, 
-    isLoading, 
-    error,
-    categoryFilter,
-    difficultyFilter,
-    searchTerm 
-  })
+  // Debug information for quizzes page
+  // quizzes, filteredQuizzes, isLoading, error, categoryFilter, difficultyFilter, searchTerm
 
   const difficulties = [
     { value: 'easy', label: 'Asan' },

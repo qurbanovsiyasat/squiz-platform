@@ -51,14 +51,13 @@ class PersistenceManager {
         localStorage.setItem(storageKey, dataString)
       }
       
-      console.log(`Draft saved successfully: ${storageKey} (${(dataString.length / 1024).toFixed(2)} KB)`)
       return draftId
     } catch (error) {
       console.warn('localStorage failed, trying sessionStorage:', error)
       // Fallback to sessionStorage if localStorage fails
       try {
         sessionStorage.setItem(storageKey, JSON.stringify(draftData))
-        console.log(`Draft saved to sessionStorage: ${storageKey}`)
+        // Draft saved to sessionStorage
         return draftId
       } catch (sessionError) {
         console.error('Both localStorage and sessionStorage failed:', sessionError)
@@ -66,7 +65,7 @@ class PersistenceManager {
         this.cleanupExpiredDrafts()
         try {
           localStorage.setItem(storageKey, JSON.stringify(draftData))
-          console.log(`Draft saved after cleanup: ${storageKey}`)
+          // Draft saved after cleanup
           return draftId
         } catch (finalError) {
           console.error('Failed to save draft after cleanup:', finalError)
@@ -101,7 +100,7 @@ class PersistenceManager {
         return null
       }
 
-      console.log(`Draft loaded: ${storageKey}`)
+      // Draft loaded successfully
       return draftData.data
     } catch (error) {
       console.error('Failed to load draft:', error)
@@ -116,7 +115,7 @@ class PersistenceManager {
     try {
       localStorage.removeItem(storageKey)
       sessionStorage.removeItem(storageKey)
-      console.log(`Draft deleted: ${storageKey}`)
+      // Draft deleted successfully
     } catch (error) {
       console.error('Failed to delete draft:', error)
     }
@@ -234,7 +233,7 @@ class PersistenceManager {
         }
       })
       
-      console.log(`Cleaned up ${keysToDelete.length} expired/corrupted drafts`)
+      // Cleaned up expired/corrupted drafts
     } catch (error) {
       console.error('Failed to cleanup expired drafts:', error)
     }
@@ -267,7 +266,7 @@ class PersistenceManager {
     const timeout = setTimeout(() => {
       try {
         this.saveDraft(type, data, id)
-        console.log(`Auto-saved draft: ${timeoutKey}`)
+        // Auto-saved draft successfully
       } catch (error) {
         console.error(`Auto-save failed for ${timeoutKey}:`, error)
       } finally {

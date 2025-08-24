@@ -108,7 +108,6 @@ export function useFileUpload(options: UseFileUploadOptions = {}) {
         setUploadProgress(prev => ({ ...prev, [fileId]: 70 }))
         
       } catch (storageError: any) {
-        console.error('Storage upload error:', storageError)
         throw new Error(`Upload failed: ${storageError.message}`)
       }
 
@@ -130,7 +129,6 @@ export function useFileUpload(options: UseFileUploadOptions = {}) {
             })
           
           if (saveError) {
-            console.error('Failed to save attachment metadata:', saveError)
             // Don't fail upload, but mark as not persistent
             toast.warning(`File uploaded but metadata save failed: ${saveError.message}`)
           } else {
@@ -138,7 +136,6 @@ export function useFileUpload(options: UseFileUploadOptions = {}) {
             isPersistent = true
           }
         } catch (error) {
-          console.error('Database save error:', error)
           // Don't fail upload, just log
           toast.warning('File uploaded successfully but database save failed')
         }
@@ -158,10 +155,8 @@ export function useFileUpload(options: UseFileUploadOptions = {}) {
         isPersistent
       }
 
-      console.log(`File uploaded successfully: ${file.name} -> ${uploadUrl} (persistent: ${isPersistent})`)
       return fileItem
     } catch (error: any) {
-      console.error('File upload error:', error)
       throw new Error(error.message || `Failed to upload ${file.name}`)
     } finally {
       setUploadProgress(prev => {
@@ -214,7 +209,6 @@ export function useFileUpload(options: UseFileUploadOptions = {}) {
           
           toast.success(`${file.name} uploaded successfully ${uploadedFile.isPersistent ? '(saved to database)' : '(storage only)'}`)
         } catch (error: any) {
-          console.error(`Failed to upload ${file.name}:`, error)
           toast.error(`Failed to upload ${file.name}: ${error.message}`)
         }
       }
@@ -238,7 +232,7 @@ export function useFileUpload(options: UseFileUploadOptions = {}) {
             p_attachment_id: fileId
           })
         } catch (dbError: any) {
-          console.error('Failed to delete from database:', dbError)
+          // Handle database deletion error silently
         }
       }
       
@@ -255,7 +249,7 @@ export function useFileUpload(options: UseFileUploadOptions = {}) {
               .remove([filePath])
           }
         } catch (storageError: any) {
-          console.error('Failed to delete from storage:', storageError)
+          // Handle storage deletion error silently
         }
       }
       
@@ -263,7 +257,6 @@ export function useFileUpload(options: UseFileUploadOptions = {}) {
       setFiles(prev => prev.filter(f => f.id !== fileId))
       toast.success('File removed successfully')
     } catch (error: any) {
-      console.error('Failed to remove file:', error)
       // Still remove from UI even if storage deletion fails
       setFiles(prev => prev.filter(f => f.id !== fileId))
       toast.success('File removed from form (storage cleanup may have failed)')
@@ -288,7 +281,6 @@ export function useFileUpload(options: UseFileUploadOptions = {}) {
         .order('created_at', { ascending: true })
       
       if (error) {
-        console.error('Failed to load form files:', error)
         return []
       }
       
@@ -305,7 +297,6 @@ export function useFileUpload(options: UseFileUploadOptions = {}) {
       setFiles(formFiles)
       return formFiles
     } catch (error: any) {
-      console.error('Failed to load form files:', error)
       toast.error('Failed to load attached files')
       return []
     }

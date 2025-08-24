@@ -44,7 +44,7 @@
     return;
   }
   window.__iframeHighlightInitialized = true;
-  console.log("Iframe 高亮脚本已加载");
+  // Iframe highlight script loaded
 
   // 创建高亮覆盖层
   var overlay = document.createElement("div");
@@ -82,17 +82,17 @@
 
   // 更新选中元素的高亮显示
   function updateSelectedHighlight(element) {
-    console.log("updateSelectedHighlight called with:", element);
+    // Update selected highlight called
     if (!element) {
       selectedBox.style.display = "none";
       selectedLabel.style.display = "none";
       selectedElement = null;
-      console.log("Cleared selected highlight");
+      // Cleared selected highlight
       return;
     }
     selectedElement = element;
     var rect = element.getBoundingClientRect();
-    console.log("Selected element rect:", rect);
+    // Selected element rect logged
 
     // 更新选中高亮框位置
     selectedBox.style.display = "block";
@@ -121,12 +121,7 @@
     }
     selectedLabel.style.left = "".concat(Math.max(5, labelLeft), "px");
     selectedLabel.style.top = "".concat(labelTop, "px");
-    console.log("Selected highlight positioned at:", {
-      left: selectedBox.style.left,
-      top: selectedBox.style.top,
-      width: selectedBox.style.width,
-      height: selectedBox.style.height
-    });
+    // Selected highlight positioned
   }
   function getElementSelector(element) {
     if (!(element instanceof Element)) throw new Error('Argument must be a DOM element');
@@ -319,11 +314,7 @@
     var selector = getElementSelector(target);
     var text = getElementText(target);
     var attributes = getElementAttributes(target);
-    console.log("Element clicked:", {
-      tagName: target.tagName,
-      selector: selector,
-      rect: rect
-    });
+    // Element clicked
 
     // 立即更新选中高亮
     updateSelectedHighlight(target);
@@ -363,24 +354,24 @@
 
   // 监听来自父窗口的消息
   function handleParentMessage(event) {
-    console.log("Received message from parent:", event.data);
+    // Received message from parent
     if (event.data.type === "iframe-highlight-toggle") {
       var enabled = event.data.enabled;
-      console.log("Highlight toggle:", enabled);
+      // Highlight toggle
       if (enabled) {
         enableHighlight();
       } else {
         disableHighlight();
       }
     } else if (event.data.type === "enable-iframe-highlight") {
-      console.log("Enable iframe highlight");
+      // Enable iframe highlight
       enableHighlight();
     } else if (event.data.type === "disable-iframe-highlight") {
-      console.log("Disable iframe highlight");
+      // Disable iframe highlight
       disableHighlight();
     } else if (event.data.type === "toggle-iframe-highlight") {
       var _enabled = event.data.enabled !== undefined ? event.data.enabled : !highlightEnabled;
-      console.log("Toggle iframe highlight to:", _enabled);
+      // Toggle iframe highlight
       if (_enabled) {
         enableHighlight();
       } else {
@@ -388,11 +379,11 @@
       }
     } else if (event.data.type === "update-selected-element") {
       var selector = event.data.selector;
-      console.log("Update selected element with selector:", selector);
+      // Update selected element with selector
       if (selector) {
         try {
           var element = document.querySelector(selector);
-          console.log("Found element by selector:", element);
+          // Found element by selector
           updateSelectedHighlight(element);
         } catch (error) {
           console.warn("Failed to select element:", error);
@@ -402,14 +393,14 @@
         updateSelectedHighlight(null);
       }
     } else if (event.data.type === "clear-selected-element") {
-      console.log("Clear selected element");
+      // Clear selected element
       updateSelectedHighlight(null);
     }
   }
 
   // 启用高亮功能
   function enableHighlight() {
-    console.log("Enabling highlight");
+    // Enabling highlight
     document.addEventListener("mouseover", handleMouseOver, true);
     document.addEventListener("mouseout", handleMouseOut, true);
     document.addEventListener("click", handleClick, true);
@@ -418,7 +409,7 @@
 
   // 禁用高亮功能
   function disableHighlight() {
-    console.log("Disabling highlight");
+    // Disabling highlight
     highlightEnabled = false;
     // 保持事件监听器，但通过 highlightEnabled 变量控制行为
     // 这样可以保留选中状态的显示
@@ -429,7 +420,7 @@
 
   // 完全禁用高亮功能（移除所有监听器）
   function fullyDisableHighlight() {
-    console.log("Fully disabling highlight");
+    // Fully disabling highlight
     highlightEnabled = false;
     document.removeEventListener("mouseover", handleMouseOver, true);
     document.removeEventListener("mouseout", handleMouseOut, true);

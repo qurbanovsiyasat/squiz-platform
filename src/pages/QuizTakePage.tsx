@@ -107,14 +107,8 @@ export default function QuizTakePage() {
   const isLastQuestion = currentQuestionIndex === totalQuestions - 1
   const isFirstQuestion = currentQuestionIndex === 0
 
-  // Debug logging for quiz questions
-  console.log('QuizTake Debug:', { 
-    quiz, 
-    currentQuestion, 
-    currentQuestionIndex, 
-    totalQuestions,
-    options: currentQuestion?.options 
-  })
+  // Debug information for quiz questions
+  // quiz, currentQuestion, currentQuestionIndex, totalQuestions, options: currentQuestion?.options
 
   const handleAnswerChange = (value: any) => {
     if (!currentQuestion) return
@@ -161,8 +155,6 @@ export default function QuizTakePage() {
         answers,
         timeTaken: timeElapsed
       })
-      
-      console.log('Quiz completion result:', result)
       
       if (!result) {
         throw new Error('Failed to complete quiz')

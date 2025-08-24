@@ -784,13 +784,11 @@ export function useSaveFormAttachments() {
           })
           
           if (error) {
-            console.error('Failed to save attachment:', attachment.name, error)
             throw handleDatabaseError(error, 'Save attachment')
           }
           
           results.push({ id: data, ...attachment })
         } catch (error) {
-          console.error('Error saving attachment:', attachment.name, error)
           // Continue with other files even if one fails
         }
       }

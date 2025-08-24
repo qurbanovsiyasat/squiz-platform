@@ -294,7 +294,7 @@ export default function SettingsPage() {
         // Only display for development if needed, and ensure NODE_ENV! 
         if (process.env.NODE_ENV === 'development' && result.verification_token) {
           // eslint-disable-next-line no-console
-          console.log('DEV ONLY: Verification token:', result.verification_token);
+          // DEV ONLY: Log verification token for development purposes
           toast.success(`Dev mode: Token is ${result.verification_token}`)
         }
       } else {

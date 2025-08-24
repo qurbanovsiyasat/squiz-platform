@@ -118,8 +118,6 @@ export default function FileUpload({
   
   // Always sync with existingFiles on mount and when they change
   useEffect(() => {
-    console.log('FileUpload: Syncing existingFiles:', existingFiles.length, 'current files:', files.length, 'existingFiles:', existingFiles.map(f => f.name))
-    
     // Only sync if existingFiles actually changed, not on every render
     const existingFileIds = new Set(existingFiles.map(f => f.id))
     const currentFileIds = new Set(files.map(f => f.id))
@@ -129,7 +127,6 @@ export default function FileUpload({
                       !files.every(f => existingFileIds.has(f.id))
     
     if (hasChanges) {
-      console.log('FileUpload: Files actually changed, updating state')
       setFiles(existingFiles)
       // Clear image load errors for new files
       setImageLoadErrors(new Set())
@@ -142,11 +139,9 @@ export default function FileUpload({
       // Only notify parent of files that have URLs (fully uploaded)
       const readyFiles = files.filter(f => f.url && f.url.trim() !== '')
       if (readyFiles.length > 0) {
-        console.log('FileUpload: Notifying parent of ready files:', readyFiles.length, 'out of', files.length)
         onFilesUploaded?.(readyFiles)
       } else if (files.length === 0) {
         // Also notify when all files are removed
-        console.log('FileUpload: No files, notifying parent')
         onFilesUploaded?.([])
       }
     }
@@ -321,7 +316,6 @@ export default function FileUpload({
     setTimeout(() => {
       setFiles(currentFiles => {
         const allFiles = currentFiles.filter(f => f.url && f.url.trim() !== '') // Only files with URLs
-        console.log('FileUpload: Upload complete, notifying parent with files:', allFiles.length)
         if (allFiles.length > 0) {
           onFilesUploaded?.(allFiles)
         }
@@ -332,13 +326,11 @@ export default function FileUpload({
 
   // Handle image load error
   const handleImageError = useCallback((fileId: string) => {
-    console.error('FileUpload: Image failed to load for file ID:', fileId)
     setImageLoadErrors(prev => new Set([...prev, fileId]))
   }, [])
 
   // Handle image load success
   const handleImageLoad = useCallback((fileId: string) => {
-    console.log('FileUpload: Image loaded successfully for file ID:', fileId)
     setImageLoadErrors(prev => {
       const next = new Set(prev)
       next.delete(fileId)
@@ -569,7 +561,7 @@ export default function FileUpload({
                                 handleImageError(file.id)
                               }}
                               onLoad={() => {
-                                console.log('Image loaded successfully:', file.name)
+
                                 handleImageLoad(file.id)
                               }}
                             />

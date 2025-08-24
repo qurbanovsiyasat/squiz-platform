@@ -255,7 +255,7 @@ export default function ImageUploadCrop({
                       setImageLoadError(true)
                     }}
                     onLoad={() => {
-                      console.log('ImageUploadCrop: Image loaded successfully:', selectedImage)
+                      // Image loaded successfully
                       setImageLoadError(false)
                     }}
                   />

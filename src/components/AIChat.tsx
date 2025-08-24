@@ -285,7 +285,7 @@ export default function AIChat() {
         onClick={() => setIsOpen(true)}
         className={cn(
           'fixed z-50 w-14 h-14 bg-purple-600 hover:bg-purple-700 text-white rounded-full shadow-lg transition-all duration-200',
-          isMobile ? 'bottom-4 right-4' : 'bottom-6 right-6',
+          isMobile ? 'bottom-24 right-4' : 'bottom-6 right-6',
           isOpen && 'opacity-0 pointer-events-none'
         )}
         whileHover={{ scale: 1.05 }}
@@ -322,7 +322,7 @@ export default function AIChat() {
 isMobile ? (
                 isFullScreen 
                   ? "inset-0 w-full h-full" // Full screen on mobile
-                  : "bottom-16 left-0 right-0 w-full h-[75vh] max-h-[600px]" // Adjusted bottom to avoid overlap
+                  : "bottom-20 left-0 right-0 w-full h-[70vh] max-h-[500px]" // Adjusted to avoid bottom nav
               ) : (
                 // Desktop: Full screen or floating window
                 isFullScreen

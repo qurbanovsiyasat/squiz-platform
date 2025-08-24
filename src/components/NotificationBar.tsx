@@ -215,7 +215,7 @@ function NotificationBarItem({
               className="h-6 w-6 p-0 text-current hover:bg-current/10"
               onClick={() => {
                 // TODO: Open notification settings
-                console.log('Open notification settings')
+                // Open notification settings
               }}
             >
               <Settings className="h-3 w-3" />

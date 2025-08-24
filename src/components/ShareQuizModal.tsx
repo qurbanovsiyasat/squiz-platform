@@ -53,7 +53,7 @@ export function ShareQuizModal({ isOpen, onClose, quiz }: ShareQuizModalProps) {
         })
       } catch (error) {
         // User cancelled sharing or sharing failed
-        console.log('Share cancelled or failed:', error)
+        // Share cancelled or failed
       }
     } else {
       // Fallback to copy link

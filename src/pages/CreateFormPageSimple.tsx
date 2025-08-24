@@ -92,7 +92,7 @@ export default function CreateFormPageSimple() {
               isImage: file.isImage
             }))
           })
-          console.log('Attachments saved to database successfully')
+          // Attachments saved to database successfully
         } catch (attachmentError) {
           console.error('Failed to save attachments to database:', attachmentError)
           // Don't fail the entire form creation if attachments fail

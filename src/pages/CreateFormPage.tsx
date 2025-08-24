@@ -241,9 +241,8 @@ export default function CreateFormPage() {
               isImage: file.isImage
             }))
           })
-          console.log('Attachments saved to database successfully')
+          
         } catch (attachmentError) {
-          console.error('Failed to save attachments to database:', attachmentError)
           // Don't fail the entire form creation if attachments fail
           toast.warning('Form created but some files may not display properly')
         }
@@ -257,7 +256,6 @@ export default function CreateFormPage() {
       toast.success('Information post created successfully!')
       navigate(`/form/${result.id}`)
     } catch (error) {
-      console.error('Form creation error:', error)
       toast.error('Failed to create information post')
     }
   }

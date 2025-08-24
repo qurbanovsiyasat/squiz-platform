@@ -25,10 +25,8 @@ export default function LoginPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    console.log(`Form field change: ${name} = ${value}`)
     setFormData(prev => {
       const newData = { ...prev, [name]: value }
-      console.log('New form data:', newData)
       return newData
     })
     // Clear error message when user starts typing
@@ -52,12 +50,10 @@ export default function LoginPage() {
     
     try {
       const result = await signIn(formData.email, formData.password)
-      console.log('Login successful:', result)
       toast.success('Uğurla giriş etdiniz!')
       
       // Small delay to ensure state is updated, then navigate
       setTimeout(() => {
-        console.log('Navigating to:', from)
         navigate(from, { replace: true })
       }, 100)
     } catch (error: any) {

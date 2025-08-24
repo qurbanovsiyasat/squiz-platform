@@ -642,7 +642,7 @@ function AnswerCard({
                     className="ml-2"
                     onDeleted={() => {
                       // Refresh answers will happen automatically via query invalidation
-                      console.log('Answer deleted successfully')
+              
                     }}
                   />
                 )}
@@ -768,7 +768,7 @@ function AnswerCard({
                           className="text-red-500 hover:text-red-600"
                           onDeleted={() => {
                             // Query invalidation will refresh the data automatically
-                            console.log('Reply deleted successfully')
+                    
                           }}
                         />
                       )}
