@@ -156,7 +156,7 @@ export default function BottomNavigation() {
       </div>
       
       {/* Safe area for devices with home indicator */}
-      <div className="h-4 sm:h-2" />
+      <div className="h-[calc(env(safe-area-inset-bottom,0px)+8px)]" />
     </motion.nav>
   )
 }
