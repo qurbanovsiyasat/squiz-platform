@@ -29,3 +29,5 @@ test_plan:
 agent_communication:
   - agent: "testing"
     message: "Starting comprehensive testing of redesigned Settings page with grouped sections (HESAB, TƏRCİHLƏR, ÜMUMİ) and all dialog interactions including password change, notifications, theme, language, and dashboard settings."
+  - agent: "testing"
+    message: "CRITICAL ISSUE: Cannot test Settings page functionality due to authentication requirement. App uses Supabase authentication but no backend is running and test credentials don't work. Frontend code analysis shows proper implementation with all required sections and dialogs, but functional testing is blocked. Need either: 1) Backend setup with Supabase connection, 2) Demo/test credentials, or 3) Authentication bypass for testing."
