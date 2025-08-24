@@ -47,15 +47,15 @@ The Squiz Platform has been comprehensively enhanced with bilingual support, imp
     "searchForms": "Search forms…" / "Formları Axtar…"
   },
   "stats": {
-    "totalQuizzes": "Total Quizzes" / "Ümumi Kviz Sayı",
+    "totalQuizzes": "Total Quizzes" / "Ümumi Quiz Sayı",
     "averageScore": "Average Score" / "Orta Bal",
     "bestResult": "Best Result" / "Ən Yaxşı Nəticə",
     "perfectResults": "Perfect Results" / "Mükəməl Nəticələr",
     "recentResults": "Recent Results" / "Son Nəticələr",
     "scoreDistribution": "Score Distribution" / "Bal Paylanması",
-    "weeklyActivity": "Weekly Activity" / "Haftalıq Aktivlik",
-    "lastWeekQuizCount": "Last Week Quiz Count" / "Son Həftə Kviz Sayı",
-    "goalTenQuizzesPerWeek": "Goal: 10 quizzes per week" / "Məqsəd: həftədə 10 kviz",
+    "weeklyActivity": "Weekly Activity" / "Həftəlik Aktivlik",
+    "lastWeekQuizCount": "Last Week Quiz Count" / "Son Həftə Quiz Sayı",
+    "goalTenQuizzesPerWeek": "Goal: 10 quizzes per week" / "Məqsəd: həftədə 10 quiz",
     "totalTime": "Total Time" / "Ümumi Vaxt",
     "averageTime": "Average Time" / "Orta Vaxt"
   }

@@ -91,7 +91,7 @@ export default function UserStatsPage() {
                   <BookOpen className="h-8 w-8 text-blue-500" />
                   <div>
                     <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                      Ümumi Kviz Sayı
+                      Ümumi Quiz Sayı
                     </p>
                     <p className="text-2xl font-bold">{stats.totalQuizzes}</p>
                   </div>
@@ -178,14 +178,14 @@ export default function UserStatsPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <BarChart3 className="h-5 w-5" />
-                    <span>Haftalıq Aktivlik</span>
+                    <span>Həfətlik Aktivlik</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex justify-between">
                       <span className="text-sm text-slate-600 dark:text-slate-400">
-                        Son Həftə Kviz Sayı
+                        Son Həftə Quiz Sayı
                       </span>
                       <span className="font-medium">{stats.lastWeekQuizzes}</span>
                     </div>
@@ -194,7 +194,7 @@ export default function UserStatsPage() {
                       className="h-2"
                     />
                     <p className="text-xs text-slate-500">
-                      Məqsəd: həftədə 10 kviz
+                      Məqsəd: həftədə 10 quiz
                     </p>
                   </div>
                 </CardContent>
@@ -236,12 +236,12 @@ export default function UserStatsPage() {
           <TabsContent value="recent" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Son Kviz Nəticələri</CardTitle>
+                <CardTitle>Son Quiz Nəticələri</CardTitle>
               </CardHeader>
               <CardContent>
                 {recentResults.length === 0 ? (
                   <p className="text-center text-slate-500 py-8">
-                    Hələ kviz tamamlamamisınız
+                    Hələ Quiz tamamlamamisınız
                   </p>
                 ) : (
                   <div className="space-y-4">
@@ -254,7 +254,7 @@ export default function UserStatsPage() {
                         className="flex items-center justify-between p-4 bg-slate-50 dark:bg-black rounded-lg"
                       >
                         <div className="flex-1">
-                          <h4 className="font-medium">Kviz #{result.quiz_id.slice(-8)}</h4>
+                          <h4 className="font-medium">Quiz #{result.quiz_id.slice(-8)}</h4>
                           <p className="text-sm text-slate-600 dark:text-slate-400">
                             {formatDate(result.completed_at)}
                           </p>
