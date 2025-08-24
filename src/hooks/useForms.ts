@@ -743,6 +743,52 @@ export function useFormSubmissions(formId: string) {
 }
 
 /**
+ * Delete form submission with enhanced validation
+ */
+export function useDeleteFormSubmission() {
+  const { user } = useAuth()
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: async (submissionId: string) => {
+      if (!user) {
+        throw new FormError('User must be authenticated', 'AUTH_REQUIRED')
+      }
+      
+      if (!submissionId) {
+        throw new FormError('Submission ID is required', 'VALIDATION_ERROR')
+      }
+      
+      try {
+        const { error } = await supabase
+          .from('form_submissions')
+          .delete()
+          .eq('id', submissionId)
+        
+        if (error) {
+          throw handleDatabaseError(error, 'Delete form submission')
+        }
+        
+        return true
+      } catch (error) {
+        if (error instanceof FormError) {
+          throw error
+        }
+        throw handleDatabaseError(error, 'Delete form submission')
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['form-submissions'] })
+      toast.success('Form submission deleted successfully')
+    },
+    onError: (error: FormError) => {
+      console.error('Delete submission error:', error)
+      toast.error(error.message || 'Failed to delete form submission')
+    }
+  })
+}
+
+/**
  * Save attachment to database after form creation
  */
 export function useSaveFormAttachments() {

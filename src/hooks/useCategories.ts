@@ -62,10 +62,10 @@ export function useCategories(type: string = '') {
         return []
       }
     },
-    retry: 3, // Retry up to 3 times
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000), // Exponential backoff
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    retry: 2, // Reduce retry attempts
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000), // Faster retry
+    staleTime: 2 * 60 * 1000, // Cache for 2 minutes
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
   })
 }
 
@@ -79,14 +79,51 @@ export function useCreateCategory() {
       type: string
       description?: string
     }) => {
-      const { data, error } = await supabase.rpc('create_category', {
-        p_name: name.trim(),
-        p_type: type,
-        p_description: description || ''
-      })
+      // Validate inputs
+      if (!name || !name.trim()) {
+        throw new Error('Category name is required')
+      }
       
-      if (error) throw error
-      return data
+      if (!type || !type.trim()) {
+        throw new Error('Category type is required')
+      }
+      
+      try {
+        // Try RPC function first
+        const { data, error } = await supabase.rpc('create_category', {
+          p_name: name.trim(),
+          p_type: type,
+          p_description: description || ''
+        })
+        
+        if (error) {
+          console.error('Create category RPC error:', error)
+          // Fallback to direct insert
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .from('categories')
+            .insert([{
+              name: name.trim(),
+              type: type,
+              description: description || ''
+            }])
+            .select()
+            .single()
+          
+          if (fallbackError) {
+            throw fallbackError
+          }
+          
+          return fallbackData
+        }
+        
+        return data
+      } catch (error: any) {
+        // Handle specific database errors
+        if (error.code === '23505') {
+          throw new Error('A category with this name already exists')
+        }
+        throw error
+      }
     },
     onSuccess: (_, variables) => {
       // Invalidate and refetch categories
@@ -109,14 +146,44 @@ export function useDeleteCategory() {
   
   return useMutation({
     mutationFn: async (categoryId: string) => {
-      const { data, error } = await supabase.rpc('delete_category', {
-        p_category_id: categoryId
-      })
+      if (!categoryId) {
+        throw new Error('Category ID is required')
+      }
       
-      if (error) throw error
-      if (!data) throw new Error('Failed to delete category')
-      
-      return data
+      try {
+        // Try RPC function first
+        const { data, error } = await supabase.rpc('delete_category', {
+          p_category_id: categoryId
+        })
+        
+        if (error) {
+          console.error('Delete category RPC error:', error)
+          
+          // Fallback to direct delete
+          const { error: fallbackError } = await supabase
+            .from('categories')
+            .delete()
+            .eq('id', categoryId)
+          
+          if (fallbackError) {
+            throw fallbackError
+          }
+          
+          return true
+        }
+        
+        if (!data) {
+          throw new Error('Failed to delete category')
+        }
+        
+        return data
+      } catch (error: any) {
+        // Handle specific database errors
+        if (error.code === '23503') {
+          throw new Error('Cannot delete category because it contains items')
+        }
+        throw error
+      }
     },
     onSuccess: () => {
       // Invalidate all category queries

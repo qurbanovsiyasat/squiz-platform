@@ -74,29 +74,63 @@ interface MixedContentRendererProps {
 }
 
 export function MixedContentRenderer({ content, className = '' }: MixedContentRendererProps) {
+  if (!content) return null
+  
   // Split content by LaTeX delimiters and render accordingly
   const renderMixedContent = (text: string) => {
-    // Split by $...$ for inline math and $$...$$ for display math
-    const parts = text.split(/(\$\$.*?\$\$|\$.*?\$)/g)
+    // Enhanced regex to capture both display and inline math
+    const mathRegex = /(\$\$[^$]*\$\$|\$[^$\n]*\$|\\\[[^\]]*\\\]|\\\([^)]*\\\))/g
+    const parts = text.split(mathRegex)
     
     return parts.map((part, index) => {
+      if (!part) return null
+      
+      // Display math: $$...$$
       if (part.startsWith('$$') && part.endsWith('$$')) {
-        // Display math
-        const latex = part.slice(2, -2)
-        return <MathRenderer key={index} latex={latex} displayMode={true} />
-      } else if (part.startsWith('$') && part.endsWith('$')) {
-        // Inline math
-        const latex = part.slice(1, -1)
-        return <MathRenderer key={index} latex={latex} inline={true} />
-      } else {
-        // Regular text
-        return <span key={index}>{part}</span>
+        const latex = part.slice(2, -2).trim()
+        if (!latex) return null
+        return <MathRenderer key={index} latex={latex} displayMode={true} className="my-2" />
       }
-    })
+      
+      // Inline math: $...$
+      else if (part.startsWith('$') && part.endsWith('$') && part.length > 2) {
+        const latex = part.slice(1, -1).trim()
+        if (!latex) return part
+        return <MathRenderer key={index} latex={latex} inline={true} />
+      }
+      
+      // LaTeX block delimiters: \[...\]
+      else if (part.startsWith('\\[') && part.endsWith('\\]')) {
+        const latex = part.slice(2, -2).trim()
+        if (!latex) return null
+        return <MathRenderer key={index} latex={latex} displayMode={true} className="my-2" />
+      }
+      
+      // LaTeX inline delimiters: \(...\)
+      else if (part.startsWith('\\(') && part.endsWith('\\)')) {
+        const latex = part.slice(2, -2).trim()
+        if (!latex) return part
+        return <MathRenderer key={index} latex={latex} inline={true} />
+      }
+      
+      // Regular text - preserve line breaks
+      else {
+        return (
+          <span key={index} className="whitespace-pre-wrap">
+            {part.split('\n').map((line, lineIndex) => (
+              <React.Fragment key={lineIndex}>
+                {line}
+                {lineIndex < part.split('\n').length - 1 && <br />}
+              </React.Fragment>
+            ))}
+          </span>
+        )
+      }
+    }).filter(Boolean)
   }
 
   return (
-    <div className={className}>
+    <div className={`mixed-content ${className}`}>
       {renderMixedContent(content)}
     </div>
   )
