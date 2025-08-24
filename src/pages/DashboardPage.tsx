@@ -465,6 +465,7 @@ export default function DashboardPage() {
                 )}
               </CardContent>
             </Card>
+            )}
 
             {/* Progress Card */}
             <Card className="card-modern">
