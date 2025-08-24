@@ -30,7 +30,7 @@ import {
 
 interface SidebarProps {
   isOpen: boolean
-  onClose?: () => void
+  onClose?: () =&gt; void
   isMobile: boolean
 }
 
@@ -38,7 +38,7 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>
   label: string
   href?: string
-  onClick?: () => void
+  onClick?: () =&gt; void
   badge?: string
   badgeVariant?: 'default' | 'secondary' | 'destructive' | 'outline'
   adminOnly?: boolean
@@ -109,8 +109,8 @@ export default function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
 
   ]
 
-  const filteredNavigation = navigation.filter(item => 
-    !item.adminOnly || (item.adminOnly && isAdmin)
+  const filteredNavigation = navigation.filter(item =&gt; 
+    !item.adminOnly || (item.adminOnly &amp;&amp; isAdmin)
   )
 
   const sidebarContent = (
@@ -129,7 +129,7 @@ export default function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
               </span>
             </div>
           </div>
-          {isMobile && onClose && (
+          {isMobile &amp;&amp; onClose &amp;&amp; (
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X className="h-5 w-5" />
             </Button>
@@ -138,12 +138,12 @@ export default function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2">
-        {filteredNavigation.map((item, index) => {
-          const isActive = item.href && (location.pathname === item.href || 
-            (item.href !== '/dashboard' && location.pathname.startsWith(item.href)))
+      <nav className="flex-1 p-4 space-y-1.5">
+        {filteredNavigation.map((item, index) =&gt; {
+          const isActive = item.href &amp;&amp; (location.pathname === item.href || 
+            (item.href !== '/dashboard' &amp;&amp; location.pathname.startsWith(item.href)))
           
-          const handleClick = () => {
+          const handleClick = () =&gt; {
             if (item.onClick) {
               item.onClick()
             }
@@ -162,9 +162,9 @@ export default function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
               {item.href ? (
                 <Link
                   to={item.href}
-                  onClick={() => isMobile && onClose?.()}
+                  onClick={() =&gt; isMobile &amp;&amp; onClose?.()}
                   className={cn(
-                    'flex items-center justify-between w-full p-3 rounded-xl text-ui-label transition-all duration-200 group ring-1 ring-black/[0.04] dark:ring-white/[0.04]',
+                    'flex items-center justify-between w-full p-2.5 rounded-lg text-[13px] transition-all duration-200 group ring-1 ring-black/[0.04] dark:ring-white/[0.04]',
                     isActive
                       ? 'bg-gray-100 text-gray-900 dark:bg-[#1A1A20] dark:text-white'
                       : 'text-medium-grey hover:bg-soft-grey hover:text-dark-charcoal dark:text-dark-text-muted dark:hover:bg-[#141418] dark:hover:text-white'
@@ -173,14 +173,14 @@ export default function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
                   <div className="flex items-center space-x-3">
                     <item.icon 
                       className={cn(
-                        'h-5 w-5 transition-colors',
+                        'h-4 w-4 transition-colors',
                         isActive ? 'text-purple-600 dark:text-purple-400' : 'text-medium-grey group-hover:text-vibrant-blue dark:text-dark-text-muted dark:group-hover:text-purple-400'
                       )} 
                     />
                     <span>{item.label}</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    {item.badge && (
+                    {item.badge &amp;&amp; (
                       <Badge 
                         variant={item.badgeVariant || 'default'} 
                         className="text-xs px-2 py-0.5"
@@ -188,7 +188,7 @@ export default function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
                         {item.badge}
                       </Badge>
                     )}
-                    {!isActive && (
+                    {!isActive &amp;&amp; (
                       <ChevronRight className="h-4 w-4 text-medium-grey opacity-0 group-hover:opacity-100 transition-opacity dark:text-dark-text-muted" />
                     )}
                   </div>
@@ -197,18 +197,18 @@ export default function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
                 <button
                   onClick={handleClick}
                   className={cn(
-                    'flex items-center justify-between w-full p-3 rounded-xl text-ui-label transition-all duration-200 group ring-1 ring-black/[0.04] dark:ring-white/[0.04]',
+                    'flex items-center justify-between w-full p-2.5 rounded-lg text-[13px] transition-all duration-200 group ring-1 ring-black/[0.04] dark:ring-white/[0.04]',
                     'text-medium-grey hover:bg-soft-grey hover:text-dark-charcoal dark:text-dark-text-muted dark:hover:bg-[#141418] dark:hover:text-white'
                   )}
                 >
                   <div className="flex items-center space-x-3">
                     <item.icon 
-                      className="h-5 w-5 transition-colors text-medium-grey group-hover:text-vibrant-blue dark:text-dark-text-muted dark:group-hover:text-purple-400" 
+                      className="h-4 w-4 transition-colors text-medium-grey group-hover:text-vibrant-blue dark:text-dark-text-muted dark:group-hover:text-purple-400" 
                     />
                     <span>{item.label}</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    {item.badge && (
+                    {item.badge &amp;&amp; (
                       <Badge 
                         variant={item.badgeVariant || 'default'} 
                         className="text-xs px-2 py-0.5"
@@ -266,7 +266,7 @@ export default function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
   // Mobile sidebar with overlay
   return (
     <AnimatePresence>
-      {isOpen && (
+      {isOpen &amp;&amp; (
         <>
           {/* Overlay */}
           <motion.div
