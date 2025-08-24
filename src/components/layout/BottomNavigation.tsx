@@ -60,7 +60,8 @@ export default function BottomNavigation() {
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-xl lg:hidden dark:bg-gray-900/95 dark:border-gray-700"
+      // IMPORTANT: prevent any accidental overlay from capturing clicks outside of nav
+      className="pointer-events-none fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-xl lg:hidden dark:bg-gray-900/95 dark:border-gray-700"
     >
       <div className="grid grid-cols-5 gap-1 px-2 py-3 max-w-screen-sm mx-auto">
         {navigation.map((item, index) => {
@@ -71,8 +72,9 @@ export default function BottomNavigation() {
             <Link
               key={item.href}
               to={item.href}
+              // Allow pointer events only on interactive elements
               className={cn(
-                'flex flex-col items-center justify-center px-2 py-2 rounded-xl transition-all duration-200 relative group',
+                'pointer-events-auto flex flex-col items-center justify-center px-2 py-2 rounded-xl transition-all duration-200 relative group',
                 'min-h-[60px] hover:scale-105 active:scale-95',
                 isActive
                   ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
@@ -113,7 +115,7 @@ export default function BottomNavigation() {
               key={item.label}
               onClick={item.onClick}
               className={cn(
-                'flex flex-col items-center justify-center px-2 py-2 rounded-xl transition-all duration-200 relative group',
+                'pointer-events-auto flex flex-col items-center justify-center px-2 py-2 rounded-xl transition-all duration-200 relative group',
                 'min-h-[60px] hover:scale-105 active:scale-95',
                 isActive
                   ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'

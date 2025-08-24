@@ -9,15 +9,15 @@ interface SliderProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 
   step?: number
 }
 
+// Styled, centered range slider for consistent look across browsers
 const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
   ({ className, value = [0], onValueChange, min = 0, max = 100, step = 1, ...props }, ref) => {
     return (
       <input
         type="range"
         className={cn(
-          "w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer",
-          "slider:bg-slate-500 slider:rounded-lg",
-          "focus:outline-none focus:ring-2 focus:ring-slate-400",
+          // Base width and our custom skin class
+          "w-full ui-slider",
           className
         )}
         ref={ref}
