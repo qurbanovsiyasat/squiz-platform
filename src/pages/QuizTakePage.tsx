@@ -46,6 +46,72 @@ export default function QuizTakePage() {
   const [quizStarted, setQuizStarted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // Quiz state persistence key
+  const quizStateKey = `quiz_state_${id}`
+  const quizAnswersKey = `quiz_answers_${id}`
+  const quizProgressKey = `quiz_progress_${id}`
+
+  // Load persisted quiz state on component mount
+  useEffect(() => {
+    if (id && user) {
+      try {
+        // Load saved answers
+        const savedAnswers = localStorage.getItem(quizAnswersKey)
+        if (savedAnswers) {
+          setAnswers(JSON.parse(savedAnswers))
+        }
+        
+        // Load saved progress
+        const savedProgress = localStorage.getItem(quizProgressKey)
+        if (savedProgress) {
+          const progress = JSON.parse(savedProgress)
+          setCurrentQuestionIndex(progress.currentQuestionIndex || 0)
+          setTimeElapsed(progress.timeElapsed || 0)
+          if (progress.startTime) {
+            setStartTime(new Date(progress.startTime))
+            setQuizStarted(true)
+          }
+        }
+      } catch (error) {
+        console.error('Error loading quiz state:', error)
+        // Clear corrupted data
+        localStorage.removeItem(quizAnswersKey)
+        localStorage.removeItem(quizProgressKey)
+      }
+    }
+  }, [id, user, quizAnswersKey, quizProgressKey])
+
+  // Save quiz state whenever it changes
+  useEffect(() => {
+    if (id && user && quizStarted) {
+      try {
+        // Save answers
+        localStorage.setItem(quizAnswersKey, JSON.stringify(answers))
+        
+        // Save progress
+        const progressData = {
+          currentQuestionIndex,
+          timeElapsed,
+          startTime: startTime?.toISOString(),
+          lastSaved: new Date().toISOString()
+        }
+        localStorage.setItem(quizProgressKey, JSON.stringify(progressData))
+      } catch (error) {
+        console.error('Error saving quiz state:', error)
+      }
+    }
+  }, [answers, currentQuestionIndex, timeElapsed, startTime, id, user, quizStarted, quizAnswersKey, quizProgressKey])
+
+  // Clear quiz state on completion
+  const clearQuizState = () => {
+    try {
+      localStorage.removeItem(quizAnswersKey)
+      localStorage.removeItem(quizProgressKey)
+    } catch (error) {
+      console.error('Error clearing quiz state:', error)
+    }
+  }
+
   // Timer effect
   useEffect(() => {
     if (!quizStarted || !startTime) return
@@ -159,6 +225,9 @@ export default function QuizTakePage() {
       if (!result) {
         throw new Error('Failed to complete quiz')
       }
+      
+      // Clear persisted quiz state on successful completion
+      clearQuizState()
       
       toast.success(`Quiz completed! Score: ${result?.score || 0}%`)
       

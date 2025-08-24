@@ -624,21 +624,24 @@ export default function QuizEditPage() {
                 <div className="space-y-2">
                   <Label>Question Text *</Label>
                   {currentQuestion.question_type === 'math' ? (
-                    <MathEditor
-                      value={currentQuestion.question_text}
-                      onChange={(latex, isValid) => {
-                        updateQuestion(currentQuestionIndex, 'question_text', latex)
-                      }}
-                      placeholder="Enter mathematical question using the visual editor or LaTeX..."
-                      className="w-full"
-                      showPreview={true}
-                    />
+                    <div className="w-full max-w-none">
+                      <MathEditor
+                        value={currentQuestion.question_text}
+                        onChange={(latex, isValid) => {
+                          updateQuestion(currentQuestionIndex, 'question_text', latex)
+                        }}
+                        placeholder="Enter mathematical question using the visual editor or LaTeX..."
+                        className="w-full min-h-[200px]"
+                        showPreview={true}
+                      />
+                    </div>
                   ) : (
                     <Textarea
                       value={currentQuestion.question_text}
                       onChange={(e) => updateQuestion(currentQuestionIndex, 'question_text', e.target.value)}
                       placeholder="Enter your question"
-                      rows={3}
+                      rows={6}
+                      className="w-full min-h-[150px] resize-y text-base leading-relaxed"
                     />
                   )}
                 </div>
@@ -680,24 +683,29 @@ export default function QuizEditPage() {
                 {currentQuestion.question_type === 'multiple_choice' && (
                   <div className="space-y-2">
                     <Label>Answer Options</Label>
-                    <div className="space-y-3">
+                    <div className="space-y-3 max-w-none">
                       {[0, 1, 2, 3, 4].map((optionIndex) => (
-                        <div key={optionIndex} className="flex items-center space-x-3">
-                          <span className="w-6 h-6 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-sm font-medium">
+                        <div key={optionIndex} className="flex items-start space-x-3">
+                          <span className="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-sm font-medium mt-1 flex-shrink-0">
                             {String.fromCharCode(65 + optionIndex)}
                           </span>
-                          <Input
+                          <Textarea
                             value={currentQuestion.options[optionIndex] || ''}
                             onChange={(e) => {
                               const newOptions = [...currentQuestion.options]
                               newOptions[optionIndex] = e.target.value
                               updateQuestion(currentQuestionIndex, 'options', newOptions)
                             }}
-                            placeholder={`Option ${String.fromCharCode(65 + optionIndex)}`}
+                            placeholder={`Option ${String.fromCharCode(65 + optionIndex)} - Enter answer choice`}
+                            rows={2}
+                            className="flex-1 text-base resize-y"
                           />
                         </div>
                       ))}
                     </div>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                      Enter up to 5 answer options. Leave unused options empty.
+                    </p>
                   </div>
                 )}
 
@@ -793,9 +801,13 @@ export default function QuizEditPage() {
                   <Textarea
                     value={currentQuestion.explanation}
                     onChange={(e) => updateQuestion(currentQuestionIndex, 'explanation', e.target.value)}
-                    placeholder="Explain the correct answer"
-                    rows={2}
+                    placeholder="Explain the correct answer or provide additional context"
+                    rows={4}
+                    className="w-full text-base leading-relaxed resize-y"
                   />
+                  <p className="text-sm text-slate-500">
+                    This explanation will be shown to students after they complete the quiz.
+                  </p>
                 </div>
               </CardContent>
             </Card>

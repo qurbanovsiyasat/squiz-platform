@@ -76,17 +76,20 @@ export default function FormDetailPage() {
   }
 
   const renderFileAttachment = (attachment: any) => {
-    const isImage = attachment.mime_type?.startsWith('image/') || attachment.is_image
-    const isPdf = attachment.mime_type === 'application/pdf'
+    const isImage = attachment.mime_type?.startsWith('image/') || attachment.is_image || attachment.type?.startsWith('image/')
+    const isPdf = attachment.mime_type === 'application/pdf' || attachment.type === 'application/pdf'
     const fileUrl = attachment.file_path || attachment.url
+    const fileName = attachment.original_name || attachment.name
+    const fileSize = attachment.file_size || attachment.size
     
     if (!fileUrl) {
+      console.warn('File attachment missing URL:', attachment)
       return null
     }
     
     return (
       <div
-        key={attachment.id}
+        key={attachment.id || `attachment-${Math.random()}`}
         className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-md hover:shadow-lg transition-all duration-300"
       >
         {/* File Preview/Thumbnail */}
@@ -94,14 +97,14 @@ export default function FormDetailPage() {
           {isImage ? (
             <ImageViewer
               src={fileUrl}
-              alt={attachment.original_name || attachment.name}
-              title={attachment.original_name || attachment.name}
+              alt={fileName}
+              title={fileName}
               className="w-full h-full"
               showControls={true}
             >
               <img
                 src={fileUrl}
-                alt={attachment.original_name || attachment.name}
+                alt={fileName}
                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
                 onError={(e) => {
                   // Fallback to icon if image fails to load
@@ -120,7 +123,7 @@ export default function FormDetailPage() {
                 <FileType className="h-16 w-16 mb-3" />
               )}
               <span className="text-sm font-medium text-center max-w-full truncate px-2">
-                {attachment.original_name || attachment.name}
+                {fileName}
               </span>
             </div>
           )}
@@ -142,7 +145,7 @@ export default function FormDetailPage() {
           <div className="flex items-center justify-between">
             <div className="flex-1 min-w-0">
               <h3 className="font-medium text-gray-900 dark:text-white truncate text-sm">
-                {attachment.original_name || attachment.name}
+                {fileName}
               </h3>
               <div className="flex items-center space-x-2 mt-1">
                 {isImage && (
@@ -157,9 +160,9 @@ export default function FormDetailPage() {
                     PDF
                   </Badge>
                 )}
-                {attachment.file_size && (
+                {fileSize && (
                   <span className="text-xs text-gray-500 dark:text-gray-400">
-                    {(attachment.file_size / 1024 / 1024).toFixed(1)} MB
+                    {(fileSize / 1024 / 1024).toFixed(1)} MB
                   </span>
                 )}
               </div>
@@ -169,8 +172,8 @@ export default function FormDetailPage() {
               {isImage ? (
                 <ImageViewer
                   src={fileUrl}
-                  alt={attachment.original_name || attachment.name}
-                  title={attachment.original_name || attachment.name}
+                  alt={fileName}
+                  title={fileName}
                   showControls={true}
                 >
                   <Button
@@ -192,7 +195,17 @@ export default function FormDetailPage() {
                   <ExternalLink className="h-3 w-3" />
                   <span>View</span>
                 </Button>
-              ) : null}
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open(fileUrl, '_blank')}
+                  className="flex items-center space-x-1 text-xs"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  <span>Open</span>
+                </Button>
+              )}
               
               <Button
                 variant="outline"
@@ -200,7 +213,7 @@ export default function FormDetailPage() {
                 onClick={() => {
                   const link = document.createElement('a')
                   link.href = fileUrl
-                  link.download = attachment.original_name || attachment.name
+                  link.download = fileName
                   link.target = '_blank'
                   document.body.appendChild(link)
                   link.click()

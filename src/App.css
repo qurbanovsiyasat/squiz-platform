@@ -47,12 +47,80 @@
   word-wrap: break-word; /* For older browsers */
   overflow: hidden; /* Hide overflow */
   text-overflow: ellipsis; /* Add ellipsis for overflowed text */
+  max-width: 100%;
 }
 
-/* Ensure question input fields are adequately wide */
+/* Form and Quiz creation interface improvements */
+.form-creation-container {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.quiz-creation-container {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Question input improvements */
 .question-input {
   width: 100%; /* Full width */
   max-width: 100%; /* Prevent exceeding container width */
+  min-height: 120px; /* Minimum height for better usability */
+  resize: vertical; /* Allow vertical resize only */
+}
+
+/* Math editor improvements */
+.math-editor-container {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+/* Form attachment grid improvements */
+.attachment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  .attachment-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Prevent horizontal scroll in form content */
+.form-content-wrapper {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+/* File upload component improvements */
+.file-upload-preview {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.file-upload-preview img {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Quiz taking interface improvements */
+.quiz-taking-container {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Form display improvements */
+.form-display-container {
+  max-width: 100%;
+  overflow-x: hidden;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Enhanced LaTeX rendering styles */
