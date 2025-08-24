@@ -224,15 +224,15 @@
     "profileUpdated": "Profil yeniləndi"
   },
   "stats": {
-    "totalQuizzes": "Ümumi Kviz Sayı",
+    "totalQuizzes": "Ümumi Quiz say"
     "averageScore": "Orta Bal",
     "bestResult": "Ən Yaxşı Nəticə",
     "perfectResults": "Mükəməl Nəticələr",
     "recentResults": "Son Nəticələr",
     "scoreDistribution": "Bal Paylanması",
-    "weeklyActivity": "Haftalıq Aktivlik",
-    "lastWeekQuizCount": "Son Həftə Kviz Sayı",
-    "goalTenQuizzesPerWeek": "Məqsəd: həftədə 10 kviz",
+    "weeklyActivity": "Həftəlik aktivlik",
+    "lastWeekQuizCount": "Son Həftə Quiz sayı",
+    "goalTenQuizzesPerWeek": "Məqsəd: həftədə 10 quiz",
     "totalTime": "Ümumi Vaxt",
     "averageTime": "Orta Vaxt"
   },
