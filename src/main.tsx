@@ -2,6 +2,8 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 import './index.css'
+import './index_mobile_additions.css'
+
 import './lib/i18n' // Initialize i18n
 import 'katex/dist/katex.min.css' // KaTeX styles for math rendering
 
