@@ -297,7 +297,7 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-soft-grey p-4 sm:p-6 lg:p-8">
       <div className="max-w-3xl mx-auto space-y-8">
         {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+        <div>
           <div className="flex items-center space-x-4 mb-2">
             <div className="w-12 h-12 bg-gradient-to-br from-slate-600 to-slate-800 rounded-design-system flex items-center justify-center">
               <SettingsIcon className="h-6 w-6 text-pure-white" />
@@ -307,7 +307,7 @@ export default function SettingsPage() {
               <p className="text-body">{t('settings.general')}</p>
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* ACCOUNT */}
         <Card className="card-modern">
