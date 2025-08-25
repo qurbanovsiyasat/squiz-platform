@@ -71,7 +71,7 @@
 }
 
 .mobile-card-content {
-  @apply p-4;
+  @apply px-3 py-4 sm:px-6 sm:py-6;
 }
 
 @media (min-width: 768px) {
