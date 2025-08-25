@@ -30,7 +30,7 @@ import {
 
 interface SidebarProps {
   isOpen: boolean
-  onClose?: () =&gt; void
+  onClose?: () => void
   isMobile: boolean
 }
 
@@ -38,7 +38,7 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>
   label: string
   href?: string
-  onClick?: () =&gt; void
+  onClick?: () => void
   badge?: string
   badgeVariant?: 'default' | 'secondary' | 'destructive' | 'outline'
   adminOnly?: boolean
@@ -109,8 +109,8 @@ export default function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
 
   ]
 
-  const filteredNavigation = navigation.filter(item =&gt; 
-    !item.adminOnly || (item.adminOnly &amp;&amp; isAdmin)
+  const filteredNavigation = navigation.filter(item => 
+    !item.adminOnly || (item.adminOnly && isAdmin)
   )
 
   const sidebarContent = (
@@ -129,7 +129,7 @@ export default function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
               </span>
             </div>
           </div>
-          {isMobile &amp;&amp; onClose &amp;&amp; (
+          {isMobile && onClose && (
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X className="h-5 w-5" />
             </Button>
@@ -139,11 +139,11 @@ export default function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1.5">
-        {filteredNavigation.map((item, index) =&gt; {
-          const isActive = item.href &amp;&amp; (location.pathname === item.href || 
-            (item.href !== '/dashboard' &amp;&amp; location.pathname.startsWith(item.href)))
+        {filteredNavigation.map((item, index) => {
+          const isActive = item.href && (location.pathname === item.href || 
+            (item.href !== '/dashboard' && location.pathname.startsWith(item.href)))
           
-          const handleClick = () =&gt; {
+          const handleClick = () => {
             if (item.onClick) {
               item.onClick()
             }
@@ -162,7 +162,7 @@ export default function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
               {item.href ? (
                 <Link
                   to={item.href}
-                  onClick={() =&gt; isMobile &amp;&amp; onClose?.()}
+                  onClick={() => isMobile && onClose?.()}
                   className={cn(
                     'flex items-center justify-between w-full p-2.5 rounded-lg text-[13px] transition-all duration-200 group ring-1 ring-black/[0.04] dark:ring-white/[0.04]',
                     isActive
@@ -180,7 +180,7 @@ export default function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
                     <span>{item.label}</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    {item.badge &amp;&amp; (
+                    {item.badge && (
                       <Badge 
                         variant={item.badgeVariant || 'default'} 
                         className="text-xs px-2 py-0.5"
@@ -188,7 +188,7 @@ export default function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
                         {item.badge}
                       </Badge>
                     )}
-                    {!isActive &amp;&amp; (
+                    {!isActive && (
                       <ChevronRight className="h-4 w-4 text-medium-grey opacity-0 group-hover:opacity-100 transition-opacity dark:text-dark-text-muted" />
                     )}
                   </div>
@@ -208,7 +208,7 @@ export default function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
                     <span>{item.label}</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    {item.badge &amp;&amp; (
+                    {item.badge && (
                       <Badge 
                         variant={item.badgeVariant || 'default'} 
                         className="text-xs px-2 py-0.5"
@@ -266,7 +266,7 @@ export default function Sidebar({ isOpen, onClose, isMobile }: SidebarProps) {
   // Mobile sidebar with overlay
   return (
     <AnimatePresence>
-      {isOpen &amp;&amp; (
+      {isOpen && (
         <>
           {/* Overlay */}
           <motion.div

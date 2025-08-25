@@ -65,9 +65,9 @@ export default function BottomNavigation() {
       <div className="px-4">
         <div className="max-w-md mx-auto rounded-2xl bg-white/95 backdrop-blur ring-1 ring-black/5 shadow-lg pointer-events-auto dark:bg-[#0B0B0F]/95 dark:ring-white/10">
           <div className="grid grid-cols-5 gap-1 px-2 py-2">
-            {navigation.map((item) =&gt; {
-              const isActive = item.href &amp;&amp; (location.pathname === item.href || 
-                (item.href !== '/dashboard' &amp;&amp; location.pathname.startsWith(item.href)))
+            {navigation.map((item) => {
+              const isActive = item.href && (location.pathname === item.href || 
+                (item.href !== '/dashboard' && location.pathname.startsWith(item.href)))
 
               const Content = (
                 <motion.div whileTap={{ scale: 0.95 }} className="flex flex-col items-center justify-center w-full">
@@ -83,7 +83,7 @@ export default function BottomNavigation() {
                         isActive ? 'text-purple-600 dark:text-purple-400' : 'text-gray-700 dark:text-gray-400'
                       )} 
                     />
-                    {isActive &amp;&amp; (
+                    {isActive && (
                       <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-purple-600/90 dark:bg-purple-400/90" />
                     )}
                   </div>
