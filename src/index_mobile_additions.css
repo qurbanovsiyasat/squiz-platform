@@ -16,7 +16,7 @@
 
 @media (min-width: 640px) {
   .mobile-qa-filters {
-    @apply flex-row space-y-0 space-x-3;
+    @apply flex-row gap-3;
   }
 }
 
