@@ -17,7 +17,7 @@ import { QueryErrorFallback } from '@/components/ui/ErrorBoundary'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PageWrapper } from '@/components/layout/PageWrapper'
 import { motion } from 'framer-motion'
-import { Search, Plus, MessageSquare, Eye, ArrowUp, ArrowDown, CheckCircle, MessageCircle, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Search, Plus, MessageSquare, Eye, ArrowUp, ArrowDown, CheckCircle, ChevronLeft, ChevronRight, Filter } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 
 export default function QAPage() {
@@ -68,14 +68,15 @@ export default function QAPage() {
     setCurrentPage(1)
   }
 
+  const clearFilters = () => {
+    setSearchTerm('')
+    setCategoryFilter('all')
+    setSortBy('recent')
+    setCurrentPage(1)
+  }
+
   // Get categories using the new hook
   const { data: categories = [] } = useCategories('qa')
-
-  const getDisplayName = (author: any) => {
-    if (!author) return 'Anonim'
-    if (author.is_private && !isAdmin) return 'Abituriyent'
-    return author.full_name || 'Abituriyent'
-  }
 
   return (
     <PageWrapper
@@ -99,8 +100,8 @@ export default function QAPage() {
             </p>
           </div>
           <Link to="/qa/create" className="w-full sm:w-auto">
-            <Button size="lg" className="w-full sm:w-auto space-x-2 touch-target">
-              <Plus className="h-4 w-4" />
+            <Button size="lg" className="w-full sm:w-auto touch-target bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white shadow-lg">
+              <Plus className="h-4 w-4 mr-2" />
               <span>Sual ver</span>
             </Button>
           </Link>
@@ -125,7 +126,6 @@ export default function QAPage() {
                   className="pl-10 mobile-form-input text-break"
                 />
               </div>
-              
               <Select value={categoryFilter} onValueChange={handleCategoryChange}>
                 <SelectTrigger className="w-full sm:w-48 mobile-form-input">
                   <SelectValue placeholder="Kateqoriya" />
@@ -139,7 +139,6 @@ export default function QAPage() {
                   ))}
                 </SelectContent>
               </Select>
-              
               <Select value={sortBy} onValueChange={(value: any) => handleSortChange(value)}>
                 <SelectTrigger className="w-full sm:w-40 mobile-form-input">
                   <SelectValue placeholder="Sırala" />
@@ -150,6 +149,14 @@ export default function QAPage() {
                   <SelectItem value="unanswered">Cavabsız</SelectItem>
                 </SelectContent>
               </Select>
+              <Button 
+                variant="outline" 
+                onClick={clearFilters}
+                className="space-x-2 h-10 rounded-lg border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700"
+              >
+                <Filter className="h-4 w-4" />
+                <span>Filtri təmizlə</span>
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -225,7 +232,6 @@ export default function QAPage() {
                               : question.content
                             }
                           </p>
-
                           {/* Question Image */}
                           {question.image_url && (
                             <div className="mb-4">
@@ -301,7 +307,6 @@ export default function QAPage() {
                 </motion.div>
               ))}
             </div>
-            
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex items-center justify-center space-x-1 md:space-x-2 mt-8">
@@ -315,7 +320,6 @@ export default function QAPage() {
                   <ChevronLeft className="h-4 w-4" />
                   <span className="hidden sm:inline">Əvvəlki</span>
                 </Button>
-                
                 <div className="flex items-center space-x-1">
                   {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
                     const pageNum = i + 1
@@ -331,7 +335,6 @@ export default function QAPage() {
                       </Button>
                     )
                   })}
-                  
                   {totalPages > 3 && (
                     <>
                       <span className="text-slate-500 typography-small">...</span>
@@ -346,7 +349,6 @@ export default function QAPage() {
                     </>
                   )}
                 </div>
-                
                 <Button
                   variant="outline"
                   size="sm"
@@ -379,8 +381,6 @@ export default function QAPage() {
           />
         )}
       </motion.div>
-      
-
     </PageWrapper>
   )
 }

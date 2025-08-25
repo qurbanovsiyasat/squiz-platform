@@ -17,16 +17,17 @@ import { motion } from 'framer-motion'
 import { 
   Search,
   Plus,
-  Eye, 
-  MessageSquare, 
-  User, 
-  Calendar, 
+  Eye,
+  MessageSquare,
+  User,
+  Calendar,
   Send,
   Loader2,
   ChevronLeft,
   ChevronRight,
   FileText,
-  Heart
+  Heart,
+  Filter
 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { formatDate } from '@/lib/utils'
@@ -78,6 +79,13 @@ export default function FormPage() {
     setCurrentPage(1)
   }
 
+  const clearFilters = () => {
+    setSearchTerm('')
+    setCategoryFilter('all')
+    setSortBy('recent')
+    setCurrentPage(1)
+  }
+
   const getDisplayName = (creator: any) => {
     if (!creator) return 'Anonymous'
     if (creator.is_private && !isAdmin) return 'User'
@@ -117,8 +125,8 @@ export default function FormPage() {
             </p>
           </div>
           <Link to="/forms/create" className="w-full sm:w-auto">
-            <Button size="lg" className="w-full sm:w-auto space-x-2 touch-target">
-              <Plus className="h-4 w-4" />
+            <Button size="lg" className="w-full sm:w-auto touch-target bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white shadow-lg">
+              <Plus className="h-4 w-4 mr-2" />
               <span>Create Form</span>
             </Button>
           </Link>
@@ -168,6 +176,15 @@ export default function FormPage() {
                   <SelectItem value="submissions">Most Submissions</SelectItem>
                 </SelectContent>
               </Select>
+
+              <Button 
+                variant="outline" 
+                onClick={clearFilters}
+                className="space-x-2 h-10 rounded-lg border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700"
+              >
+                <Filter className="h-4 w-4" />
+                <span>Filtri təmizlə</span>
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -303,7 +320,6 @@ export default function FormPage() {
                 </motion.div>
               ))}
             </div>
-            
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex items-center justify-center space-x-1 md:space-x-2 mt-8">
@@ -317,7 +333,6 @@ export default function FormPage() {
                   <ChevronLeft className="h-4 w-4" />
                   <span className="hidden sm:inline">Previous</span>
                 </Button>
-                
                 <div className="flex items-center space-x-1">
                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                     const pageNum = i + 1
@@ -333,7 +348,6 @@ export default function FormPage() {
                       </Button>
                     )
                   })}
-                  
                   {totalPages > 5 && (
                     <>
                       <span className="text-slate-500 typography-small">...</span>
@@ -348,7 +362,6 @@ export default function FormPage() {
                     </>
                   )}
                 </div>
-                
                 <Button
                   variant="outline"
                   size="sm"
