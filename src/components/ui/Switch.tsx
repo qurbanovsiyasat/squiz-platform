@@ -3,12 +3,12 @@ import * as SwitchPrimitive from "@radix-ui/react-switch"
 import { cn } from "@/lib/utils"
 
 /*
- Global Switch redesign to match the provided reference.
+ Global Switch redesign to match Material 3 reference and user's request (mor rəng - purple).
  Sizes:
-  - sm: 40x22 track, 18x18 thumb (DEFAULT)
+  - sm: 36x22 track, 18x18 thumb (DEFAULT)
   - lg: 44x26 track, 22x22 thumb
  Off: neutral grey track, thumb with inner ring (o)
- On: purple track (#6E56CF), check icon appears; smooth transitions
+ On: M3 primary purple track (#6750A4)
 */
 
 type SwitchSize = 'sm' | 'lg'
@@ -41,8 +41,8 @@ const Switch = React.forwardRef<
       // Base (light) + dark
       "rounded-full bg-[#E6E2EA] ring-1 ring-[#A9A6AD]",
       "dark:bg-[#2A2A2E] dark:ring-[#4A4A50]",
-      // Checked state track
-      "data-[state=checked]:bg-[#6E56CF] data-[state=checked]:ring-[#6E56CF]",
+      // Checked state track (M3 purple)
+      "data-[state=checked]:bg-[#6750A4] data-[state=checked]:ring-[#6750A4]",
       // Motion
       "transition-colors duration-300",
       // Focus
@@ -80,7 +80,7 @@ const Switch = React.forwardRef<
       {/* ON check icon (purple) */}
       <svg
         className={cn(
-          "absolute h-[12px] w-[12px] text-[#6E56CF]",
+          "absolute h-[12px] w-[12px] text-[#6750A4]",
           "opacity-0 group-data-[state=checked]:opacity-100 transition-opacity duration-200"
         )}
         viewBox="0 0 24 24"
