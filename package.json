@@ -7,6 +7,7 @@
     "node": ">=18.18 <23"
   },
   "scripts": {
+    "start": "vite --port 3000 --host 0.0.0.0",
     "dev": "vite",
     "build:preview": "yes | pnpm install && rm -rf node_modules/.vite-temp && tsc -b && vite build",
     "build": "tsc -b && vite build",
