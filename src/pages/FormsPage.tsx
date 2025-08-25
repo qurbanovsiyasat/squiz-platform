@@ -125,7 +125,7 @@ export default function FormPage() {
             </p>
           </div>
           <Link to="/forms/create" className="w-full sm:w-auto">
-            <Button size="lg" className="w-full sm:w-auto touch-target bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white shadow-lg">
+            <Button size="lg" className="w-full sm:w-auto touch-target bg-gradient-to-r from-[#6F56D9] to-[#6750A4] hover:from-[#7A61E6] hover:to-[#6F56D9] text-white shadow-[0_6px_20px_-5px_rgba(103,80,164,0.5)]">
               <Plus className="h-4 w-4 mr-2" />
               <span>Create Form</span>
             </Button>
