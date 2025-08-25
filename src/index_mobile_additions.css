@@ -11,7 +11,7 @@
 }
 
 .mobile-qa-filters {
-  @apply flex flex-col space-y-3 w-full;
+  @apply flex flex-col gap-3 w-full;
 }
 
 @media (min-width: 640px) {
